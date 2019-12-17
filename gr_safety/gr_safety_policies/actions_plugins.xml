@@ -10,4 +10,10 @@
       Dynamic Reconfigure Safe Action
     </description>
   </class>
+
+  <class name="power_action" type="gr_safety_policies::ServiceCallerSafeAction" base_class_type="safety_core::SafeAction">
+    <description>
+      ROS SERVICE Safe Action
+    </description>
+  </class>
 </library>
