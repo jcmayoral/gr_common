@@ -2,10 +2,12 @@
 #include <pluginlib/class_list_macros.h>
 #include <iostream>
 
-PLUGINLIB_DECLARE_CLASS(gr_safety_policies, ProximityPolicy,
+/*PLUGINLIB_DECLARE_CLASS(gr_safety_policies, ProximityPolicy,
                         gr_safety_policies::ProximityPolicy,
                         safety_core::SafePolicy)
-
+*/
+PLUGINLIB_EXPORT_CLASS(gr_safety_policies::ProximityPolicy,
+                        safety_core::SafePolicy)
 using namespace safety_core;
 namespace gr_safety_policies
 {
