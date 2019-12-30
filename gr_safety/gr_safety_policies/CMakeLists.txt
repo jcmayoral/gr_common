@@ -15,11 +15,15 @@ find_package(catkin REQUIRED
         std_msgs
         cv_bridge
         message_filters
-	#yaml_cpp_0_3
 )
 
 find_package(OpenCV 3.2 REQUIRED)
-find_package(yaml-cpp REQUIRED)
+
+#find_package(PkgConfig REQUIRED)
+find_package(YAML-CPP 0.5 REQUIRED)
+
+#pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
+
 
 generate_dynamic_reconfigure_options(
   cfg/ProximityPolicy.cfg
@@ -47,7 +51,6 @@ catkin_package(
         std_msgs
         cv_bridge
         message_filters
-	#yaml_cpp_0_3
 )
 
 file(GLOB POLICIES src/policies/*.cpp)
@@ -55,7 +58,6 @@ file(GLOB ACTIONS src/safe_actions/*.cpp)
 
 add_library(gr_safety_policies ${POLICIES} src/policies_manager.cpp)
 add_library(gr_safe_actions ${ACTIONS})
-
 add_executable(proximity_policy_node src/proximity_policy_node.cpp)
 add_executable(hri_policy_node src/hri_policy_node.cpp)
 
