@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gr_safety_policies)
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+#set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic")
+#set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(catkin REQUIRED
         COMPONENTS
@@ -14,13 +16,14 @@ find_package(catkin REQUIRED
         std_msgs
         cv_bridge
         message_filters
+	pcl_conversions
 )
 
 find_package(OpenCV 3.2 REQUIRED)
 find_package(PCL REQUIRED)
 
 #find_package(PkgConfig REQUIRED)
-find_package(YAML-CPP 0.5 REQUIRED)
+#find_package(YAML-CPP 0.3 REQUIRED)
 
 #pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 
@@ -51,6 +54,7 @@ catkin_package(
         std_msgs
         cv_bridge
         message_filters
+	pcl_conversions
 )
 
 file(GLOB POLICIES src/policies/*.cpp)
@@ -66,7 +70,7 @@ add_executable(action_manager_node src/action_manager_node.cpp)
 
 add_definitions(-DCURL_STATICLIB)
 
-target_link_libraries(gr_safety_policies ${catkin_LIBRARIES} curl ${JSON_INCLUDE_DIRS} ${OpenCV_LIBRARIES} ${YAML_CPP_LIBRARIES}i ${PCL_LIBRARIES})
+target_link_libraries(gr_safety_policies ${catkin_LIBRARIES} curl ${JSON_INCLUDE_DIRS} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES}  yaml-cpp)
 #Independent policies
 target_link_libraries(proximity_policy_node gr_safety_policies gr_safe_actions)
 target_link_libraries(hri_policy_node gr_safety_policies gr_safe_actions)
