@@ -19,22 +19,24 @@ namespace gr_safety_policies
     nh.param<std::string>("config_path", config_path, "config");
     nh.param<std::string>("config_file", config_file, "proximity_monitor.yaml");
     std::cout << path+"/"+config_path+"/"+config_file << std::endl;
-    //YAML::Node config_yaml = YAML::LoadFile((path+"/"+config_path+"/"+config_file).c_str());
+    YAML::Node config_yaml = YAML::LoadFile((path+"/"+config_path+"/"+config_file).c_str());
     std::ifstream fin((path+"/"+config_path+"/"+config_file).c_str());
     YAML::Parser parser(fin);
 
-    YAML::Node doc;
-    while(parser.GetNextDocument(doc)) {
-    const YAML::Node& topics_to_subscribe = doc["topics"];
-    std::cout << topics_to_subscribe.size() << std::endl;
+    //YAML::Node doc;
+    //while(parser.GetNextDocument(doc)) {
+    const YAML::Node& topics_to_subscribe = config_yaml["topics"];
 
-    for (YAML::Iterator a= topics_to_subscribe.begin(); a != topics_to_subscribe.end(); ++a){
-      //std::string topic = a->as<std::string>();
-      std::string topic;
-      *a >> topic;
+    std::cout << "topics " << topics_to_subscribe.size() << std::endl;
+
+    //for (YAML::Iterator a= topics_to_subscribe.begin(); a != topics_to_subscribe.end(); ++a){
+    for (YAML::const_iterator a= topics_to_subscribe.begin(); a != topics_to_subscribe.end(); ++a){
+      std::string topic = a->as<std::string>();
+      //std::string topic;
+      //*a >> topic;
       ROS_INFO_STREAM("Subscribing to " << topic);
       monitor_sub_.push_back(nh.subscribe(topic.c_str(), 1, &ProximityPolicy::poses_CB, this));
-    }
+    //}
     }
 
     marker_pub_ = nh.advertise<visualization_msgs::MarkerArray>("proximity_visualization", 1);
