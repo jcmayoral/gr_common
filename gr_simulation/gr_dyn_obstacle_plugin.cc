@@ -7,6 +7,13 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 
+
+#include <thread>
+#include <ros/ros.h>
+#include <ros/callback_queue.h>
+#include <ros/subscribe_options.h>
+#include <geometry_msgs/Twist.h>
+
 namespace gazebo
 {
   /// \brief A plugin to control a GR Dynamic Obstacle sensor.
@@ -18,6 +25,16 @@ namespace gazebo
     private: double ang_velocity = 0;
     private: double lin_velx = 0;
     private: double lin_vely = 0;
+
+    //For ROS
+    /// \brief A node use for ROS transport
+    private: std::unique_ptr<ros::NodeHandle> rosNode;
+    /// \brief A ROS subscriber
+    private: ros::Subscriber rosSub;
+    /// \brief A ROS callbackqueue that helps process messages
+    private: ros::CallbackQueue rosQueue;
+    /// \brief A thread the keeps running the rosQueue
+    private: std::thread rosQueueThread;
  
     public: void SetAngVelocity(const double &_vel){
         ang_velocity = _vel;
@@ -59,6 +76,8 @@ namespace gazebo
             lin_vely = _sdf->Get<double>("lin_vely");
         }
         
+
+        //CallBack for Gazebo
         this->model = _model;
         this->model->SetGravityMode(false);
         this->link = _model->GetLinks()[0];
@@ -68,7 +87,46 @@ namespace gazebo
         this->node->Init(this->model->GetWorld()->Name());
         std::string topicName = "~/" + this->model->GetName() + "/vel_cmd";
         this->sub = this->node->Subscribe(topicName,&GRDynObstaclePlugin::OnMsg, this);
+
+
+        //Callback for ROS
+        // Initialize ros, if it has not already bee initialized.
+        if (!ros::isInitialized()){
+            int argc = 0;
+            char **argv = NULL;
+            ros::init(argc, argv, "gazebo_client",
+            ros::init_options::NoSigintHandler);
+        }
+        // Create our ROS node. This acts in a similar manner to
+        // the Gazebo node
+        this->rosNode.reset(new ros::NodeHandle("gazebo_client"));
+        // Create a named topic, and subscribe to it.
+        ros::SubscribeOptions so = ros::SubscribeOptions::create<geometry_msgs::Twist>(
+                "/" + this->model->GetName() + "/vel_cmd",1,
+                boost::bind(&GRDynObstaclePlugin::OnRosMsg, this, _1),
+                ros::VoidPtr(), &this->rosQueue);
+        this->rosSub = this->rosNode->subscribe(so);
+
+        // Spin up the queue helper thread.
+        this->rosQueueThread =
+        std::thread(std::bind(&GRDynObstaclePlugin::QueueThread, this));
     }
+
+
+    public: void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg){
+        this->SetLinearVelocityX(_msg->linear.x);
+        this->SetLinearVelocityY(_msg->linear.y);
+        this->SetAngVelocity(_msg->angular.z);
+    }
+
+    /// \brief ROS helper function that processes messages
+    private: void QueueThread(){
+        static const double timeout = 0.01;
+        while (this->rosNode->ok()){
+            this->rosQueue.callAvailable(ros::WallDuration(timeout));
+            }
+    }
+
     /// \brief Pointer to the model.
     private: physics::ModelPtr model;
 
