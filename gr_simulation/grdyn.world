@@ -14,6 +14,7 @@
     <model name="my_person">
       <include>
         <uri>model://person_standing</uri>
+        <!--uri>model://velodyne_hdl32</uri-->
       </include>
 
       <!-- Attach the plugin to this model -->
