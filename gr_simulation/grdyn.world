@@ -10,18 +10,32 @@
       <uri>model://ground_plane</uri>
     </include>
 
-    <!-- A testing model that includes the Velodyne sensor model -->
     <model name="my_person">
       <include>
         <uri>model://person_standing</uri>
         <!--uri>model://velodyne_hdl32</uri-->
       </include>
+      <pose> 5 5 0 </pose>
+      <!-- Attach the plugin to this model -->
+      <plugin name="grdyn_control" filename="build/libgrdyn_plugin.so">
+	 <ang_velocity> 0.0 </ang_velocity>
+	 <lin_velx> 0.0 </lin_velx>
+	 <lin_vely> 0.0 </lin_vely>
+      </plugin>
+    </model>
+
+    <model name="my_person2">
+      <include>
+        <uri>model://person_standing</uri>
+        <!--uri>model://velodyne_hdl32</uri-->
+      </include>
+      <pose> -5 -5 0 </pose>
 
       <!-- Attach the plugin to this model -->
       <plugin name="grdyn_control" filename="build/libgrdyn_plugin.so">
-	 <ang_velocity> 0.25 </ang_velocity>
-	 <lin_velx> 0.05 </lin_velx>
-	 <lin_vely> 0.25 </lin_vely>
+	 <ang_velocity> 0.0 </ang_velocity>
+	 <lin_velx> 0.0 </lin_velx>
+	 <lin_vely> 0.0 </lin_vely>
       </plugin>
     </model>
 

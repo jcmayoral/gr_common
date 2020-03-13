@@ -13,6 +13,7 @@
 #include <ros/callback_queue.h>
 #include <ros/subscribe_options.h>
 #include <geometry_msgs/Twist.h>
+#include <std_msgs/Bool.h>
 
 namespace gazebo
 {
@@ -20,22 +21,16 @@ namespace gazebo
   class GRDynObstaclePlugin : public ModelPlugin
   {
     /// \brief Constructor
-    public: GRDynObstaclePlugin() {}
+    public: GRDynObstaclePlugin() {
+        // Initialize ros, if it has not already bee initialized.
+        if (!ros::isInitialized()){
+            int argc = 0;
+            char **argv = NULL;
+            ros::init(argc, argv, "gazebo_client",
+            ros::init_options::NoSigintHandler);
+        }
+    }
 
-    private: double ang_velocity = 0;
-    private: double lin_velx = 0;
-    private: double lin_vely = 0;
-
-    //For ROS
-    /// \brief A node use for ROS transport
-    private: std::unique_ptr<ros::NodeHandle> rosNode;
-    /// \brief A ROS subscriber
-    private: ros::Subscriber rosSub;
-    /// \brief A ROS callbackqueue that helps process messages
-    private: ros::CallbackQueue rosQueue;
-    /// \brief A thread the keeps running the rosQueue
-    private: std::thread rosQueueThread;
- 
     public: void SetAngVelocity(const double &_vel){
         ang_velocity = _vel;
         this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,ang_velocity));		 
@@ -89,24 +84,27 @@ namespace gazebo
         this->sub = this->node->Subscribe(topicName,&GRDynObstaclePlugin::OnMsg, this);
 
 
+
+
+        //Once all setup is finished
         //Callback for ROS
-        // Initialize ros, if it has not already bee initialized.
-        if (!ros::isInitialized()){
-            int argc = 0;
-            char **argv = NULL;
-            ros::init(argc, argv, "gazebo_client",
-            ros::init_options::NoSigintHandler);
-        }
-        // Create our ROS node. This acts in a similar manner to
-        // the Gazebo node
-        this->rosNode.reset(new ros::NodeHandle("gazebo_client"));
+        //this->nh.reset(new ros::NodeHandle("gazebo_client"));
+        this->nh = boost::make_shared<ros::NodeHandle>();
+     
+        //NOT WORKING TEST WITH full simulation
+        //this->poseTimer = this->nh->createTimer(ros::Duration(0.1), &GRDynObstaclePlugin::updatePose, this);
+        ROS_INFO("HERE");
         // Create a named topic, and subscribe to it.
         ros::SubscribeOptions so = ros::SubscribeOptions::create<geometry_msgs::Twist>(
                 "/" + this->model->GetName() + "/vel_cmd",1,
                 boost::bind(&GRDynObstaclePlugin::OnRosMsg, this, _1),
                 ros::VoidPtr(), &this->rosQueue);
-        this->rosSub = this->rosNode->subscribe(so);
-
+     
+        this->rosPub = this->nh->advertise<std_msgs::Bool>( "/" + this->model->GetName() + "/rrrrr", 1);
+        this->rosSub = this->nh->subscribe(so);
+     
+        ROS_INFO("THERE");
+        //update pose TODO fancy stuff
         // Spin up the queue helper thread.
         this->rosQueueThread =
         std::thread(std::bind(&GRDynObstaclePlugin::QueueThread, this));
@@ -114,15 +112,28 @@ namespace gazebo
 
 
     public: void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg){
+        //TOBE REMOVED ONCE TIMER WORKS
+        this->updatePose(ros::TimerEvent());
+
         this->SetLinearVelocityX(_msg->linear.x);
         this->SetLinearVelocityY(_msg->linear.y);
         this->SetAngVelocity(_msg->angular.z);
     }
 
+    public: void updatePose(const ros::TimerEvent& event){
+        ROS_INFO("GERER");
+        current_pose = this->model->WorldPose();
+        std::cout << "A" << std::endl;
+        std::cout <<"X "<< current_pose.Pos().X();
+        std::cout << "B" << std::endl;
+        std_msgs::Bool msg;
+        this->rosPub.publish(msg);
+    }
+
     /// \brief ROS helper function that processes messages
     private: void QueueThread(){
         static const double timeout = 0.01;
-        while (this->rosNode->ok()){
+        while (this->nh->ok()){
             this->rosQueue.callAvailable(ros::WallDuration(timeout));
             }
     }
@@ -130,20 +141,34 @@ namespace gazebo
     /// \brief Pointer to the model.
     private: physics::ModelPtr model;
 
-    /// \brief Pointer to the joint.
-    private: physics::JointPtr joint;
-
     private: physics::LinkPtr link;
-
-    /// \brief A PID controller for the joint.
-    private: common::PID pid;
-
-
-        /// \brief A node used for transport
+    /// \brief A node used for transport
     private: transport::NodePtr node;
 
     /// \brief A subscriber to a named topic.
     private: transport::SubscriberPtr sub;
+
+    public: ignition::math::Pose3<double> current_pose;
+
+    private: double ang_velocity = 0;
+    private: double lin_velx = 0;
+    private: double lin_vely = 0;
+
+    //For ROS
+    /// \brief A node use for ROS transpor
+    private: ros::NodeHandlePtr nh;
+    private: ros::Timer poseTimer;
+
+    /// \brief A ROS subscriber
+    private: ros::Subscriber rosSub;
+    private: ros::Publisher rosPub;
+    /// \brief A ROS callbackqueue that helps process messages
+    private: ros::CallbackQueue rosQueue;
+    /// \brief A thread the keeps running the rosQueue
+    private: std::thread rosQueueThread;
+ 
+
+
   };
 
   // Tell Gazebo about this plugin, so that Gazebo can call Load on this plugin.
