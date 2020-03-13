@@ -18,7 +18,11 @@
       </include>
 
       <!-- Attach the plugin to this model -->
-      <plugin name="grdyn_control" filename="build/libgrdyn_plugin.so"/>
+      <plugin name="grdyn_control" filename="build/libgrdyn_plugin.so">
+	 <ang_velocity> 0.25 </ang_velocity>
+	 <lin_velx> 0.05 </lin_velx>
+	 <lin_vely> 0.25 </lin_vely>
+      </plugin>
     </model>
 
   </world>

@@ -15,3 +15,10 @@ target_link_libraries(model_push ${GAZEBO_LIBRARIES})
 
 add_library(grdyn_plugin SHARED gr_dyn_obstacle_plugin.cc)
 target_link_libraries(grdyn_plugin ${GAZEBO_LIBRARIES})
+
+
+add_executable(personvel_pub grdyn_pub.cc)
+#include(FindBoost)
+#  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)
+#  target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES})
