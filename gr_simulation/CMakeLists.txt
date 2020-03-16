@@ -21,6 +21,8 @@ target_link_libraries(model_push ${GAZEBO_LIBRARIES})
 add_library(grdyn_plugin SHARED gr_dyn_obstacle_plugin.cc)
 target_link_libraries(grdyn_plugin ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
+add_library(grdyn_plugin2 SHARED gr_dyn_obstacle_plugin_2.cc)
+target_link_libraries(grdyn_plugin2 ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
 add_executable(personvel_pub grdyn_pub.cc)
 #include(FindBoost)

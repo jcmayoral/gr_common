@@ -32,6 +32,6 @@ int main(int _argc, char **_argv)
 
   // Make sure to shut everything down.
   gazebo::client::shutdown();
-  
+
   return 1;
 }
