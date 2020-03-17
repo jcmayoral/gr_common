@@ -30,7 +30,7 @@ void GazeboDynamicObject::OnMsg(ConstVector3dPtr &_msg){
 
 void GazeboDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     // Just output a message for now
-    std::cerr << "\nThe velodyne plugin is attach to model[" <<
+    std::cerr << "\nThe custom plugin is attach to model[" <<
     _model->GetName() << "]\n";
 
     if (_sdf->HasElement("ang_velocity")){

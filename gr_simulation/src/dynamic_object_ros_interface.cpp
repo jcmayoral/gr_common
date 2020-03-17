@@ -27,14 +27,14 @@ void GazeboROSDynamicObject::SetLinearVelocityY(const double &_vel){
 
 void GazeboROSDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     // Just output a message for now
-    std::cerr << "\nThe velodyne plugin is attach to model[" <<
+    std::cerr << "\nThe custom plugin is attach to model[" <<
     _model->GetName() << "]\n";
 
     if (_sdf->HasElement("ang_velocity")){
         ang_velocity = _sdf->Get<double>("ang_velocity");
     }
 
-    if (_sdf->HasElement("lin_velx")){
+    if (_sdf->HasElement("lin_velx")){0
         lin_velx = _sdf->Get<double>("lin_velx");
     }
 
