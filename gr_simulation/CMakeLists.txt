@@ -25,6 +25,9 @@ target_link_libraries(dynobjectgazebo ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 add_library(dynobjectros SHARED src/dynamic_object_ros_interface.cpp)
 target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
+add_library(grassrow SHARED src/grass_row.cpp)
+target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
+
 add_executable(personvel_pub src/grdyn_pub.cpp)
 #include(FindBoost)
 #  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)

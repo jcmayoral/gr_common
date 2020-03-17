@@ -34,7 +34,7 @@ void GazeboROSDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
         ang_velocity = _sdf->Get<double>("ang_velocity");
     }
 
-    if (_sdf->HasElement("lin_velx")){0
+    if (_sdf->HasElement("lin_velx")){
         lin_velx = _sdf->Get<double>("lin_velx");
     }
 
