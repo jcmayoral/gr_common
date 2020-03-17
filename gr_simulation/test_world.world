@@ -17,7 +17,7 @@
       </include>
       <pose> 5 5 0 </pose>
       <!-- Attach the plugin to this model -->
-      <plugin name="grdyn_control" filename="libgrdyn_plugin.so">
+      <plugin name="dynobjectgazebo" filename="libdynobjectgazebo.so">
         <ang_velocity> 0.0 </ang_velocity>
         <lin_velx> 0.0 </lin_velx>
         <lin_vely> 0.0 </lin_vely>
@@ -32,7 +32,7 @@
       <pose> -5 -5 0 </pose>
 
       <!-- Attach the plugin to this model -->
-      <plugin name="grdyn_control" filename="libgrdyn_plugin.so">
+      <plugin name="dynobjectros" filename="libdynobjectros.so">
         <ang_velocity> 0.0 </ang_velocity>
         <lin_velx> 0.0 </lin_velx>
         <lin_vely> 0.0 </lin_vely>
