@@ -8,7 +8,12 @@ include_directories(include)
 include_directories(${roscpp_INCLUDE_DIRS})
 include_directories(${geometry_msgs_INCLUDE_DIRS})
 include_directories(${GAZEBO_INCLUDE_DIRS})
-link_directories(${GAZEBO_LIBRARY_DIRS})
+include_directories(  ${CMAKE_CURRENT_BINARY_DIR}/msgs)
+
+link_directories(${GAZEBO_LIBRARY_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/msgs)
+add_subdirectory(msgs)
+
+#link_directories(${GAZEBO_LIBRARY_DIRS})
 #list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
@@ -25,10 +30,14 @@ add_library(dynobjectros SHARED src/dynamic_object_ros_interface.cpp)
 target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
 add_library(grassrow SHARED src/visual_grass_row.cpp)
-target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
+target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
 
 add_executable(personvel_pub src/grdyn_pub.cpp)
+
+add_executable(grass_cutter src/grass_event_caller.cpp)
+
 #include(FindBoost)
 #  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)
 #  target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES})
+target_link_libraries(grass_cutter ${GAZEBO_LIBRARIES} gr_simulation_msgs)

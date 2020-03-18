@@ -13,6 +13,19 @@ VisualGrassRow::~VisualGrassRow(){
 }
 
 void VisualGrassRow::Init(){
+    std::cout << "Init " << access_counter << std::endl;
+    access_counter++;
+    std::cout << "SUbscribed to topic " << this->sub->GetTopic() << std::endl;
+}
+
+//seems Load function runs twice when added manually on Gazebo server
+//TODO review behavior when a world is loaded
+void VisualGrassRow::Load(rendering::VisualPtr _parent, sdf::ElementPtr _sdf){
+    this->model = _parent;  
+
+    std::cout << "Load " << access_counter << std::endl;
+    access_counter++;
+
     //CallBack for Gazebo
     this->node = transport::NodePtr(new transport::Node());
     this->node->Init(this->model->Name());
@@ -24,22 +37,12 @@ void VisualGrassRow::Init(){
     auto start_idx = model_id.find("grassrow");
     auto end_idx = model_id.find("link")-2;
     model_id = model_id.substr(start_idx, end_idx);
-    std::string topicName = "~/" + model_id + "/event";
+    std::string topicName = "/test";///" + model_id + "/event";
     std::cout << topicName << "  final topic" << std::endl;
     // Just output a message for now
     this->sub = this->node->Subscribe(topicName,&VisualGrassRow::OnRequest, this);
 
-    std::cout << "Init " << access_counter << std::endl;
-    access_counter++;
-}
 
-//seems Load function runs twice when added manually on Gazebo server
-//TODO review behavior when a world is loaded
-void VisualGrassRow::Load(rendering::VisualPtr _parent, sdf::ElementPtr _sdf){
-    this->model = _parent;  
-
-    std::cout << "Load " << access_counter << std::endl;
-    access_counter++;
     /*
     if (_sdf->HasElement("ang_velocity")){
         ang_velocity = _sdf->Get<double>("ang_velocity");
@@ -56,7 +59,8 @@ void VisualGrassRow::Load(rendering::VisualPtr _parent, sdf::ElementPtr _sdf){
 
 }
 
-void VisualGrassRow::OnRequest(ConstEmptyPtr &event){
+void VisualGrassRow::OnRequest(GrassCutterRequestPtr &event){
+    std::cout << "onRequest " << std::endl;
     OnEvent();
 }
 

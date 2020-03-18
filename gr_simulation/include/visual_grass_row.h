@@ -8,9 +8,11 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <thread>
+#include "grasscutter.pb.h"
 
 namespace gazebo
 {
+  typedef const boost::shared_ptr<const gr_simulation_msgs::msgs::GrassCutterRequest> GrassCutterRequestPtr;
   /// \brief A plugin to control a GR Dynamic Obstacle sensor.
   class VisualGrassRow : public VisualPlugin
   {
@@ -29,7 +31,7 @@ namespace gazebo
         virtual void Init();
     private: 
         void OnEvent();
-        void OnRequest(ConstEmptyPtr &event);
+        void OnRequest(GrassCutterRequestPtr &event);
         /// \brief Pointer to the model.
         rendering::VisualPtr model;
         std::string model_id;
