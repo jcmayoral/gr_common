@@ -4,17 +4,10 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <ignition/math/Vector3.hh>
-//#include <gazebo/transport/transport.hh>
-#include <gazebo/msgs/msgs.hh>
-//#include <gazebo/common/Plugin.hh>
-//#include <gazebo/physics/Model.hh>
 #include <gazebo/rendering/Visual.hh>
-
+#include <gazebo/transport/transport.hh>
+#include <gazebo/msgs/msgs.hh>
 #include <thread>
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
-#include <ros/subscribe_options.h>
-#include <std_msgs/Bool.h>
 
 namespace gazebo
 {
@@ -25,9 +18,6 @@ namespace gazebo
     public: 
         VisualGrassRow();
         ~VisualGrassRow();
-        void SetSizeZ(const double &_sz);
-        void SetSizeX(const double &_sx);
-        void SetSizeY(const double &_sy);
 
         /// \brief The load function is called by Gazebo when the plugin is
         /// inserted into simulation
@@ -37,10 +27,9 @@ namespace gazebo
         //virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
         virtual void Load(rendering::VisualPtr _parent, sdf::ElementPtr _sdf);
         virtual void Init();
-        void OnUpdate();
     private: 
-        void OnMsg();
-        void QueueThread();
+        void OnEvent();
+        void OnRequest(ConstEmptyPtr &event);
         /// \brief Pointer to the model.
         rendering::VisualPtr model;
         std::string model_id;
@@ -52,18 +41,13 @@ namespace gazebo
         double lin_vely = 0;
         sdf::ElementPtr visualElem;
 
+        int access_counter;
 
-        //For ROS
-        /// \brief A node use for ROS transpor
-        ros::NodeHandlePtr nh;
-        ros::Timer poseTimer;
-        /// \brief A ROS subscriber
-        ros::Subscriber rosSub;
-        ros::Publisher rosPub;
-        /// \brief A ROS callbackqueue that helps process messages
-        ros::CallbackQueue rosQueue;
-        /// \brief A thread the keeps running the rosQueue
-        std::thread rosQueueThread;
+        bool is_cut;
+        /// \brief A node used for transport
+        transport::NodePtr node;
+        transport::SubscriberPtr sub;
+
   };
 
   // Tell Gazebo about this plugin, so that Gazebo can call Load on this plugin.
