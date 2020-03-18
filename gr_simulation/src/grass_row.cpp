@@ -27,6 +27,34 @@ void GrassRow::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     std::cerr << "\nThe custom plugin is attach to model[" <<
     _model->GetName() << "]\n";
 
+    this->node = transport::NodePtr(new transport::Node());
+    this->node->Init(_model->GetWorld()->Name());
+    visPub = this->node->Advertise<msgs::Visual>("~/visual", 10);
+
+    // Set the visual's name. This should be unique.
+    visualMsg.set_name("__RED_CYLINDER_VISUAL__");
+
+    // Set the visual's parent. This visual will be attached to the parent
+    visualMsg.set_parent_name(_model->GetScopedName());
+
+    // Create a cylinder
+    geomMsg = visualMsg.mutable_geometry();
+    geomMsg->set_type(msgs::Geometry::CYLINDER);
+    geomMsg->mutable_cylinder()->set_radius(1);
+    geomMsg->mutable_cylinder()->set_length(.1);
+
+    // Set the material to be bright red
+    visualMsg.mutable_material()->mutable_script()->set_name(
+        "Gazebo/RedGlow");
+
+    // Set the pose of the visual relative to its parent
+    msgs::Set(visualMsg.mutable_pose(),
+        ignition::math::Pose3d(0, 0, 0.6, 0, 0, 0));
+
+    // Don't cast shadows
+    visualMsg.set_cast_shadows(false);
+
+    visPub->Publish(visualMsg);
 
     /*
     if (_sdf->HasElement("ang_velocity")){
@@ -69,6 +97,7 @@ void GrassRow::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
 void GrassRow::OnRosMsg(const geometry_msgs::Vector3ConstPtr &_msg){
     //TOBE REMOVED ONCE TIMER WORKS
+    /*
     msgs::Visual visual_msg;
     msgs::Geometry geo_msg;
     visual_msg = this->link->GetVisualMessage("visual");
@@ -78,6 +107,33 @@ void GrassRow::OnRosMsg(const geometry_msgs::Vector3ConstPtr &_msg){
     std::cout << v3d.x() << std::endl;
     std::cout << v3d.y() << std::endl;
     std::cout << v3d.z() << std::endl;
+    */
+        // Create a cylinder
+    geomMsg->set_type(msgs::Geometry::BOX);
+    //geomMsg->mutable_box()->set_size(1);
+    msgs::Vector3d v3d = geomMsg->mutable_box()->size();
+     std::cout << v3d.x() << std::endl;
+    std::cout << v3d.y() << std::endl;
+    std::cout << v3d.z() << std::endl;
+    //geomMsg->mutable_box()->set_size(1);
+    //geomMsg->mutable_cylinder()->set_length(.1);
+
+    // Set the material to be bright red
+    //visualMsg.mutable_material()->mutable_script()->set_name(
+    // ..   "Gazebo/RedGlow");
+
+    // Set the pose of the visual relative to its parent
+    //msgs::Set(visualMsg.mutable_pose(),
+    //   ignition::math::Pose3d(10, 0, 0.6, 0, 0, 0));
+
+    msgs::Set(visualMsg.mutable_geometry()->mutable_size(),
+        ignition::math::Vector3d(10, 10, 0.6));
+
+    // Don't cast shadows
+    //visualMsg.set_cast_shadows(false);
+
+    visPub->Publish(visualMsg);
+
     //this->SetSizeX(_msg->x);
     //this->SetSizeY(_msg->y);
     //this->SetSizeZ(_msg->z);
