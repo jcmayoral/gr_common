@@ -16,7 +16,7 @@ int main(int _argc, char **_argv)
   node->Init();
 
   gazebo::transport::PublisherPtr pub =
-    node->Advertise<gazebo::msgs::Empty>("/test");///grassrow/event");
+    node->Advertise< gr_simulation_msgs::msgs::GrassCutterRequest>("/test");///grassrow/event");
 ///grassrow::link_0:/event");
     //"/grassrow_0/event");
   std::cout << pub->GetTopic() << std::endl;
