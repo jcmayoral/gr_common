@@ -29,12 +29,8 @@ target_link_libraries(dynobjectgazebo ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 add_library(dynobjectros SHARED src/dynamic_object_ros_interface.cpp)
 target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
-add_library(visualgrassrow SHARED src/visual_grass_row.cpp)
-target_link_libraries(visualgrassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
-
 add_library(grassrow SHARED src/grass_row.cpp)
 target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
-
 
 add_executable(personvel_pub src/grdyn_pub.cpp)
 add_executable(grass_cutter src/grass_event_caller.cpp)

@@ -1,7 +1,7 @@
 #include <grass_row.h>
 using namespace gazebo;
 
-GrassRow::GrassRow(){
+GrassRow::GrassRow(): gznode(new transport::Node()){
     // Initialize ros, if it has not already bee initialized.
     if (!ros::isInitialized()){
         int argc = 0;
@@ -44,9 +44,10 @@ void GrassRow::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     std::string topicName = "/" + this->model->GetName() + "/event";
 
 
-    this->gznode = transport::NodePtr(new transport::Node());
-    this->gznode->Init(_model->GetWorld()->Name());
-    this->gzsub = this->gznode->Subscribe("/test",&GrassRow::OnRequest, this);
+    //this->gznode = transport::NodePtr(new transport::Node());
+    this->gznode->Init("grasscutter");
+    this->gzsub = this->gznode->Subscribe("~/test",&GrassRow::OnRequest, this);
+    gazebo::common::Time::MSleep(10);
 
     //Once all setup is finished
     //Callback for ROS
