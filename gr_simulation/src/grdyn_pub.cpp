@@ -18,7 +18,7 @@ int main(int _argc, char **_argv)
 
   // Publish to the  velodyne topic
   gazebo::transport::PublisherPtr pub =
-    node->Advertise<gazebo::msgs::Vector3d>("~/my_person/vel_cmd");
+    node->Advertise<gazebo::msgs::Vector3d>("/my_person/vel_cmd");
 
   // Wait for a subscriber to connect to this publisher
   pub->WaitForConnection();
