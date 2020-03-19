@@ -1,3 +1,9 @@
+/*
+NOTE WILL NOT WORK!!!!!!!!!!!!
+Visual Plugin seems to be run once when object is instantiated on gazebo
+Use Model Plugin instead
+*/
+
 #include <visual_grass_row.h>
 #include <gtest/gtest.h>
 
@@ -6,30 +12,47 @@ using namespace gazebo;
 
 VisualGrassRow::VisualGrassRow():is_cut(false), access_counter(0){
     // Initialize ros, if it has not already bee initialized.
+    if (!ros::isInitialized()){
+        int argc = 0;
+        char **argv = NULL;
+        ros::init(argc, argv, "gazebo_client",
+        ros::init_options::NoSigintHandler);
+    }
 }
 
 VisualGrassRow::~VisualGrassRow(){
+    std::cout << "KILLED?"<<std::endl;
     this->model.reset();
 }
 
 void VisualGrassRow::Init(){
     std::cout << "Init " << access_counter << std::endl;
     access_counter++;
-    std::cout << "SUbscribed to topic " << this->sub->GetTopic() << std::endl;
+
+    /*
+    if (this->rosSub.getTopic().empty()){
+        ROS_INFO("initialize subscriber");
+        this->rosSub = this->nh->subscribe("test", 1, &VisualGrassRow::ros_cb, this);
+        ROS_INFO("subscriber working");
+        ros::spinOnce();
+    }
+    */
+    //std::cout << "SUbscribed to topic " << this->sub->GetTopic() << std::endl;
+    //OnEvent();
+
 }
 
 //seems Load function runs twice when added manually on Gazebo server
 //TODO review behavior when a world is loaded
 void VisualGrassRow::Load(rendering::VisualPtr _parent, sdf::ElementPtr _sdf){
-    this->model = _parent;  
-
+    
+    this->model = _parent;
     std::cout << "Load " << access_counter << std::endl;
     access_counter++;
 
     //CallBack for Gazebo
-    this->node = transport::NodePtr(new transport::Node());
-    this->node->Init(this->model->Name());
-
+    //transport::init();
+    //transport::run();
     //this->model->SetName("grassrow");
     model_id = this->model->Name();//this->model->Name();  
     
@@ -39,10 +62,13 @@ void VisualGrassRow::Load(rendering::VisualPtr _parent, sdf::ElementPtr _sdf){
     model_id = model_id.substr(start_idx, end_idx);
     std::string topicName = "/test";///" + model_id + "/event";
     std::cout << topicName << "  final topic" << std::endl;
-    // Just output a message for now
-    this->sub = this->node->Subscribe(topicName,&VisualGrassRow::OnRequest, this);
 
 
+    if (false){
+        this->node = transport::NodePtr(new transport::Node());
+        this->node->Init("ggg");//this->model->Name());    
+        this->sub = this->node->Subscribe("/test",&VisualGrassRow::OnRequest, this);
+    }
     /*
     if (_sdf->HasElement("ang_velocity")){
         ang_velocity = _sdf->Get<double>("ang_velocity");
@@ -57,6 +83,25 @@ void VisualGrassRow::Load(rendering::VisualPtr _parent, sdf::ElementPtr _sdf){
     }
     */
 
+    //this->nh.reset(new ros::NodeHandle("gazebo_client"));
+    this->nh = boost::make_shared<ros::NodeHandle>();
+    //Subscriber
+    ros::SubscribeOptions so = ros::SubscribeOptions::create<std_msgs::Bool>(
+            topicName,1,
+           boost::bind(&VisualGrassRow::ros_cb, this, _1),
+         ros::VoidPtr(), &this->rosQueue);    
+    //this->rosSub = this->nh.subscribe(topicName, 1, &GrassRow::OnRosMsg, this);
+    this->rosSub = this->nh->subscribe(so);
+    //update pose TODO fancy stuff
+    // Spin up the queue helper thread.
+    this->rosQueueThread = std::thread(std::bind(&VisualGrassRow::QueueThread, this));
+    
+    //sleep(2);
+}
+
+void VisualGrassRow::ros_cb(const std_msgs::BoolConstPtr &_msg){
+    std::cout << "ros_cb" << std::endl;
+    OnEvent();
 }
 
 void VisualGrassRow::OnRequest(GrassCutterRequestPtr &event){
@@ -67,21 +112,23 @@ void VisualGrassRow::OnRequest(GrassCutterRequestPtr &event){
 
 void VisualGrassRow::OnEvent(){
     ignition::math::Vector3d new_scale;
-    new_scale = this->model->Scale();
+    //new_scale = this->model->Scale();
     std::cout << "SX" << new_scale.X() << std::endl;
     std::cout << "SY" << new_scale.Y() << std::endl;
     std::cout << "SZ " << new_scale.Z() << std::endl;
-
-    new_scale.Z() = 1.0;
-
-    if (is_cut){
-        new_scale.Z() = 10.;
-    }
-    new_scale.Y() = 1.0;
-    new_scale.X() = 1.0;
-    this->model->SetScale(new_scale);
+    //this->model->SetScale(new_scale);
     //new_scale = this->model->Scale();
-    //ignition::math::Pose3d update_pose = ignition::math::Pose3d(1,1,-1,0,0,0);
+    //ignition::math::Pose3d update_pose = ignition::math::Pose3d(1,1,-1,1.0,0,0);
     //this->model->SetWorldPose(update_pose);
+    is_cut = this->model->GetVisible();
     is_cut = !is_cut;
+    this->model->SetVisible(is_cut);
+    this->model->Update();
+}
+
+void VisualGrassRow::QueueThread(){
+    static const double timeout = 0.01;
+    while (this->nh->ok()){
+        this->rosQueue.callAvailable(ros::WallDuration(timeout));
+    }
 }

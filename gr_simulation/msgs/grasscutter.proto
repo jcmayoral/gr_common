@@ -1,14 +1,9 @@
 package gr_simulation_msgs.msgs;
-import "vector2d.proto";
 
 message GrassCutterRequest
 {
-  required gazebo.msgs.Vector2d   upperLeft  = 1;
-  required gazebo.msgs.Vector2d   upperRight = 2;
-  required gazebo.msgs.Vector2d   lowerRight = 3;
-  required gazebo.msgs.Vector2d   lowerLeft  = 4;
-  required double                 height     = 5;
-  required double                 resolution = 6;
-  optional string                 filename   = 7 [default = ""];
-  optional int32                  threshold  = 8 [default = 255];
+  required double                 height     = 1 [default = 1.0];
+  required double                 resolution = 2 [default = 0.0];
+  optional string                 filename   = 3 [default = ""];
+  optional int32                  threshold  = 4 [default = 255];
 }

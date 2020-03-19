@@ -8,33 +8,20 @@
 /////////////////////////////////////////////////
 int main(int _argc, char **_argv)
 {
+  gr_simulation_msgs::msgs::GrassCutterRequest request;
   // Load gazebo as a client
-  gazebo::client::setup(_argc, _argv);
-
-  // Create our node for communication
+  std::cout << ">" << std::endl;
+  gazebo::transport::init();
+  gazebo::transport::run();
   gazebo::transport::NodePtr node(new gazebo::transport::Node());
-  node->Init();
-
-  gazebo::transport::PublisherPtr pub =
-    node->Advertise< gr_simulation_msgs::msgs::GrassCutterRequest>("/test");///grassrow/event");
-///grassrow::link_0:/event");
-    //"/grassrow_0/event");
-  std::cout << pub->GetTopic() << std::endl;
-  // Wait for a subscriber to connect to this publisher
+  node->Init("default");
+  gazebo::transport::PublisherPtr pub = node->Advertise< gr_simulation_msgs::msgs::GrassCutterRequest>("/test");///grassrow/event"); 
+  std::cout << "waiting"; 
   pub->WaitForConnection();
-  gr_simulation_msgs::msgs::GrassCutterRequest msg;
+  sleep(1);
+  pub->Publish(request);
+  sleep(1);
 
-  // Set the velocity in the x-component
-  //gazebo::msgs::Set(&msg, ignition::math::Vector3d(std::atof(_argv[1]), std::atof(_argv[2]), std::atof(_argv[3])));
-
-  // Send the message
-  for (int i=0; i<10; i++){
-    pub->Publish(msg);
-    sleep(3);
-  }
-
-  // Make sure to shut everything down.
-  gazebo::client::shutdown();
-
+  gazebo::transport::fini();
   return 1;
 }
