@@ -24,9 +24,16 @@ void GazeboDynamicObject::OnMsg(ConstVector3dPtr &_msg){
     this->SetLinearVelocityX(_msg->x());
     this->SetLinearVelocityY(_msg->y());
     this->SetAngVelocity(_msg->z());
-    current_pose = this->model->WorldPose();
+    //current_pose = this->model->WorldPose();
     std::cout <<"X "<< current_pose.Pos().X();
 }
+
+void GazeboDynamicObject::OnUpdate(){
+      // Apply a small linear velocity to the model.
+      current_pose = this->model->WorldPose();
+      this->pub->Publish(gazebo::msgs::Convert(current_pose));
+    }
+
 
 void GazeboDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     // Just output a message for now
@@ -51,7 +58,14 @@ void GazeboDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,ang_velocity));
     this->node = transport::NodePtr(new transport::Node());
     this->node->Init(this->model->GetWorld()->Name());
-    std::string topicName = "~/" + this->model->GetName() + "/vel_cmd";
-    this->sub = this->node->Subscribe(topicName,&GazeboDynamicObject::OnMsg, this);
+
+    std::string pubtopicName = "/" + this->model->GetName() + "/world_odom";
+    this -> pub = this->node->Advertise<msgs::Pose>(pubtopicName);
+
+    std::string subtopicName = "/" + this->model->GetName() + "/vel_cmd";
+    this->sub = this->node->Subscribe(subtopicName,&GazeboDynamicObject::OnMsg, this);
+
+     this->updateConnection = event::Events::ConnectWorldUpdateBegin(
+          std::bind(&GazeboDynamicObject::OnUpdate, this));
 
 }

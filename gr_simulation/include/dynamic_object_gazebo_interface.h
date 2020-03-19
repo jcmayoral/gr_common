@@ -28,6 +28,7 @@ namespace gazebo
         /// \param[in] _sdf A pointer to the plugin's SDF element.
         virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
         void OnMsg(ConstVector3dPtr &_msg);
+        void OnUpdate();
 
     private: 
         void QueueThread();
@@ -38,12 +39,13 @@ namespace gazebo
         transport::NodePtr node;
         /// \brief A subscriber to a named topic.
         transport::SubscriberPtr sub;
-        
+        transport::PublisherPtr pub;
+
         ignition::math::Pose3<double> current_pose;
         double ang_velocity = 0;
         double lin_velx = 0;
         double lin_vely = 0;
-
+        event::ConnectionPtr updateConnection;
   };
 
   // Tell Gazebo about this plugin, so that Gazebo can call Load on this plugin.
