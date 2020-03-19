@@ -35,7 +35,7 @@ namespace gazebo
         virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
         virtual void Init();
     private:
-        void OnEvent();
+        void OnEvent(bool state=true);
         //gazebo
         void OnRequest(GrassCutterRequestPtr &event);
         //ros

@@ -12,10 +12,17 @@ GrassRow::GrassRow(): gznode(new transport::Node()){
 }
 
 GrassRow::~GrassRow(){
+    //
+    this->nh->shutdown();
     this->rosSub.shutdown();
-    this->link.reset();
+    this->rosQueueThread.detach();
+    std::cout << "e1";
     this->nh.reset();
+    std::cout << "e2";
+    //delete this->nh;
     this->model.reset();
+    this->link.reset();
+    std::cout << "e3";
 }
 
 void GrassRow::Init(){
@@ -68,23 +75,47 @@ void GrassRow::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
 void GrassRow::OnRequest(GrassCutterRequestPtr &event){
     std::cout << "onRequest " << std::endl;
-    OnEvent();
+    OnEvent(true);
 }
 
 
 void GrassRow::OnRosMsg(const std_msgs::BoolConstPtr& msg){
     //TOBE REMOVED ONCE TIMER WORKS
     std::cout << "CB " << std::endl;
-    OnEvent();
+    OnEvent(msg->data);
     //this->model->Update();
 }
 
-void GrassRow::OnEvent(){
+void GrassRow::OnEvent(bool state){
     ignition::math::Vector3d nscale;
     nscale.X() = 1.0;
     nscale.Y() = 1.0;
-    nscale.Z() = 0.5;
-   this->model->SetScale(nscale,true);
+    nscale.Z() = 1.0;
+    double wz = 0.0;
+    if (state){
+        nscale.Z() = 0.5;
+        wz = -3.0;
+    }
+   //this->model->SetScale(nscale,true);
+
+   uint32_t visualid;
+   if (this->link->VisualId("visual", visualid)){
+       ignition::math::Pose3d pose;//(0,0,wz,0,0,0);
+       std::cout << "a";
+       if(this->link->VisualPose(visualid,pose)){
+           std::cout << pose.Pos().Z() << std::endl;
+           pose.Pos().Z() = wz;
+           if(this->link->SetVisualPose(visualid,pose)){
+               std::cout << "w1";
+            }
+       }
+
+   }
+
+   //this->model->SetEnabled(false);
+   //this->model->Update();
+   //;
+   //this->model->SetLinkWorldPose(pose, this->link);
 }
 
 void GrassRow::QueueThread(){
