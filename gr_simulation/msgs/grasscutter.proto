@@ -1,9 +1,9 @@
+syntax = "proto2";
+
 package gr_simulation_msgs.msgs;
 
 message GrassCutterRequest
 {
-  required double                 height     = 1 [default = 1.0];
-  required double                 resolution = 2 [default = 0.0];
-  optional string                 filename   = 3 [default = ""];
-  optional int32                  threshold  = 4 [default = 255];
+  required int32                 row     = 1 [default = 0];
+  required int32                column = 2 [default = 0];
 }

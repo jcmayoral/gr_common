@@ -33,44 +33,37 @@ void GrassRow::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     std::cerr << "\nThe custom plugin is attach to model[" <<
     _model->GetName() << "]\n";
 
-    /*
-    if (_sdf->HasElement("ang_velocity")){
-        ang_velocity = _sdf->Get<double>("ang_velocity");
-    }
-    if (_sdf->HasElement("lin_velx")){0
-        lin_velx = _sdf->Get<double>("lin_velx");
-    }
-    if (_sdf->HasElement("lin_vely")){
-        lin_vely = _sdf->Get<double>("lin_vely");
-    }
-    */
+    bool use_ros=true;
 
-    //Copying Poiners
+    if (_sdf->HasElement("use_ros")){
+        use_ros = _sdf->Get<bool>("use_ros");
+    }
+
     this->model = _model;
     this->link = _model->GetLinks()[0];
     std::string topicName = "/" + this->model->GetName() + "/event";
+        
+    //Copying Poiners
+    if(!use_ros){
+        //this->gznode = transport::NodePtr(new transport::Node());
+        std::cout << "gazebo";
+        this->gznode->Init();
+        this->gzsub = this->gznode->Subscribe("/test",&GrassRow::OnRequest, this);
+    }
 
-
-    //this->gznode = transport::NodePtr(new transport::Node());
-    this->gznode->Init("grasscutter");
-    this->gzsub = this->gznode->Subscribe("~/test",&GrassRow::OnRequest, this);
-    gazebo::common::Time::MSleep(10);
-
-    //Once all setup is finished
-    //Callback for ROS
-    //this->nh.reset(new ros::NodeHandle("gazebo_client"));
-    //this->nh.reset(new ros::NodeHandle(this->model->GetName()));
-    this->nh = boost::make_shared<ros::NodeHandle>();
-    // Create a named topic, and subscribe to it.
-    ros::SubscribeOptions so = ros::SubscribeOptions::create<std_msgs::Bool>(
+    if (use_ros){
+        this->nh = boost::make_shared<ros::NodeHandle>();
+        // Create a named topic, and subscribe to it.
+        ros::SubscribeOptions so = ros::SubscribeOptions::create<std_msgs::Bool>(
             topicName,1,
            boost::bind(&GrassRow::OnRosMsg, this, _1),
-         ros::VoidPtr(), &this->rosQueue);
-    //this->rosPub = this->nh->advertise<std_msgs::Empty>( "/" + this->model->GetName() + "/rrrrr", 1);
-    this->rosSub = this->nh->subscribe(so);
-    //this->rosSub = this->nh.subscribe(topicName, 1, &GrassRow::OnRosMsg, this);
-    // Spin up the queue helper thread.
-    this->rosQueueThread = std::thread(std::bind(&GrassRow::QueueThread, this));
+        ros::VoidPtr(), &this->rosQueue);
+        //this->rosPub = this->nh->advertise<std_msgs::Empty>( "/" + this->model->GetName() + "/rrrrr", 1);
+        this->rosSub = this->nh->subscribe(so);
+        //this->rosSub = this->nh.subscribe(topicName, 1, &GrassRow::OnRosMsg, this);
+        // Spin up the queue helper thread.
+        this->rosQueueThread = std::thread(std::bind(&GrassRow::QueueThread, this));
+    }
 }
 
 void GrassRow::OnRequest(GrassCutterRequestPtr &event){
