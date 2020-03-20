@@ -41,14 +41,14 @@ void GrassRow::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
     this->model = _model;
     this->link = _model->GetLinks()[0];
-    std::string topicName = "/" + this->model->GetName() + "/event";
+    std::string topicName = "/" + this->model->GetName();
         
     //Copying Poiners
     if(!use_ros){
         //this->gznode = transport::NodePtr(new transport::Node());
         std::cout << "gazebo";
         this->gznode->Init();
-        this->gzsub = this->gznode->Subscribe("/test",&GrassRow::OnRequest, this);
+        this->gzsub = this->gznode->Subscribe(topicName,&GrassRow::OnRequest, this);
     }
 
     if (use_ros){
@@ -68,7 +68,8 @@ void GrassRow::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
 void GrassRow::OnRequest(GrassCutterRequestPtr &event){
     std::cout << "onRequest " << std::endl;
-    OnEvent(true);
+    std::cout << event->cut() << std::endl;
+    OnEvent(event->cut());
 }
 
 
@@ -87,16 +88,13 @@ void GrassRow::OnEvent(bool state){
     double wz = 0.0;
     if (state){
         nscale.Z() = 0.5;
-        wz = -3.0;
+        wz = -0.5;
     }
-   //this->model->SetScale(nscale,true);
 
    uint32_t visualid;
    if (this->link->VisualId("visual", visualid)){
        ignition::math::Pose3d pose;//(0,0,wz,0,0,0);
-       std::cout << "a";
        if(this->link->VisualPose(visualid,pose)){
-           std::cout << pose.Pos().Z() << std::endl;
            pose.Pos().Z() = wz;
            if(this->link->SetVisualPose(visualid,pose)){
                std::cout << "w1";
@@ -105,6 +103,7 @@ void GrassRow::OnEvent(bool state){
 
    }
 
+   this->model->SetScale(nscale,true);
    //this->model->SetEnabled(false);
    //this->model->Update();
    //;

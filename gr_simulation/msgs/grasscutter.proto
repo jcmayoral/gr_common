@@ -6,4 +6,5 @@ message GrassCutterRequest
 {
   required int32                 row     = 1 [default = 0];
   required int32                column = 2 [default = 0];
+  required bool                cut = 3 [default = false];
 }
