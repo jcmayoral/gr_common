@@ -46,7 +46,8 @@ void VisualGrassRow::Load(rendering::VisualPtr _parent, sdf::ElementPtr _sdf){
     auto start_idx = model_id.find("grassrow");
     auto end_idx = model_id.find("link")-2;
     model_id = model_id.substr(start_idx, end_idx);
-    std::string topicName = model_id;
+    std::string topicName = "/" + model_id;
+    std::cout << topicName << std::endl;
 
     if (!use_ros){
         this->node = transport::NodePtr(new transport::Node());

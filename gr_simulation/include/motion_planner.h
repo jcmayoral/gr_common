@@ -10,11 +10,10 @@ namespace gazebo{
             MotionPlanner();
             void OnMsg(ConstPosePtr &_msg);
             void operator()(gazebo::transport::NodePtr node, std::string obstacleid);
-            std::string obstacleid_;
-
         private:
             transport::SubscriberPtr odom_sub_;
             transport::PublisherPtr vel_pub_;
+            std::string obstacleid_;
     };
 }
 
