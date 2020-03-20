@@ -10,15 +10,17 @@
 #include <gazebo/gazebo_config.h>
 #include <gazebo/gazebo_client.hh>
 #include <motion_planner.h>
+#include <thread>
 
 namespace gazebo{
   class ObstaclesCoordinator{
     public:
       ObstaclesCoordinator(int nobstacles, std::string rootname="my_person");
      ~ObstaclesCoordinator();
+     void start();
 
    private:
-    std::vector<MotionPlanner> obstacles_motion_planners_;
+    std::vector<std::thread> obstacles_motion_planners_;
     transport::NodePtr node_;
   };
 }

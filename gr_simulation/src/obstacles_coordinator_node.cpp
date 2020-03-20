@@ -3,7 +3,9 @@
 int main (int argc, char** argv){
     gazebo::client::setup(argc, argv);
     gazebo::ObstaclesCoordinator coordinator(std::atoi(argv[1]));
-    sleep(10);
+    coordinator.start();
+    while(true);
+
     gazebo::client::shutdown();
     return 1;
 }

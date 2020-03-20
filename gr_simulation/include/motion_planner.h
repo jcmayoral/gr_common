@@ -7,12 +7,14 @@
 namespace gazebo{
     class MotionPlanner{
         public:
-            MotionPlanner(gazebo::transport::NodePtr node, std::string obstacleid);
+            MotionPlanner();
             void OnMsg(ConstPosePtr &_msg);
+            void operator()(gazebo::transport::NodePtr node, std::string obstacleid);
+            std::string obstacleid_;
+
         private:
             transport::SubscriberPtr odom_sub_;
-            transport::SubscriberPtr vel_pub_;
-            std::string obstacleid_;
+            transport::PublisherPtr vel_pub_;
     };
 }
 
