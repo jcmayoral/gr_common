@@ -59,7 +59,7 @@ void GazeboDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     this->node = transport::NodePtr(new transport::Node());
     this->node->Init(this->model->GetWorld()->Name());
 
-    std::string pubtopicName = "/" + this->model->GetName() + "/world_odom";
+    std::string pubtopicName = "/" + this->model->GetName() + "/odom";
     this -> pub = this->node->Advertise<msgs::Pose>(pubtopicName);
 
     std::string subtopicName = "/" + this->model->GetName() + "/vel_cmd";

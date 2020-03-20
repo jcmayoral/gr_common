@@ -1,4 +1,3 @@
- 
 #ifndef _GAZEBO_GRASS_ROW_HH_
 #define _GAZEBO_GRASS_ROW_HH_
 
@@ -16,12 +15,11 @@
 #include <ros/subscribe_options.h>
 #include <std_msgs/Bool.h>
 
-namespace gazebo
-{
+namespace gazebo{
   typedef const boost::shared_ptr<const gr_simulation_msgs::msgs::GrassCutterRequest> GrassCutterRequestPtr;
   /// \brief A plugin to control a GR Dynamic Obstacle sensor.
-  class GrassRow : public ModelPlugin
-  {
+
+  class GrassRow : public ModelPlugin{
     /// \brief Constructor
     public: 
         GrassRow();

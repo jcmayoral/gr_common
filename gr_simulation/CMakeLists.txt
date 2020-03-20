@@ -32,11 +32,18 @@ target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 add_library(grassrow SHARED src/grass_row.cpp)
 target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
 
+add_library(motionplanner SHARED src/motion_planner.cpp)
+target_link_libraries(motionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} )
+
+add_library(obstaclescoordinator SHARED src/obstacles_coordinator.cpp)
+target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} motionplanner)
+
 add_executable(personvel_pub src/grdyn_pub.cpp)
 add_executable(grass_cutter src/grass_event_caller.cpp)
-
+add_executable(run_obstacle_coordinator src/obstacles_coordinator_node.cpp)
 #include(FindBoost)
 #  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)
 #  target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES})
 target_link_libraries(grass_cutter ${GAZEBO_LIBRARIES} gr_simulation_msgs)
+target_link_libraries(run_obstacle_coordinator ${GAZEBO_LIBRARIES} obstaclescoordinator)
