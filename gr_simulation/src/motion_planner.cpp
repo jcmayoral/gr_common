@@ -2,10 +2,16 @@
 
 using namespace gazebo;
 
-MotionPlanner::MotionPlanner(): obstacleid_("defaults"), initialized_(false),ncells_(100){
+MotionPlanner::MotionPlanner(): obstacleid_("defaults"), initialized_(false),ncells_(100), mtx_(){
+  std::cout << "constructor";
 }
 
 void MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obstacleid){
+  run(node, obstacleid);
+}
+
+void MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid){
+  
     obstacleid_ = obstacleid;
     double map_size = 100; //meters
     std::cout << "Creating Motion model for  " << obstacleid << std::endl;
@@ -79,7 +85,26 @@ void MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obst
     auto plan_result = planPath();
     std::cout << "Planned " << plan_result << std::endl;
     std::cout << "Plan size " << sbpl_path_.size() << std::endl;
-} 
+    while(sbpl_path_.size()!=1){
+      ExecuteCommand();
+      sleep(0.1);
+    }
+    std::cout << "END motion" << std::endl;
+}
+
+void MotionPlanner::ExecuteCommand(){
+    //mtx_.lock();
+    boost::mutex::scoped_lock lock(mtx_);
+    EnvNAVXYTHETALAT3Dpt_t expected_pose = sbpl_path_.back();
+    sbpl_path_.pop_back();
+    
+    auto velx = expected_pose.x - current_pose_.x();
+    msgs::Vector3d msg;
+    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx,0,0.0));
+    // Send the message
+    vel_pub_->Publish(msg);
+    //mtx_.unlock();
+}
 
 void MotionPlanner::OnMsg(ConstPosePtr &_msg){
     //boost::mutex::scoped_lock lck(mtx_);
@@ -89,11 +114,6 @@ void MotionPlanner::OnMsg(ConstPosePtr &_msg){
     //std::cout << "odometry received on "<< odom_sub_->GetTopic() << std::endl;
     current_pose_ = _msg->position();
     // Create a a vector3 message
-    msgs::Vector3d msg;
-    gazebo::msgs::Set(&msg, ignition::math::Vector3d(0,0,0.0));
-    // Send the message
-    vel_pub_->Publish(msg);
-    sleep(0.1);
 }
 
 bool MotionPlanner::planPath(){
@@ -192,6 +212,8 @@ bool MotionPlanner::planPath(){
         0);
     sbpl_path_.push_back(s);
   }
+
+  std::reverse(sbpl_path_.begin(), sbpl_path_.end());
 
   //sbpl_path[i].y;
   //sbpl_path[i].theta);

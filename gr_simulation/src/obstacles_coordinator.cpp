@@ -16,6 +16,8 @@ ObstaclesCoordinator::ObstaclesCoordinator(int nobstacles, std::string rootname)
         else{
             obstacleid = "my_person_"+std::to_string(i-1);
         }
+        //MotionPlanner mp;
+        //mp.run(node_, obstacleid);
         obstacles_motion_planners_.emplace_back(std::thread(MotionPlanner(),node_, obstacleid));
     }
 }

@@ -6,15 +6,20 @@
 #include <sbpl/headers.h>
 
 //TODO
-//#include <boost/thread/mutex.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace gazebo{
     class MotionPlanner{
         public:
             MotionPlanner();
+            MotionPlanner(MotionPlanner&& motionplanner){
+
+            }
             void OnMsg(ConstPosePtr &_msg);
             void operator()(gazebo::transport::NodePtr node, std::string obstacleid);
             bool planPath();
+            void ExecuteCommand();
+            void run(gazebo::transport::NodePtr node, std::string obstacleid);
         private:
             transport::SubscriberPtr odom_sub_;
             transport::PublisherPtr vel_pub_;
@@ -27,7 +32,7 @@ namespace gazebo{
             bool initialized_;
             double resolution_;
             int ncells_;
-            //boost::mutex mtx_;
+            boost::mutex mtx_;
     };
 }
 

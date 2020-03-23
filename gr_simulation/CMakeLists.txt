@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-add_compile_options(-std=c++14)
+add_compile_options(-std=c++17)
 
 find_package(roscpp REQUIRED)
 find_package(std_msgs REQUIRED)
