@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
+add_compile_options(-std=c++14)
+
 find_package(roscpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(gazebo REQUIRED)
@@ -58,6 +60,8 @@ target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES})
 target_link_libraries(grass_cutter ${GAZEBO_LIBRARIES} gr_simulation_msgs)
 target_link_libraries(run_obstacle_coordinator ${GAZEBO_LIBRARIES} obstaclescoordinator)
 
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pr2.mprim
+file(GLOB PRIMITIVES_FILES
+  "*.mprim"
+)
+file(COPY ${PRIMITIVES_FILES} 
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
