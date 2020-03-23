@@ -3,6 +3,7 @@
 
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
+#include <sbpl/headers.h>
 
 namespace gazebo{
     class MotionPlanner{
@@ -14,6 +15,8 @@ namespace gazebo{
             transport::SubscriberPtr odom_sub_;
             transport::PublisherPtr vel_pub_;
             std::string obstacleid_;
+            SBPLPlanner* planner_;
+            EnvironmentNAVXYTHETALAT* env_;
     };
 }
 

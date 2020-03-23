@@ -4,13 +4,20 @@ find_package(roscpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(gazebo REQUIRED)
 
-include_directories(include)
-include_directories(${roscpp_INCLUDE_DIRS})
-include_directories(${geometry_msgs_INCLUDE_DIRS})
-include_directories(${GAZEBO_INCLUDE_DIRS})
-include_directories(  ${CMAKE_CURRENT_BINARY_DIR}/msgs)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SBPL REQUIRED sbpl)
+find_library(SBPL_LIBRARY NAMES sbpl PATHS ${SBPL_LIBRARY_DIRS} NO_DEFAULT_PATH)
 
-link_directories(${GAZEBO_LIBRARY_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/msgs)
+include_directories(include
+                    ${roscpp_INCLUDE_DIRS}
+                    ${geometry_msgs_INCLUDE_DIRS}
+                    ${GAZEBO_INCLUDE_DIRS}
+                    ${CMAKE_CURRENT_BINARY_DIR}/msgs
+                    ${SBPL_INCLUDE_DIRS})
+
+link_directories(${GAZEBO_LIBRARY_DIRS} 
+                 ${CMAKE_CURRENT_BINARY_DIR}/msgs
+                 ${SBPL_LIBRARY_DIRS})
 add_subdirectory(msgs)
 
 #link_directories(${GAZEBO_LIBRARY_DIRS})
@@ -36,7 +43,7 @@ add_library(visualgrassrow SHARED src/visual_grass_row.cpp)
 target_link_libraries(visualgrassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
 
 add_library(motionplanner SHARED src/motion_planner.cpp)
-target_link_libraries(motionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} )
+target_link_libraries(motionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY})
 
 add_library(obstaclescoordinator SHARED src/obstacles_coordinator.cpp)
 target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} motionplanner)
@@ -50,3 +57,7 @@ add_executable(run_obstacle_coordinator src/obstacles_coordinator_node.cpp)
 target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES})
 target_link_libraries(grass_cutter ${GAZEBO_LIBRARIES} gr_simulation_msgs)
 target_link_libraries(run_obstacle_coordinator ${GAZEBO_LIBRARIES} obstaclescoordinator)
+
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/pr2.mprim
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
