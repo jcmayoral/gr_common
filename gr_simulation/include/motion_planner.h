@@ -20,6 +20,7 @@ namespace gazebo{
             bool planPath();
             void ExecuteCommand();
             void run(gazebo::transport::NodePtr node, std::string obstacleid);
+            void stop();
         private:
             transport::SubscriberPtr odom_sub_;
             transport::PublisherPtr vel_pub_;
@@ -32,6 +33,8 @@ namespace gazebo{
             bool initialized_;
             double resolution_;
             int ncells_;
+            double offset_;
+            double error_;
             boost::mutex mtx_;
     };
 }

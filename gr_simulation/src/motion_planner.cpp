@@ -85,10 +85,14 @@ void MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid)
     auto plan_result = planPath();
     std::cout << "Planned " << plan_result << std::endl;
     std::cout << "Plan size " << sbpl_path_.size() << std::endl;
-    while(sbpl_path_.size()!=1){
+    error_ = 10000;
+
+    while(sbpl_path_.size()!=1 || error_>10.0){
       ExecuteCommand();
       sleep(0.1);
     }
+    stop();
+
     std::cout << "END motion" << std::endl;
 }
 
@@ -97,14 +101,25 @@ void MotionPlanner::ExecuteCommand(){
     boost::mutex::scoped_lock lock(mtx_);
     EnvNAVXYTHETALAT3Dpt_t expected_pose = sbpl_path_.back();
     sbpl_path_.pop_back();
-    
-    auto velx = expected_pose.x - current_pose_.x();
+    std::cout << " x " << (expected_pose.x - offset_) << " , " << current_pose_.x() << std::endl;
+    auto velx = (expected_pose.x- offset_) - current_pose_.x();
+    auto vely = (expected_pose.y - offset_) - current_pose_.y();
     msgs::Vector3d msg;
-    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx,0,0.0));
+    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx,vely,0.0));
+    std::cout << "velx " << velx << " vely " << vely << std::endl;
     // Send the message
     vel_pub_->Publish(msg);
+    error_ = sqrt(pow(velx,2) + pow(vely,2));
     //mtx_.unlock();
 }
+
+void MotionPlanner::stop(){
+  msgs::Vector3d msg;
+    gazebo::msgs::Set(&msg, ignition::math::Vector3d(0,0,0.0));
+    // Send the message
+    vel_pub_->Publish(msg);
+}
+
 
 void MotionPlanner::OnMsg(ConstPosePtr &_msg){
     //boost::mutex::scoped_lock lck(mtx_);
@@ -124,12 +139,12 @@ bool MotionPlanner::planPath(){
 
     double theta_start = 1.0;//2 * atan2(start.pose.orientation.z, start.pose.orientation.w);
     double theta_goal = 0;//2 * atan2(goal.pose.orientation.z, goal.pose.orientation.w);
-    auto offset = ncells_/2 * resolution_;
+    offset_ = ncells_/2 * resolution_;
 
   try{
     //Check conversion offset of map start with frame -> gr_map_utils
     //Substract offset
-    int ret = env_->SetStart(current_pose_.x()+offset, current_pose_.y()+offset, theta_start);
+    int ret = env_->SetStart(current_pose_.x()+offset_, current_pose_.y()+offset_, theta_start);
 
     if(ret < 0 || planner_->set_start(ret) == 0){
       std::cerr<<"ERROR: failed to set start state\n"<<std::endl;
@@ -146,8 +161,8 @@ bool MotionPlanner::planPath(){
     //Check conversion offset of map start with frame -> gr_map_utils
     //Substract offset
     //TODO make an interface for this Fake init GOAL
-    auto diff_goal = 6.6;
-    int ret = env_->SetGoal(current_pose_.x()+diff_goal+offset, current_pose_.y()+offset, theta_goal);
+    auto diff_goal = 50.0;
+    int ret = env_->SetGoal(current_pose_.x()+diff_goal+offset_, current_pose_.y()+offset_, theta_goal);
 
     if(ret < 0 || planner_->set_goal(ret) == 0){
       std::cerr<<"ERROR: failed to set goal state\n" << std::endl;
@@ -213,7 +228,7 @@ bool MotionPlanner::planPath(){
     sbpl_path_.push_back(s);
   }
 
-  std::reverse(sbpl_path_.begin(), sbpl_path_.end());
+  //std::reverse(sbpl_path_.begin(), sbpl_path_.end());
 
   //sbpl_path[i].y;
   //sbpl_path[i].theta);
