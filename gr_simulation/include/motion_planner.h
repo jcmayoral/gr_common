@@ -25,6 +25,7 @@ namespace gazebo{
                 planner_ = motionplanner.planner_;
                 env_ = motionplanner.env_;
                 current_pose_ = motionplanner.current_pose_;
+                current_goal_ = motionplanner.current_goal_;
             }
             void OnMsg(ConstPosePtr &_msg);
             void operator()(gazebo::transport::NodePtr node, std::string obstacleid);
@@ -41,6 +42,7 @@ namespace gazebo{
             SBPLPlanner* planner_;
             EnvironmentNAVXYTHETALAT* env_;
             msgs::Vector3d current_pose_;
+            msgs::Vector3d current_goal_;
             std::vector<EnvNAVXYTHETALAT3Dpt_t> sbpl_path_;
             bool initialized_;
             double resolution_;

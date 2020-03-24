@@ -12,7 +12,6 @@ void MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obst
 }
 
 bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid){
-  
     obstacleid_ = obstacleid;
     double map_size = 100; //meters
     std::cout << "Creating Motion model for  " << obstacleid << std::endl;
@@ -88,31 +87,36 @@ bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid)
 
 void MotionPlanner::performMotion(){
 
-  double offset = 10;
+  double motionx;
+  double motiony;
 
-  for (auto i = 0; i<10; i++){
-    auto plan_result = planPath(offset, 0, 0);
-    std::cout << "Planned " << plan_result << std::endl;
+  auto repetitions = rand() % 10 + 1;
+
+  for (auto i = 0; i<repetitions; i++){
+    motionx = rand() % -10 + 10;
+    motiony = rand() % -10 + 10;
+    auto plan_result = planPath(motionx, motiony, 0);
+    std::cout << "Planned " << plan_result << " for " << obstacleid_ <<std::endl;
     std::cout << "Plan size " << sbpl_path_.size() << std::endl;
-    error_ = 10000;
+    error_ = -1;
+    double dist2Goal = -1;
 
     if (!plan_result){
       std::cout << "failuire on path planning motion " << i << std::endl;
       continue;
     }
 
-    while(sbpl_path_.size()>1){
+    while(sbpl_path_.size()>1 || dist2Goal> 0.25){
       ExecuteCommand();
-      sleep(0.50);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      dist2Goal = sqrt(pow(current_goal_.x() - current_pose_.x() ,2) + pow(current_goal_.y() - current_pose_.y() ,2)); 
     }
     stop();
 
-    std::cout << "END motion number" << i << std::endl;
-    std::cout << " x " << current_pose_.x() << " , " << current_pose_.y() << std::endl;
+    std::cout << "END motion number" << i+1 << " of " << repetitions << " person id:  " << obstacleid_ << std::endl;
+    //std::cout << " x " << current_pose_.x() << " , " << current_pose_.y() << std::endl;
 
     //going backwards
-    offset = offset * -1;
   }
 }
 
@@ -122,7 +126,7 @@ void MotionPlanner::ExecuteCommand(){
     EnvNAVXYTHETALAT3Dpt_t expected_pose = sbpl_path_.back();
     sbpl_path_.pop_back();
     //std::cout << " x " << (expected_pose.x - offset_) << " , " << current_pose_.x() << std::endl;
-    auto velx = (expected_pose.x- offset_) - current_pose_.x();
+    auto velx = (expected_pose.x - offset_) - current_pose_.x();
     auto vely = (expected_pose.y - offset_) - current_pose_.y();
     msgs::Vector3d msg;
     gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx,vely,0.0));
@@ -177,11 +181,11 @@ bool MotionPlanner::planPath(double goalx, double goaly, double goalyaw){
   }
 
   try{
-    //Check conversion offset of map start with frame -> gr_map_utils
     //Substract offset
-    //TODO make an interface for this Fake init GOAL
-    std::cout << " GOAL " << current_pose_.x()+goalx <<  current_pose_.y()+goaly << std::endl;
-    int ret = env_->SetGoal(current_pose_.x()+goalx+offset_, current_pose_.y()+goaly+offset_, goalyaw);
+    current_goal_.set_x(current_pose_.x()+goalx);
+    current_goal_.set_y(current_pose_.y()+goaly);
+    
+    int ret = env_->SetGoal(current_goal_.x()+offset_, current_goal_.y()+offset_, goalyaw);
 
     if(ret < 0 || planner_->set_goal(ret) == 0){
       std::cerr<<"ERROR: failed to set goal state\n" << std::endl;
