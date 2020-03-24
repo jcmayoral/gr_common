@@ -8,6 +8,8 @@ ObstaclesCoordinator::ObstaclesCoordinator(int nobstacles, std::string rootname)
     //node_->Init();
     std::cout << "initializing " << nobstacles << std::endl;
     std::string obstacleid;
+    std::atomic<int> counter;
+    //std::condition_variable cv;
     for (auto i=0; i < nobstacles; i++){
 
         if (i==0){
@@ -29,7 +31,11 @@ ObstaclesCoordinator::~ObstaclesCoordinator(){
 
 void ObstaclesCoordinator::start(){
     for (auto it = obstacles_motion_planners_.begin(); it!= obstacles_motion_planners_.end(); it++){
-        it->detach();
+        it->join();
     }
     std::cout << "ending start";
+    //while(true){
+    //    sleep(3);
+    //    std::cout << obstacles_motion_planners_.size() << std::endl;
+    //}
 }

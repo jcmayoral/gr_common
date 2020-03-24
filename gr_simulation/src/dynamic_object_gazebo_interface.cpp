@@ -25,7 +25,7 @@ void GazeboDynamicObject::OnMsg(ConstVector3dPtr &_msg){
     this->SetLinearVelocityY(_msg->y());
     this->SetAngVelocity(_msg->z());
     //current_pose = this->model->WorldPose();
-    std::cout <<"X "<< current_pose.Pos().X();
+    //std::cout <<"X "<< current_pose.Pos().X();
 }
 
 void GazeboDynamicObject::OnUpdate(){

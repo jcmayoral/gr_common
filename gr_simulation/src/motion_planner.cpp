@@ -6,11 +6,12 @@ MotionPlanner::MotionPlanner(): obstacleid_("defaults"), initialized_(false),nce
   std::cout << "constructor";
 }
 
+
 void MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obstacleid){
   run(node, obstacleid);
 }
 
-void MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid){
+bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid){
   
     obstacleid_ = obstacleid;
     double map_size = 100; //meters
@@ -82,18 +83,37 @@ void MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid)
     vel_pub_->WaitForConnection();
     odom_sub_ = node->Subscribe("/" + obstacleid + "/odom",&MotionPlanner::OnMsg, this);
     std::cout << odom_sub_->GetTopic() << std::endl;
-    auto plan_result = planPath();
+    performMotion();
+}
+
+void MotionPlanner::performMotion(){
+
+  double offset = 10;
+
+  for (auto i = 0; i<10; i++){
+    auto plan_result = planPath(offset, 0, 0);
     std::cout << "Planned " << plan_result << std::endl;
     std::cout << "Plan size " << sbpl_path_.size() << std::endl;
     error_ = 10000;
 
-    while(sbpl_path_.size()!=1 || error_>10.0){
+    if (!plan_result){
+      std::cout << "failuire on path planning motion " << i << std::endl;
+      continue;
+    }
+
+    while(sbpl_path_.size()>1){
       ExecuteCommand();
-      sleep(0.1);
+      sleep(0.50);
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     stop();
 
-    std::cout << "END motion" << std::endl;
+    std::cout << "END motion number" << i << std::endl;
+    std::cout << " x " << current_pose_.x() << " , " << current_pose_.y() << std::endl;
+
+    //going backwards
+    offset = offset * -1;
+  }
 }
 
 void MotionPlanner::ExecuteCommand(){
@@ -101,12 +121,12 @@ void MotionPlanner::ExecuteCommand(){
     boost::mutex::scoped_lock lock(mtx_);
     EnvNAVXYTHETALAT3Dpt_t expected_pose = sbpl_path_.back();
     sbpl_path_.pop_back();
-    std::cout << " x " << (expected_pose.x - offset_) << " , " << current_pose_.x() << std::endl;
+    //std::cout << " x " << (expected_pose.x - offset_) << " , " << current_pose_.x() << std::endl;
     auto velx = (expected_pose.x- offset_) - current_pose_.x();
     auto vely = (expected_pose.y - offset_) - current_pose_.y();
     msgs::Vector3d msg;
     gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx,vely,0.0));
-    std::cout << "velx " << velx << " vely " << vely << std::endl;
+    //std::cout << "velx " << velx << " vely " << vely << std::endl;
     // Send the message
     vel_pub_->Publish(msg);
     error_ = sqrt(pow(velx,2) + pow(vely,2));
@@ -131,14 +151,13 @@ void MotionPlanner::OnMsg(ConstPosePtr &_msg){
     // Create a a vector3 message
 }
 
-bool MotionPlanner::planPath(){
+bool MotionPlanner::planPath(double goalx, double goaly, double goalyaw){
     while(!initialized_){
       //std::cout << "wait for initialization" << std::endl;
     }
     sbpl_path_.clear();
 
-    double theta_start = 1.0;//2 * atan2(start.pose.orientation.z, start.pose.orientation.w);
-    double theta_goal = 0;//2 * atan2(goal.pose.orientation.z, goal.pose.orientation.w);
+    double theta_start = 0.0;//2 * atan2(start.pose.orientation.z, start.pose.orientation.w);
     offset_ = ncells_/2 * resolution_;
 
   try{
@@ -161,8 +180,8 @@ bool MotionPlanner::planPath(){
     //Check conversion offset of map start with frame -> gr_map_utils
     //Substract offset
     //TODO make an interface for this Fake init GOAL
-    auto diff_goal = 50.0;
-    int ret = env_->SetGoal(current_pose_.x()+diff_goal+offset_, current_pose_.y()+offset_, theta_goal);
+    std::cout << " GOAL " << current_pose_.x()+goalx <<  current_pose_.y()+goaly << std::endl;
+    int ret = env_->SetGoal(current_pose_.x()+goalx+offset_, current_pose_.y()+goaly+offset_, goalyaw);
 
     if(ret < 0 || planner_->set_goal(ret) == 0){
       std::cerr<<"ERROR: failed to set goal state\n" << std::endl;
@@ -176,6 +195,7 @@ bool MotionPlanner::planPath(){
   }
 
 
+  /*
   //Try to load environment from test files
   for(unsigned int ix = 0; ix < ncells_; ix++) {
     for(unsigned int iy = 0; iy < ncells_; iy++) {
@@ -183,10 +203,11 @@ bool MotionPlanner::planPath(){
       env_->UpdateCost(ix,iy, (unsigned char) 0);//costmap_ros_->getCostmap()->getCost(ix,iy)));
     }
   }
+  */
 
 
   //TODO parametrize
-  double allocated_time_ = 500.0;
+  double allocated_time_ = 1.0;
   double initial_epsilon_ = 3.0;
   //setting planner parameters
   //ROS_DEBUG("allocated:%f, init eps:%f\n",allocated_time_,initial_epsilon_);

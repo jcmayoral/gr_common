@@ -22,6 +22,7 @@ namespace gazebo{
    private:
     std::vector<std::thread> obstacles_motion_planners_;
     transport::NodePtr node_;
+    std::condition_variable* cv_;
   };
 }
 
