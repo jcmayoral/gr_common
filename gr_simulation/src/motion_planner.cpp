@@ -20,7 +20,7 @@ bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid)
     planner_ = new ARAPlanner(env_, false); //forward_search
     //TODO PARAMETRIZE
 
-    resolution_ = 0.025;
+    resolution_ = 0.1;
     double nominalvel_mpersecs = 0.1;
     double timetoturn45degsinplace_secs = 0.1;
     int obst_cost_thresh= 2.0;
@@ -53,11 +53,9 @@ bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid)
     pt_m.y = halfwidth;
     perimeterptsV.push_back(pt_m);
 
-
-
     bool ret;
     std::string primitive_filename_;
-    primitive_filename_ = "pr2.mprim";
+    primitive_filename_ = "my_mprim_test.mprim";
 
     ncells_ = int(map_size/resolution_ + 1);
 
@@ -99,17 +97,18 @@ void MotionPlanner::performMotion(){
     std::cout << "Planned " << plan_result << " for " << obstacleid_ <<std::endl;
     std::cout << "Plan size " << sbpl_path_.size() << std::endl;
     error_ = -1;
-    double dist2Goal = -1;
+    double dist2Goal = 10000;
 
     if (!plan_result){
       std::cout << "failuire on path planning motion " << i << std::endl;
       continue;
     }
 
-    while(sbpl_path_.size()>1 || dist2Goal> 0.25){
+    while(sbpl_path_.size()>1 && dist2Goal> 0.25){
       ExecuteCommand();
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(80));
       dist2Goal = sqrt(pow(current_goal_.x() - current_pose_.x() ,2) + pow(current_goal_.y() - current_pose_.y() ,2)); 
+      std::cout << dist2Goal << " : " << obstacleid_ << "and " << sbpl_path_.size() << std::endl;
     }
     stop();
 
@@ -123,17 +122,21 @@ void MotionPlanner::performMotion(){
 void MotionPlanner::ExecuteCommand(){
     //mtx_.lock();
     boost::mutex::scoped_lock lock(mtx_);
-    EnvNAVXYTHETALAT3Dpt_t expected_pose = sbpl_path_.back();
+    auto expected_pose = sbpl_path_.back();
     sbpl_path_.pop_back();
     //std::cout << " x " << (expected_pose.x - offset_) << " , " << current_pose_.x() << std::endl;
     auto velx = (expected_pose.x - offset_) - current_pose_.x();
     auto vely = (expected_pose.y - offset_) - current_pose_.y();
+    //pos error
+    error_ += sqrt(pow(velx,2) + pow(vely,2));
+    //std::cout << "vel x " << velx <<  " vel y " << vely << std::endl;
     msgs::Vector3d msg;
+    //assert(velx < 2.0);
+    //assert(vely < 2.0);
     gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx,vely,0.0));
     //std::cout << "velx " << velx << " vely " << vely << std::endl;
     // Send the message
     vel_pub_->Publish(msg);
-    error_ = sqrt(pow(velx,2) + pow(vely,2));
     //mtx_.unlock();
 }
 
@@ -253,7 +256,7 @@ bool MotionPlanner::planPath(double goalx, double goaly, double goalyaw){
     sbpl_path_.push_back(s);
   }
 
-  //std::reverse(sbpl_path_.begin(), sbpl_path_.end());
+  std::reverse(sbpl_path_.begin(), sbpl_path_.end());
 
   //sbpl_path[i].y;
   //sbpl_path[i].theta);
