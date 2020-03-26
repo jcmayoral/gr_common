@@ -22,23 +22,9 @@ find_package(catkin REQUIRED COMPONENTS
   filters
 )
 
-find_package(OpenCV 3.2 REQUIRED
-	#COMPONENTS
-	#opencv_highgui
-	#CONFIG
-)
-
+find_package(OpenCV 3 REQUIRED)
 find_package(octomap REQUIRED)
 
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if your package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES ${PROJECT_NAME}
@@ -68,8 +54,9 @@ add_executable(
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
   safety_gridmap
-  #${OCTOMAP_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
   ${OpenCV_LIBRARIES}
+  ${catkin_LIBRARIES} 
 )
 
 # Mark executables and/or libraries for installation
