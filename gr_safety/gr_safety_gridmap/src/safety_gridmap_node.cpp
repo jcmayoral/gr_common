@@ -39,8 +39,8 @@ int main(int argc, char** argv){
                              -position.x() * std::cos(3.0 * time.toSec() + 5.0 * position.y()), 1.0);
         normal.normalize();
         map.at("normal_x", *it) = normal.x();
-        map.at("normal_y", *it) = random() % 5 + -5 ;//normal.y();
-        map.at("normal_z", *it) = -1;//normal.z();
+        map.at("normal_y", *it) = random() % 2;//normal.y();
+        map.at("normal_z", *it) = 1;//normal.z();
     }
 
     map.add("sum", map.get("normal_x") + map["normal_y"] + map["normal_z"]);
