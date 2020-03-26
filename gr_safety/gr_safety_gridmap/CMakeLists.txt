@@ -17,9 +17,11 @@ find_package(catkin REQUIRED COMPONENTS
   grid_map_visualization
   geometry_msgs
   sensor_msgs
+  nav_msgs
   cv_bridge
   octomap_msgs
   filters
+  topic_tools
 )
 
 find_package(OpenCV 3 REQUIRED)
@@ -45,23 +47,42 @@ include_directories(
   ${OCTOMAP_INCLUDE_DIR}
 )
 
-## Declare a cpp executable
+add_library(
+  ${PROJECT_NAME}
+  src/safety_gridmap.cpp
+)
+
 add_executable(
-  safety_gridmap
+  safety_gridmap_tutorial
+  src/safety_gridmap_tutorial.cpp
+)
+
+
+add_executable(
+  safety_gridmap_node
   src/safety_gridmap_node.cpp
 )
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(
-  safety_gridmap
+  safety_gridmap_tutorial
   ${OCTOMAP_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${catkin_LIBRARIES} 
 )
 
+target_link_libraries(
+  safety_gridmap_node
+  ${PROJECT_NAME}
+  ${OCTOMAP_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  ${catkin_LIBRARIES} 
+)
+
+
 # Mark executables and/or libraries for installation
 install(
-  TARGETS safety_gridmap
+  TARGETS safety_gridmap_tutorial safety_gridmap_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
