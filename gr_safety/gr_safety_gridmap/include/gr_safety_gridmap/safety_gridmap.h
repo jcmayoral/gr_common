@@ -10,7 +10,7 @@ namespace gr_safety_gridmap{
         private:
             ros::Subscriber sub_;
             ros::Publisher pub_;
-            std::map<std::string, LayerSubscriber<int>> layer_subscribers;
+            std::map<std::string, LayerSubscriber<nav_msgs::Path>> layer_subscribers;
     };
 }
 

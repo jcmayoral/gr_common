@@ -12,13 +12,19 @@ namespace gr_safety_gridmap{
                     boost::shared_ptr<topic_tools::ShapeShifter const> const &ssmsg = msg_event.getConstMessage();
                     std::string def = ssmsg->getMessageDefinition();
                     size_t length = ros::serialization::serializationLength(*ssmsg);
+                    std::cout << ssmsg->getMD5Sum() << std::endl;
+                    std::cout << msg_event.getMessage() << std::endl;
+                    std::cout << "DEF " << def << " END DEF " << std::endl;
 
                     // Check the message definition.
                     std::istringstream f(def);
                     std::string s;
                     bool flag = false;
                     while(std::getline(f, s, '\n')) {
+                        //std::cout << s << std::endl;
                         if (!s.empty() && s.find("#") != 0) {
+                            std::cout << s << std::endl;
+                            //TODO FIND POSEArray or something like that
                             // Does not start with #, is not a comment.
                             if (s.find("Header ") == 0) {
                                 flag = true;
@@ -29,10 +35,15 @@ namespace gr_safety_gridmap{
 
                     // If the header is not the first element in the message according to the definition, throw an error.
                     if (!flag) {
-                        std::cout << std::endl << "WARNING: Rate control topic is bad, header is not first. MSG may be malformed." << std::endl;
+                        std::cout << std::endl << "WARNING: Rate control topic is bad, header is not first. MSG may be malformed and does not contain pose message." << std::endl;
                         return;
                     }
 
+                    boost::shared_ptr<T> path = ssmsg->instantiate<T>();
+                    ROS_INFO_STREAM(*path);
+                    message_ = *path;
+
+                    /*
                     std::vector<uint8_t> buffer(length);
                     ros::serialization::OStream ostream(&buffer[0], length);
                     ros::serialization::Serializer<topic_tools::ShapeShifter>::write(ostream, *ssmsg);
@@ -43,6 +54,7 @@ namespace gr_safety_gridmap{
                     int32_t header_timestamp_nsec = buffer[8] | (uint32_t)buffer[9] << 8 | (uint32_t)buffer[10] << 16 | (uint32_t)buffer[11] << 24;
 
                     //last_rate_control_ = ros::Time(header_timestamp_sec, header_timestamp_nsec);
+                    */
             };
 
                 LayerSubscriber(): sub_(boost::make_shared<ros::Subscriber>()){
@@ -63,6 +75,7 @@ namespace gr_safety_gridmap{
                 boost::shared_ptr<ros::Subscriber> sub_;
                 ros::NodeHandle nh_;  
                 ros::Subscriber rsub_;  
+                T message_;
     
     };
 }
