@@ -1,0 +1,10 @@
+<launch>
+  <!-- Launch the grid map tutorial demo node -->
+  <node pkg="gr_safety_gridmap" type="safety_gridmap" name="gr_safety_gridmap" output="screen" />
+  <!-- Launch the grid map visualizer -->
+  <node pkg="grid_map_visualization" type="grid_map_visualization" name="grid_map_visualization" output="screen">
+    <rosparam command="load" file="$(find gr_safety_gridmap)/config/default.yaml" />
+  </node>
+  <!-- Launch RViz with the demo configuration -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grid_map_demos)/rviz/grid_map_demo.rviz" />
+</launch>
