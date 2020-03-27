@@ -10,10 +10,10 @@ namespace gr_safety_gridmap{
         public:
            SafetyGridMap();
            void updateGrid();
+           void publishGrid();
            grid_map::GridMap cmap_;
         private:
-            ros::Subscriber sub_;
-            ros::Publisher pub_;
+            ros::Publisher rpub_;
             std::map<std::string, LayerSubscriber<nav_msgs::Path>> layer_subscribers;
     };
 

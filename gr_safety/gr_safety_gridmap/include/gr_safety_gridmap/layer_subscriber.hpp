@@ -2,7 +2,6 @@
 #include <topic_tools/shape_shifter.h>
 #include <grid_map_ros/grid_map_ros.hpp>
 #include <grid_map_msgs/GridMap.h>
-
 //Based originally from the rosbag c++ implementation
 //https://github.com/ros/ros_comm/tree/noetic-devel/tools/rosbag/src
 //used as tutorial to get into the definition of a message.
@@ -15,7 +14,7 @@ namespace gr_safety_gridmap{
                     ROS_INFO_STREAM(t);
                 }
 
-                void UpdateLayer(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event){
+                void layerCB(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event){
                     boost::shared_ptr<topic_tools::ShapeShifter const> const &ssmsg = msg_event.getConstMessage();
                     std::string def = ssmsg->getMessageDefinition();
 
@@ -41,33 +40,38 @@ namespace gr_safety_gridmap{
                         return;
                     }
 
-                    std::cout << ssmsg->getDataType() << std::endl;
-                    //std::cout << typeid(T).name()<< std::endl;
-                    std::cout << ssmsg->getMD5Sum() << std::endl;
-                                        std::cout<<"myguess";
-
-                    path = ssmsg->instantiate<T>();
-                    plot(*path);
-                    std::cout<<"myguess" <<std::endl;
+                    boost::shared_ptr<T> ppath;
+                    ppath = boost::make_shared<T>();
+                    ppath = ssmsg->instantiate<T>();
+                    path = *ppath;
                     message_received_ = true;
+                    ppath.reset();
+                    plot(path);
+                    
                 }
 
                 
                 void updateLayer(const boost::shared_ptr<grid_map::GridMap>& map){
                     //boost::shared_ptr<grid_map::GridMap> pmap;
+                    //path = nullptr;
+                    std::cout << "updatelayer"<<std::endl;
                     //pmap = boost::static_pointer_cast<grid_map::GridMap>(map);
-                    ROS_INFO_STREAM(map->exists("a"));
-                    map->add("a", 0);
-                    ROS_INFO_STREAM(*path);
-                    message_received_ = false;
+                    ROS_INFO_STREAM(map->exists(id_));
+                    map->add(id_, 0);
+                    //ROS_INFO_STREAM(*path);
+                    grid_map::Position position;
+                    ROS_INFO_STREAM(path);
+                    //message_received_ = false;
+
                 }
 
                 bool isMessageReceived(){
-                    return message_received_;
+                    //boost::mutex::scoped_lock lock(mtx_);
+                    ROS_INFO_STREAM(path << " v1");
+                    return path.poses.size()>0 ? true : false;
                 }
                 
-                LayerSubscriber():message_received_(false){
-                    path = boost::make_shared<T>();
+                LayerSubscriber(std::string id):message_received_(false), id_(id), path(){
                     ros::SubscribeOptions ops;
                     ops.topic ="/test";//options_.rate_control_topic;
                     ops.queue_size = 1;
@@ -75,7 +79,7 @@ namespace gr_safety_gridmap{
                     ops.datatype = ros::message_traits::datatype<topic_tools::ShapeShifter>();
                     ops.helper = boost::make_shared<ros::SubscriptionCallbackHelperT<
                             const ros::MessageEvent<topic_tools::ShapeShifter const> &> >(
-                                    boost::bind(&LayerSubscriber::UpdateLayer, this, _1));
+                                    boost::bind(&LayerSubscriber::layerCB, this, _1));
                     rsub_ = nh_.subscribe(ops);
                 }
 
@@ -83,7 +87,8 @@ namespace gr_safety_gridmap{
                 boost::shared_ptr<ros::Subscriber> sub_;
                 ros::NodeHandle nh_;  
                 ros::Subscriber rsub_;  
-                boost::shared_ptr<T> path;
+                T path;
                 bool message_received_;
+                std::string id_;
     };
 };
