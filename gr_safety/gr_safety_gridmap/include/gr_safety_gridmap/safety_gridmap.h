@@ -1,12 +1,16 @@
 #include <ros/ros.h>
 #include <gr_safety_gridmap/layer_subscriber.h>
 #include <nav_msgs/Path.h>
+#include <memory>
+#include <grid_map_msgs/GridMap.h>
+#include <grid_map_ros/grid_map_ros.hpp>
 
 namespace gr_safety_gridmap{
     class SafetyGridMap{
         public:
            SafetyGridMap();
            void Update();
+           boost::shared_ptr<grid_map::GridMap> map_;
         private:
             ros::Subscriber sub_;
             ros::Publisher pub_;
