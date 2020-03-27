@@ -14,6 +14,7 @@ namespace gr_safety_gridmap{
                     std::cout << "IN PLOT "<< std::endl;
                     ROS_INFO_STREAM(t);
                 }
+
                 void UpdateLayer(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event){
                     boost::shared_ptr<topic_tools::ShapeShifter const> const &ssmsg = msg_event.getConstMessage();
                     std::string def = ssmsg->getMessageDefinition();
@@ -43,18 +44,25 @@ namespace gr_safety_gridmap{
                     std::cout << ssmsg->getDataType() << std::endl;
                     //std::cout << typeid(T).name()<< std::endl;
                     std::cout << ssmsg->getMD5Sum() << std::endl;
-                    boost::shared_ptr<T> path;
+                                        std::cout<<"myguess";
+
                     path = boost::make_shared<T>();
                     path = ssmsg->instantiate<T>();
                     //plot(*path);
+                    std::cout<<"myguess" <<std::endl;
                 }
 
-                LayerSubscriber(boost::shared_ptr<grid_map::GridMap> map){
-                    //message_.reset(new T());
-                    //test_ = boost::static_pointer_cast<int>(test);
-                    //test_ = boost::make_shared<int>(test);
-                    //test_ = 50;
-                    std::cout << "in constructor "<< *test_ << std::endl;
+                
+                void updateLayer(const boost::shared_ptr<grid_map::GridMap>& map){
+                    std::cout << "here";
+                    boost::shared_ptr<grid_map::GridMap> pmap;
+                    pmap = boost::static_pointer_cast<grid_map::GridMap>(map);
+                    ROS_INFO_STREAM(pmap->exists("a"));
+                    pmap->add("a", 0);
+                    std::cout << "here"<<std::endl;
+                }
+                
+                LayerSubscriber(){
                     ros::SubscribeOptions ops;
                     ops.topic ="/test";//options_.rate_control_topic;
                     ops.queue_size = 1;
@@ -65,12 +73,11 @@ namespace gr_safety_gridmap{
                                     boost::bind(&LayerSubscriber::UpdateLayer, this, _1));
                     rsub_ = nh_.subscribe(ops);
                 }
+
             private:
                 boost::shared_ptr<ros::Subscriber> sub_;
-                boost::shared_ptr<int> test_;
                 ros::NodeHandle nh_;  
                 ros::Subscriber rsub_;  
-                boost::shared_ptr<int> message_;
-    
+                boost::shared_ptr<T> path;
     };
-}
+};

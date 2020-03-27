@@ -9,14 +9,16 @@ namespace gr_safety_gridmap{
     class SafetyGridMap{
         public:
            SafetyGridMap();
-           void Update();
-           boost::shared_ptr<grid_map::GridMap> map_;
+           void updateGrid();
+           grid_map::GridMap cmap_;
         private:
             ros::Subscriber sub_;
             ros::Publisher pub_;
             std::map<std::string, LayerSubscriber<nav_msgs::Path>> layer_subscribers;
     };
-}
+
+
+};
 
 /*
 ros::AdvertiseOptions createAdvertiseOptions(const ConnectionInfo* c, uint32_t queue_size, const std::string& prefix) {
