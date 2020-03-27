@@ -46,23 +46,28 @@ namespace gr_safety_gridmap{
                     std::cout << ssmsg->getMD5Sum() << std::endl;
                                         std::cout<<"myguess";
 
-                    path = boost::make_shared<T>();
                     path = ssmsg->instantiate<T>();
-                    //plot(*path);
+                    plot(*path);
                     std::cout<<"myguess" <<std::endl;
+                    message_received_ = true;
                 }
 
                 
                 void updateLayer(const boost::shared_ptr<grid_map::GridMap>& map){
-                    std::cout << "here";
-                    boost::shared_ptr<grid_map::GridMap> pmap;
-                    pmap = boost::static_pointer_cast<grid_map::GridMap>(map);
-                    ROS_INFO_STREAM(pmap->exists("a"));
-                    pmap->add("a", 0);
-                    std::cout << "here"<<std::endl;
+                    //boost::shared_ptr<grid_map::GridMap> pmap;
+                    //pmap = boost::static_pointer_cast<grid_map::GridMap>(map);
+                    ROS_INFO_STREAM(map->exists("a"));
+                    map->add("a", 0);
+                    ROS_INFO_STREAM(*path);
+                    message_received_ = false;
+                }
+
+                bool isMessageReceived(){
+                    return message_received_;
                 }
                 
-                LayerSubscriber(){
+                LayerSubscriber():message_received_(false){
+                    path = boost::make_shared<T>();
                     ros::SubscribeOptions ops;
                     ops.topic ="/test";//options_.rate_control_topic;
                     ops.queue_size = 1;
@@ -79,5 +84,6 @@ namespace gr_safety_gridmap{
                 ros::NodeHandle nh_;  
                 ros::Subscriber rsub_;  
                 boost::shared_ptr<T> path;
+                bool message_received_;
     };
 };

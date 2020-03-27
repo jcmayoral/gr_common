@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <gr_safety_gridmap/layer_subscriber.h>
+#include <gr_safety_gridmap/layer_subscriber.hpp>
 #include <nav_msgs/Path.h>
 #include <memory>
 #include <grid_map_msgs/GridMap.h>

@@ -11,7 +11,9 @@ void SafetyGridMap::updateGrid(){
     boost::shared_ptr<grid_map::GridMap> pmap = boost::make_shared<grid_map::GridMap>(cmap_);
 
     for (auto& it : layer_subscribers){
-        it.second.updateLayer(pmap);
-        ROS_INFO_STREAM(pmap->exists(it.first) << " MAIN ");
+        if (it.second.isMessageReceived()){
+            it.second.updateLayer(pmap);
+            ROS_INFO_STREAM(pmap->exists(it.first) << " MAIN ");
+        }
     }
 }
