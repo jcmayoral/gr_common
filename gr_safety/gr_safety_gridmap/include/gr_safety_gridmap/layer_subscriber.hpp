@@ -58,7 +58,16 @@ namespace gr_safety_gridmap{
                     gridmap.add(id_, 0);
                     //ROS_INFO_STREAM(*path);<d
                     grid_map::Position position;
-                    ROS_INFO_STREAM(path);
+                    grid_map::Index index;
+                    int c = 0;
+                    for (auto p : path.poses){
+                        position(0) = p.pose.position.x;
+                        position(1) = p.pose.position.y;
+                        gridmap.getIndex(position, index);
+                        ROS_INFO_STREAM(index);
+                        gridmap.at(id_, index) = 0.1 *exp(-c);
+                        c++;
+                    }
                     message_received_ = false;
                 }
 
@@ -76,9 +85,9 @@ namespace gr_safety_gridmap{
                     message_received_ = other.message_received_;
                  }
                 
-                LayerSubscriber(std::string id): id_(id), message_received_(false){
+                LayerSubscriber(std::string input, std::string id): id_(id), message_received_(false){
                     ros::SubscribeOptions ops;
-                    ops.topic ="/" + id;//options_.rate_control_topic;
+                    ops.topic ="/" + input;//options_.rate_control_topic;
                     ops.queue_size = 1;
                     ops.md5sum = ros::message_traits::md5sum<topic_tools::ShapeShifter>();
                     ops.datatype = ros::message_traits::datatype<topic_tools::ShapeShifter>();

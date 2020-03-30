@@ -7,8 +7,9 @@ SafetyGridMap::SafetyGridMap(){
     gridmap.setGeometry(grid_map::Length(10.0, 10.0), 0.20);
     ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
-    layer_subscribers.emplace_back("test2");
-    layer_subscribers.emplace_back("test");
+    //TODO config file
+    layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_0");
+    //layer_subscribers.emplace_back("input", "layer_name");
 
 }
 
