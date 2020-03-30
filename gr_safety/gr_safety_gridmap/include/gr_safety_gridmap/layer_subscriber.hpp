@@ -39,15 +39,8 @@ namespace gr_safety_gridmap{
                         std::cout << std::endl << "WARNING: Rate control topic is bad, header is not first. MSG may be malformed and does not contain pose message." << std::endl;
                         return;
                     }
-
-                    boost::shared_ptr<T> ppath;
-                    ppath = boost::make_shared<T>();
-                    ppath = ssmsg->instantiate<T>();
-                    path = *ppath;
-                    message_received_ = true;
-                    ppath.reset();
-                    plot(path);
-                    
+                    path = *ssmsg->instantiate<T>();
+                    message_received_ = true; 
                 }
 
                 
@@ -61,17 +54,23 @@ namespace gr_safety_gridmap{
                     //ROS_INFO_STREAM(*path);
                     grid_map::Position position;
                     ROS_INFO_STREAM(path);
-                    //message_received_ = false;
+                    message_received_ = false;
 
                 }
 
                 bool isMessageReceived(){
                     //boost::mutex::scoped_lock lock(mtx_);
-                    ROS_INFO_STREAM(path << " v1");
-                    return path.poses.size()>0 ? true : false;
+                    //return message_received;
+                    //For DEBUGGING
+                   if(!message_received_){
+                       std::cout << "Message has not been received " << message_received_ <<std::endl;
+                       return false;
+                   }
+                   std::cout << "Message received " << message_received_ <<std::endl;
+                   return true;//path->poses.size()>0 ? true : false;
                 }
                 
-                LayerSubscriber(std::string id):message_received_(false), id_(id), path(){
+                LayerSubscriber(std::string id): id_(id){
                     ros::SubscribeOptions ops;
                     ops.topic ="/test";//options_.rate_control_topic;
                     ops.queue_size = 1;
@@ -87,8 +86,13 @@ namespace gr_safety_gridmap{
                 boost::shared_ptr<ros::Subscriber> sub_;
                 ros::NodeHandle nh_;  
                 ros::Subscriber rsub_;  
-                T path;
-                bool message_received_;
+                static T path;
+                static bool message_received_;
                 std::string id_;
     };
 };
+
+template <typename T>
+bool gr_safety_gridmap::LayerSubscriber<T>::message_received_ = false;
+template <typename T>
+T gr_safety_gridmap::LayerSubscriber<T>::path = T();
