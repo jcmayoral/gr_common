@@ -5,16 +5,18 @@
 #include <grid_map_msgs/GridMap.h>
 #include <grid_map_ros/grid_map_ros.hpp>
 
+
+extern grid_map::GridMap gridmap;
+
 namespace gr_safety_gridmap{
     class SafetyGridMap{
         public:
            SafetyGridMap();
            void updateGrid();
            void publishGrid();
-           grid_map::GridMap cmap_;
         private:
             ros::Publisher rpub_;
-            std::map<std::string, LayerSubscriber<nav_msgs::Path>> layer_subscribers;
+            std::vector<LayerSubscriber<nav_msgs::Path>> layer_subscribers;
     };
 
 

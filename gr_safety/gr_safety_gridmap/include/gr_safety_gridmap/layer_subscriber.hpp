@@ -6,6 +6,7 @@
 //https://github.com/ros/ros_comm/tree/noetic-devel/tools/rosbag/src
 //used as tutorial to get into the definition of a message.
 namespace gr_safety_gridmap{
+    static grid_map::GridMap gridmap;
     template<class T>
         class LayerSubscriber{
             public: 
@@ -40,17 +41,21 @@ namespace gr_safety_gridmap{
                         return;
                     }
                     path = *ssmsg->instantiate<T>();
-                    message_received_ = true; 
+                    message_received_ = true;
+                    updateLayer();
                 }
 
-                
-                void updateLayer(grid_map::GridMap& map){
+                std::string getLayerId(){
+                    return id_;
+                }
+
+                void updateLayer(){
                     //boost::shared_ptr<grid_map::GridMap> pmap;
                     //path = nullptr;
-                    std::cout << "updatelayer"<<std::endl;
+                    std::cout << "updatelayer"<< id_ << std::endl;
                     //pmap = boost::static_pointer_cast<grid_map::GridMap>(map);
-                    ROS_INFO_STREAM(map.exists(id_));
-                    map.add(id_, 0);
+                    ROS_INFO_STREAM(gridmap.exists(id_));
+                    gridmap.add(id_, 0);
                     //ROS_INFO_STREAM(*path);<d
                     grid_map::Position position;
                     ROS_INFO_STREAM(path);
@@ -60,10 +65,20 @@ namespace gr_safety_gridmap{
                 bool isMessageReceived(){
                     return message_received_;
                 }
+
+                LayerSubscriber(){
+
+                 }
                 
-                LayerSubscriber(std::string id): id_(id){
+                LayerSubscriber(const LayerSubscriber& other){
+                    id_ = other.id_;
+                    rsub_ = other.rsub_;
+                    message_received_ = other.message_received_;
+                 }
+                
+                LayerSubscriber(std::string id): id_(id), message_received_(false){
                     ros::SubscribeOptions ops;
-                    ops.topic ="/test";//options_.rate_control_topic;
+                    ops.topic ="/" + id;//options_.rate_control_topic;
                     ops.queue_size = 1;
                     ops.md5sum = ros::message_traits::md5sum<topic_tools::ShapeShifter>();
                     ops.datatype = ros::message_traits::datatype<topic_tools::ShapeShifter>();
@@ -77,13 +92,13 @@ namespace gr_safety_gridmap{
                 boost::shared_ptr<ros::Subscriber> sub_;
                 ros::NodeHandle nh_;  
                 ros::Subscriber rsub_;  
-                static T path;
-                static bool message_received_;
+                T path;
+                bool message_received_;
                 std::string id_;
     };
 };
 
-template <typename T>
-bool gr_safety_gridmap::LayerSubscriber<T>::message_received_ = false;
-template <typename T>
-T gr_safety_gridmap::LayerSubscriber<T>::path = T();
+//template <typename T>
+//bool gr_safety_gridmap::LayerSubscriber<T>::message_received_ = false;
+//template <typename T>
+//T gr_safety_gridmap::LayerSubscriber<T>::path = T();
