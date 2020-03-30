@@ -8,7 +8,9 @@ int main(int argc, char** argv){
 
     while(ros::ok()){
         safety_gridmap.updateGrid();
+        //TODO replace by rate
         ros::Duration(0.5).sleep();
+        safety_gridmap.publishGrid();
         ros::spinOnce();
     }
     return 0;

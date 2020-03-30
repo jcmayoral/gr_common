@@ -44,30 +44,21 @@ namespace gr_safety_gridmap{
                 }
 
                 
-                void updateLayer(const boost::shared_ptr<grid_map::GridMap>& map){
+                void updateLayer(grid_map::GridMap& map){
                     //boost::shared_ptr<grid_map::GridMap> pmap;
                     //path = nullptr;
                     std::cout << "updatelayer"<<std::endl;
                     //pmap = boost::static_pointer_cast<grid_map::GridMap>(map);
-                    ROS_INFO_STREAM(map->exists(id_));
-                    map->add(id_, 0);
-                    //ROS_INFO_STREAM(*path);
+                    ROS_INFO_STREAM(map.exists(id_));
+                    map.add(id_, 0);
+                    //ROS_INFO_STREAM(*path);<d
                     grid_map::Position position;
                     ROS_INFO_STREAM(path);
                     message_received_ = false;
-
                 }
 
                 bool isMessageReceived(){
-                    //boost::mutex::scoped_lock lock(mtx_);
-                    //return message_received;
-                    //For DEBUGGING
-                   if(!message_received_){
-                       std::cout << "Message has not been received " << message_received_ <<std::endl;
-                       return false;
-                   }
-                   std::cout << "Message received " << message_received_ <<std::endl;
-                   return true;//path->poses.size()>0 ? true : false;
+                    return message_received_;
                 }
                 
                 LayerSubscriber(std::string id): id_(id){
