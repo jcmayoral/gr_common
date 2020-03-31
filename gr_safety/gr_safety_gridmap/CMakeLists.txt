@@ -50,7 +50,6 @@ include_directories(
 add_library(
   ${PROJECT_NAME}
   src/safety_gridmap.cpp
-  src/layer_subscriber.cpp
 )
 
 add_executable(
