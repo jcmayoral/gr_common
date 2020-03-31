@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <gr_safety_gridmap/layer_subscriber.hpp>
 
-extern grid_map::GridMap gridmap;
+extern gr_safety_gridmap::MainGrid gridmap;
 
 namespace gr_safety_gridmap{
     class SafetyGridMap{

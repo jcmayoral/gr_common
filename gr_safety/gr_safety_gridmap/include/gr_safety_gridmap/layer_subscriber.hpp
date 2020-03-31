@@ -13,12 +13,30 @@
 //https://github.com/ros/ros_comm/tree/noetic-devel/tools/rosbag/src
 //used as tutorial to get into the definition of a message.
 namespace gr_safety_gridmap{
-    static grid_map::GridMap gridmap;
+    class MainGrid{
+        public:
+        /*
+            inline void lock(){
+                std::cout << "lock"<< std::endl;
+                mtx.lock();
+            }
+            inline void unlock(){
+                std::cout << "unlock"<< std::endl;
+                mtx.unlock();
+            }
+            */
+            grid_map::GridMap gridmap;
+            boost::mutex mtx;
+    };
+
+    static gr_safety_gridmap::MainGrid gridmap;
 
     //todo pass type geometry_msgs::PoseStamped without template
     class LayerSubscriber{
         public: 
             void layerCB(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event){
+                ROS_INFO_STREAM("A");
+                //boost::mutex::scoped_lock lck(mt);
                 boost::shared_ptr<topic_tools::ShapeShifter const> const &ssmsg = msg_event.getConstMessage();
                 auto msginfo = msg_event.getConnectionHeader();
                 std::string def = ssmsg->getMessageDefinition();
@@ -31,13 +49,11 @@ namespace gr_safety_gridmap{
                 
                 try{
                     nav_msgs::Path path(*ssmsg->instantiate<nav_msgs::Path>());
-                    reset();
                     updateLayer(path, 0);
                     ROS_INFO_STREAM("IT is a path");
                 }
                 catch(...){
                     auto parr = *ssmsg->instantiate<geometry_msgs::PoseArray>();
-                    reset();
                     updateLayer(parr, 1);
                     ROS_INFO_STREAM("IT is an array");;
                 }
@@ -48,7 +64,9 @@ namespace gr_safety_gridmap{
             }
 
             void reset(){
-                gridmap.add(id_, 0);
+                //gridmap.lock();
+                gridmap.gridmap.add(id_, 0);
+                //gridmap.unlock();
             }
 
             void convert(geometry_msgs::Pose& in){
@@ -59,21 +77,37 @@ namespace gr_safety_gridmap{
                 //boost::shared_ptr<grid_map::GridMap> pmap;
                 grid_map::Position position;
                 grid_map::Index index;
+                std::cout << "updateLayer" << id_ << std::endl;
+
+                boost::mutex::scoped_lock lck(gridmap.mtx);
+                {
+                //gridmap.lock();
+                reset();
                 int c = 0;  
+
                 for (auto p : poses.poses){
                     position(0) = p.position.x;
                     position(1) = p.position.y;
-                    gridmap.getIndex(position, index);
-                    gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.at(id_, index)),exp(-0.005*c));
+                    gridmap.gridmap.getIndex(position, index);
+                    gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
                     c++;
                 }
+                }
+                //gridmap.unlock();
             }
 
             void updateLayer(const nav_msgs::Path& path, int behaviour){
                 //boost::shared_ptr<grid_map::GridMap> pmap;
                 grid_map::Position position;
                 grid_map::Index index;
+                std::cout << "updateLayer" << id_ << std::endl;
+
                 int c = 0;
+
+                boost::mutex::scoped_lock lck(gridmap.mtx);
+                {
+                reset();
+                //gridmap.lock();
                 if (behaviour==1)
                     to_global_transform = tf_buffer_.lookupTransform("odom", "velodyne", ros::Time::now(), ros::Duration(0.5) );
 
@@ -83,11 +117,12 @@ namespace gr_safety_gridmap{
                     }
                     position(0) = p.pose.position.x;
                     position(1) = p.pose.position.y;
-                    std::cout << index << std::endl;
-                    gridmap.getIndex(position, index);
-                    gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.at(id_, index)),exp(-0.005*c));
+                    gridmap.gridmap.getIndex(position, index);
+                    gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
                     c++;
                 }
+                };
+                //gridmap.unlock();
             }
 
             LayerSubscriber():tf2_listener_(tf_buffer_){
@@ -121,6 +156,7 @@ namespace gr_safety_gridmap{
             geometry_msgs::TransformStamped to_global_transform;
             tf2_ros::Buffer tf_buffer_;
             tf2_ros::TransformListener tf2_listener_;
+            boost::mutex mt;
     };
 };
 
