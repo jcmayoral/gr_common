@@ -64,8 +64,8 @@ namespace gr_safety_gridmap{
                         position(0) = p.pose.position.x;
                         position(1) = p.pose.position.y;
                         gridmap.getIndex(position, index);
-                        ROS_INFO_STREAM(index);
-                        gridmap.at(id_, index) = 0.1 *exp(-c);
+                        gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.at(id_, index)),exp(-0.005*c));
+                        std::cout << 1 *exp(-c) << std::endl;
                         c++;
                     }
                     message_received_ = false;

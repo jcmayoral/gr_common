@@ -4,7 +4,7 @@ using namespace gr_safety_gridmap;
 
 SafetyGridMap::SafetyGridMap(){
     gridmap.setFrameId("map");
-    gridmap.setGeometry(grid_map::Length(10.0, 10.0), 0.20);
+    gridmap.setGeometry(grid_map::Length(10.0, 10.0), 0.1);
     ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
     //TODO config file
