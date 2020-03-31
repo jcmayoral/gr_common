@@ -6,6 +6,9 @@
 #include <geometry_msgs/PoseArray.h>
 #include <nav_msgs/Path.h>
 
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/transform_listener.h>
+
 //Based originally from the rosbag c++ implementation
 //https://github.com/ros/ros_comm/tree/noetic-devel/tools/rosbag/src
 //used as tutorial to get into the definition of a message.
@@ -48,6 +51,10 @@ namespace gr_safety_gridmap{
                 gridmap.add(id_, 0);
             }
 
+            void convert(geometry_msgs::Pose& in){
+                tf2::doTransform(in, in, to_global_transform);
+            }
+
             void updateLayer(const geometry_msgs::PoseArray& poses, int behaviour){
                 //boost::shared_ptr<grid_map::GridMap> pmap;
                 grid_map::Position position;
@@ -66,26 +73,35 @@ namespace gr_safety_gridmap{
                 //boost::shared_ptr<grid_map::GridMap> pmap;
                 grid_map::Position position;
                 grid_map::Index index;
-                int c = 0;  
+                int c = 0;
+                if (behaviour==1)
+                    to_global_transform = tf_buffer_.lookupTransform("odom", "velodyne", ros::Time::now(), ros::Duration(0.5) );
+
                 for (auto p : path.poses){
+                    if (behaviour==1){
+                        convert(p.pose);
+                    }
                     position(0) = p.pose.position.x;
                     position(1) = p.pose.position.y;
+                    std::cout << index << std::endl;
                     gridmap.getIndex(position, index);
                     gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.at(id_, index)),exp(-0.005*c));
                     c++;
                 }
             }
 
-            LayerSubscriber(){
+            LayerSubscriber():tf2_listener_(tf_buffer_){
 
             }
             
-            LayerSubscriber(const LayerSubscriber& other){
+            LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_){
                 id_ = other.id_;
                 rsub_ = other.rsub_;
+                //tf_buffer_ = other.tf_buffer_;
+                //tf2_listener_ = other.tf2_listener_;
             }
             
-            LayerSubscriber(std::string input, std::string id): id_(id){
+            LayerSubscriber(std::string input, std::string id): id_(id),tf2_listener_(tf_buffer_){
                 ros::SubscribeOptions ops;
                 ops.topic ="/" + input;//options_.rate_control_topic;
                 ops.queue_size = 1;
@@ -102,5 +118,10 @@ namespace gr_safety_gridmap{
             ros::NodeHandle nh_;  
             ros::Subscriber rsub_;  
             std::string id_;
+            geometry_msgs::TransformStamped to_global_transform;
+            tf2_ros::Buffer tf_buffer_;
+            tf2_ros::TransformListener tf2_listener_;
     };
 };
+
+

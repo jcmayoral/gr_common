@@ -22,6 +22,8 @@ find_package(catkin REQUIRED COMPONENTS
   octomap_msgs
   filters
   topic_tools
+  tf2
+  tf2_ros
 )
 
 find_package(OpenCV 3 REQUIRED)

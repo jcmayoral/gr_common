@@ -10,7 +10,7 @@ SafetyGridMap::SafetyGridMap(){
     //TODO config file
     layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_0");
     //layer_subscribers.emplace_back("input", "layer_name");
-
+    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", "layer_1");
 }
 
 void SafetyGridMap::publishGrid(){
