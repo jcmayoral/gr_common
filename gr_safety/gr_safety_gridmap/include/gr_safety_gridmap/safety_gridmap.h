@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <gr_safety_gridmap/layer_subscriber.hpp>
+#include <gr_safety_gridmap/layer_subscriber.h>
 
 extern grid_map::GridMap gridmap;
 
