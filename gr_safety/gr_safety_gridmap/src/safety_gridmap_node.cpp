@@ -6,7 +6,7 @@ int main(int argc, char** argv){
     ros::init(argc,argv,"gr_safety_gridmap_node");
     SafetyGridMap safety_gridmap;
 
-    ros::Rate r(1);
+    ros::Rate r(10);
 
     while(ros::ok()){
         //safety_gridmap.updateGrid();

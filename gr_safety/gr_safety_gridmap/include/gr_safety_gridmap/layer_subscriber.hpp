@@ -35,28 +35,34 @@ namespace gr_safety_gridmap{
     class LayerSubscriber{
         public: 
             void layerCB(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event){
-                ROS_INFO_STREAM("A");
                 //boost::mutex::scoped_lock lck(mt);
                 boost::shared_ptr<topic_tools::ShapeShifter const> const &ssmsg = msg_event.getConstMessage();
                 auto msginfo = msg_event.getConnectionHeader();
                 std::string def = ssmsg->getMessageDefinition();
                 
                 std::string msgtype = msginfo["type"];
-                ROS_INFO_STREAM(msgtype);
-
                 //Check if path
                 //TODO behaviour according to type
                 
                 try{
-                    nav_msgs::Path path(*ssmsg->instantiate<nav_msgs::Path>());
+                    nav_msgs::Path path;
+                    path = *ssmsg->instantiate<nav_msgs::Path>();
                     updateLayer(path, 0);
                     ROS_INFO_STREAM("IT is a path");
                 }
                 catch(...){
-                    auto parr = *ssmsg->instantiate<geometry_msgs::PoseArray>();
-                    updateLayer(parr, 1);
-                    ROS_INFO_STREAM("IT is an array");;
                 }
+
+                try{
+                    geometry_msgs::PoseArray parr;
+                    parr = *ssmsg->instantiate<geometry_msgs::PoseArray>();
+                    updateLayer(parr, 1);
+                }
+
+                catch(...){
+                    ROS_ERROR("WTF");
+                }
+                
             }
 
             std::string getLayerId(){
@@ -77,7 +83,6 @@ namespace gr_safety_gridmap{
                 //boost::shared_ptr<grid_map::GridMap> pmap;
                 grid_map::Position position;
                 grid_map::Index index;
-                std::cout << "updateLayer" << id_ << std::endl;
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 {
@@ -124,21 +129,28 @@ namespace gr_safety_gridmap{
                 };
                 //gridmap.unlock();
             }
-
-            LayerSubscriber():tf2_listener_(tf_buffer_){
-
-            }
             
-            LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_){
+            LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_), nh_(){
                 id_ = other.id_;
-                rsub_ = other.rsub_;
+                topic_ = other.topic_;
+                ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
+                ops.queue_size = 1;
+                ops.md5sum = ros::message_traits::md5sum<topic_tools::ShapeShifter>();
+                ops.datatype = ros::message_traits::datatype<topic_tools::ShapeShifter>();
+                ops.helper = boost::make_shared<ros::SubscriptionCallbackHelperT<
+                        const ros::MessageEvent<topic_tools::ShapeShifter const> &> >(
+                                boost::bind(&LayerSubscriber::layerCB, this, _1));
+                rsub_ = nh_.subscribe(ops);
+
+                //rsub_ = other.rsub_;
                 //tf_buffer_ = other.tf_buffer_;
                 //tf2_listener_ = other.tf2_listener_;
             }
             
-            LayerSubscriber(std::string input, std::string id): id_(id),tf2_listener_(tf_buffer_){
-                ros::SubscribeOptions ops;
-                ops.topic ="/" + input;//options_.rate_control_topic;
+            LayerSubscriber(std::string input, std::string id): id_(id),tf2_listener_(tf_buffer_), nh_(){
+                ROS_INFO_STREAM(id_);
+                topic_ = "/" + input;
+                ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
                 ops.queue_size = 1;
                 ops.md5sum = ros::message_traits::md5sum<topic_tools::ShapeShifter>();
                 ops.datatype = ros::message_traits::datatype<topic_tools::ShapeShifter>();
@@ -149,6 +161,7 @@ namespace gr_safety_gridmap{
             }
 
         private:
+            std::string topic_;
             boost::shared_ptr<ros::Subscriber> sub_;
             ros::NodeHandle nh_;  
             ros::Subscriber rsub_;  
@@ -157,6 +170,8 @@ namespace gr_safety_gridmap{
             tf2_ros::Buffer tf_buffer_;
             tf2_ros::TransformListener tf2_listener_;
             boost::mutex mt;
+            ros::SubscribeOptions ops;
+
     };
 };
 
