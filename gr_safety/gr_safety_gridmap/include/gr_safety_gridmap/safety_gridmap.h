@@ -1,10 +1,5 @@
 #include <ros/ros.h>
 #include <gr_safety_gridmap/layer_subscriber.hpp>
-#include <nav_msgs/Path.h>
-#include <memory>
-#include <grid_map_msgs/GridMap.h>
-#include <grid_map_ros/grid_map_ros.hpp>
-
 
 extern grid_map::GridMap gridmap;
 
@@ -16,9 +11,8 @@ namespace gr_safety_gridmap{
            void publishGrid();
         private:
             ros::Publisher rpub_;
-            std::vector<LayerSubscriber<nav_msgs::Path>> layer_subscribers;
+            std::vector<LayerSubscriber> layer_subscribers;
     };
-
 
 };
 

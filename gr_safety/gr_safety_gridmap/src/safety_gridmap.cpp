@@ -28,8 +28,10 @@ void SafetyGridMap::updateGrid(){
        // std::cout << it.second.isMessageReceived();
         auto layers = gridmap.getLayers();
 
+        /*
         for (auto l : layers){
             ROS_INFO_STREAM(" layer "<< l);
         }
+        */
     }
 }
