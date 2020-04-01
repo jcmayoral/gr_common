@@ -88,13 +88,20 @@ namespace gr_safety_gridmap{
                 {
                 //gridmap.lock();
                 reset();
-                int c = 0;  
+                int c = 0; 
+                float radius = 0.5;
+                to_global_transform = tf_buffer_.lookupTransform("odom", "velodyne", ros::Time::now(), ros::Duration(0.1) );
 
                 for (auto p : poses.poses){
+                    convert(p);
                     position(0) = p.position.x;
                     position(1) = p.position.y;
                     gridmap.gridmap.getIndex(position, index);
-                    gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
+                    //gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
+                    
+                    for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
+                        gridmap.gridmap.at(id_, *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
+                    }
                     c++;
                 }
                 }
@@ -114,7 +121,7 @@ namespace gr_safety_gridmap{
                 reset();
                 //gridmap.lock();
                 if (behaviour==1)
-                    to_global_transform = tf_buffer_.lookupTransform("odom", "velodyne", ros::Time::now(), ros::Duration(0.5) );
+                    to_global_transform = tf_buffer_.lookupTransform("odom", "velodyne", ros::Time::now(), ros::Duration(0.1) );
 
                 for (auto p : path.poses){
                     if (behaviour==1){

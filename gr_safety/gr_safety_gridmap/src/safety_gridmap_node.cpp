@@ -9,11 +9,11 @@ int main(int argc, char** argv){
     ros::Rate r(10);
 
     while(ros::ok()){
-        //safety_gridmap.updateGrid();
         //TODO replace by rate
         //ros::Duration(0.5).sleep();
         safety_gridmap.publishGrid();
         r.sleep();
+        safety_gridmap.updateGrid();
         ros::spinOnce();
     }
     return 0;

@@ -31,8 +31,14 @@ void SafetyGridMap::publishGrid(){
 void SafetyGridMap::updateGrid(){
     //modifications on this pointer get lost when function dies.
     //boost::shared_ptr<grid_map::GridMap> pmap = boost::make_shared<grid_map::GridMap>(cmap_);
+    boost::mutex::scoped_lock ltk(gridmap.mtx);{
+
+        if ( gridmap.gridmap.exists("layer_0") &&  gridmap.gridmap.exists("layer_1")){
+            gridmap.gridmap.add("sum",  gridmap.gridmap.get("layer_0") +  gridmap.gridmap.get("layer_1"));
+        }
+    }
     
-    for (auto& it : layer_subscribers){
+    //for (auto& it : layer_subscribers){
        // std::cout << it.second.isMessageReceived();
         //auto layers = gridmap.gridmap.getLayers();
 
@@ -41,5 +47,5 @@ void SafetyGridMap::updateGrid(){
             ROS_INFO_STREAM(" layer "<< l);
         }
         */
-    }
+    //}
 }
