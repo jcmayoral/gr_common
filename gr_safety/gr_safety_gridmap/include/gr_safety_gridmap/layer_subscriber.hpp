@@ -80,7 +80,7 @@ namespace gr_safety_gridmap{
             }
 
             void updateLayer(const geometry_msgs::PoseArray& poses, int behaviour){
-                ROS_INFO_STREAM("NEW MESSAGE");
+                //ROS_INFO_STREAM("NEW MESSAGE");
                 //boost::shared_ptr<grid_map::GridMap> pmap;
                 grid_map::Position position;
                 grid_map::Index index;
@@ -110,8 +110,8 @@ namespace gr_safety_gridmap{
                  for (auto p : poses.poses){
                     auto odompose = p;
                     auto aux = odompose;
-                    ROS_WARN_STREAM("person ");
-                    generateCycle(aux,1);
+                    //ROS_WARN_STREAM("person ");
+                    generateCycle(aux,2);
                     /*
                     //time
                     for (int t=0; t< 5; t++){
@@ -140,10 +140,9 @@ namespace gr_safety_gridmap{
 
             //TODO create MotionModelClass   
             void generateCycle(geometry_msgs::Pose in, int depth){
-                if (depth == 0){
+                if (depth == -1){
                     return;
                 }
-                ROS_ERROR_STREAM("depth " << depth);
 
                 //generateCycle(in,depth);
                 geometry_msgs::Pose aux, aux2;
@@ -153,9 +152,12 @@ namespace gr_safety_gridmap{
 
                 aux = in;
 
+                //MotionModel class TODO
+                double costs[9] ={10,10,2,0.1,0.1,0.1,0.1,0.1,0.1};
+
                  for (int i=0; i <9; i++){
                     aux2 = generateMotion(in,i);
-                    ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
+                    //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
                     generateCycle(aux2,depth-1);
                     //to odom frame
                     convert(aux2);
@@ -164,7 +166,7 @@ namespace gr_safety_gridmap{
                     gridmap.gridmap.getIndex(position, index);
                     //gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
                     for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
-                        gridmap.gridmap.at(id_, *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.5*depth));
+                        gridmap.gridmap.at(id_, *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),0.1*costs[i]*depth);
                     }
                  }
             }
@@ -213,7 +215,7 @@ namespace gr_safety_gridmap{
                 //boost::shared_ptr<grid_map::GridMap> pmap;
                 grid_map::Position position;
                 grid_map::Index index;
-                std::cout << "updateLayer" << id_ << std::endl;
+                //std::cout << "updateLayer" << id_ << std::endl;
 
                 int c = 0;
 
