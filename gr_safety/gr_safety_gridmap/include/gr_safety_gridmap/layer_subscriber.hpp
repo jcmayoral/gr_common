@@ -48,7 +48,7 @@ namespace gr_safety_gridmap{
                     nav_msgs::Path path;
                     path = *ssmsg->instantiate<nav_msgs::Path>();
                     updateLayer(path, 0);
-                    ROS_INFO_STREAM("IT is a path");
+                    return;
                 }
                 catch(...){
                 }
@@ -57,10 +57,10 @@ namespace gr_safety_gridmap{
                     geometry_msgs::PoseArray parr;
                     parr = *ssmsg->instantiate<geometry_msgs::PoseArray>();
                     updateLayer(parr, 1);
+                    return;
                 }
 
                 catch(...){
-                    ROS_ERROR("WTF");
                 }
                 
             }
@@ -80,6 +80,7 @@ namespace gr_safety_gridmap{
             }
 
             void updateLayer(const geometry_msgs::PoseArray& poses, int behaviour){
+                ROS_INFO_STREAM("NEW MESSAGE");
                 //boost::shared_ptr<grid_map::GridMap> pmap;
                 grid_map::Position position;
                 grid_map::Index index;
@@ -109,7 +110,8 @@ namespace gr_safety_gridmap{
                  for (auto p : poses.poses){
                     auto odompose = p;
                     auto aux = odompose;
-                    generateCycle(aux,5);
+                    ROS_WARN_STREAM("person ");
+                    generateCycle(aux,1);
                     /*
                     //time
                     for (int t=0; t< 5; t++){
@@ -137,25 +139,28 @@ namespace gr_safety_gridmap{
             }
 
             //TODO create MotionModelClass   
-            void generateCycle(geometry_msgs::Pose& in, int depth){
-                if (depth==0){
+            void generateCycle(geometry_msgs::Pose in, int depth){
+                if (depth == 0){
                     return;
                 }
+                ROS_ERROR_STREAM("depth " << depth);
 
-                depth--;
-                generateCycle(in,depth);
-                geometry_msgs::Pose aux;
+                //generateCycle(in,depth);
+                geometry_msgs::Pose aux, aux2;
                 grid_map::Position position;
                 grid_map::Index index;
-                float radius = 0.25;
+                float radius = 1.0;
+
+                aux = in;
 
                  for (int i=0; i <9; i++){
-                    generateMotion(in,i);
-                    aux = in;
+                    aux2 = generateMotion(in,i);
+                    ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
+                    generateCycle(aux2,depth-1);
                     //to odom frame
-                    convert(aux);
-                    position(0) = aux.position.x;
-                    position(1) = aux.position.y;
+                    convert(aux2);
+                    position(0) = aux2.position.x;
+                    position(1) = aux2.position.y;
                     gridmap.gridmap.getIndex(position, index);
                     //gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
                     for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
@@ -165,40 +170,43 @@ namespace gr_safety_gridmap{
             }
 
             //TODO create MotionModelClass
-            void generateMotion(geometry_msgs::Pose& in, int motion_type){
-                auto distance = 0.5;
+            geometry_msgs::Pose generateMotion(geometry_msgs::Pose in, int motion_type){
+                auto distance = 5.0;
+                geometry_msgs::Pose out;
                 switch(motion_type){
                     case 0:
+                        out = in;
                         break;
                     case 1:
-                        in.position.x+=distance;
+                        out.position.x = in.position.x+distance;
                         break;
                     case 2:
-                        in.position.x-=distance;
+                        out.position.x = in.position.x-distance;
                         break;
                     case 3:
-                        in.position.y+=distance;
+                        out.position.y = in.position.y+distance;
                         break;
                     case 4:
-                        in.position.y-=distance;
+                        out.position.y = in.position.y-distance;
                         break;
                     case 5:
-                        in.position.x+=distance;
-                        in.position.y+=distance;
+                        out.position.x = in.position.x+distance;
+                        out.position.y = in.position.y+distance;
                         break;
                     case 6:
-                        in.position.x-=distance;
-                        in.position.y-=distance;
+                        out.position.x = in.position.x-distance;
+                        out.position.y =in.position.y-distance;
                         break;
                     case 7:
-                        in.position.x-=distance;
-                        in.position.y+=distance;
+                        out.position.x = in.position.x-distance;
+                        out.position.y = in.position.y+distance;
                         break;
                     case 8:
-                        in.position.x+=distance;
-                        in.position.y-=distance;
+                        out.position.x = in.position.x+distance;
+                        out.position.y = in.position.y-distance;
                         break;
                 }
+                return out;
             }
 
             void updateLayer(const nav_msgs::Path& path, int behaviour){
