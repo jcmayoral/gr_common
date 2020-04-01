@@ -13,7 +13,7 @@ void MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obst
 
 bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid){
     obstacleid_ = obstacleid;
-    double map_size = 100; //meters
+    double map_size = 40.0; //meters
     std::cout << "Creating Motion model for  " << obstacleid << std::endl;
     env_ = new EnvironmentNAVXYTHETALAT();
 

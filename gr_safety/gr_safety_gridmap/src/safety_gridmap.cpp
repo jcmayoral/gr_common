@@ -6,7 +6,7 @@ SafetyGridMap::SafetyGridMap(){
     boost::mutex::scoped_lock(gridmap.mtx);
     {
     gridmap.gridmap.setFrameId("map");
-    gridmap.gridmap.setGeometry(grid_map::Length(10.0, 10.0), 0.1);
+    gridmap.gridmap.setGeometry(grid_map::Length(50.0, 50.0), 0.3);
     }
     ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
