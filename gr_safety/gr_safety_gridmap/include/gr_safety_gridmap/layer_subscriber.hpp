@@ -111,7 +111,7 @@ namespace gr_safety_gridmap{
                     auto odompose = p;
                     auto aux = odompose;
                     //ROS_WARN_STREAM("person ");
-                    generateCycle(aux,2);
+                    generateCycle(aux,3);
                     /*
                     //time
                     for (int t=0; t< 5; t++){
@@ -148,14 +148,14 @@ namespace gr_safety_gridmap{
                 geometry_msgs::Pose aux, aux2;
                 grid_map::Position position;
                 grid_map::Index index;
-                float radius = 1.0;
+                float radius = 0.50;
 
                 aux = in;
 
                 //MotionModel class TODO
-                double costs[9] ={10,10,2,0.1,0.1,0.1,0.1,0.1,0.1};
-
-                 for (int i=0; i <9; i++){
+                double costs[9] ={0.5,1.0,0.3,0.2,0.2,0.5,0.5,0.5,0.5};
+                int nprimitives = 9;
+                for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
                     //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
                     generateCycle(aux2,depth-1);
@@ -166,14 +166,15 @@ namespace gr_safety_gridmap{
                     gridmap.gridmap.getIndex(position, index);
                     //gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
                     for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
-                        gridmap.gridmap.at(id_, *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),0.1*costs[i]*depth);
+                        gridmap.gridmap.at(id_, *iterator) += 0.01*costs[i]*depth;
                     }
                  }
             }
 
             //TODO create MotionModelClass
             geometry_msgs::Pose generateMotion(geometry_msgs::Pose in, int motion_type){
-                auto distance = 5.0;
+                //this motion is a hack... motion on the sensor frame not the relative path
+                auto distance = 0.5;
                 geometry_msgs::Pose out;
                 switch(motion_type){
                     case 0:
