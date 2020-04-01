@@ -92,6 +92,7 @@ namespace gr_safety_gridmap{
                 float radius = 0.5;
                 to_global_transform = tf_buffer_.lookupTransform("odom", "velodyne", ros::Time::now(), ros::Duration(0.1) );
 
+                /*
                 for (auto p : poses.poses){
                     convert(p);
                     position(0) = p.position.x;
@@ -104,8 +105,100 @@ namespace gr_safety_gridmap{
                     }
                     c++;
                 }
+                */
+                 for (auto p : poses.poses){
+                    auto odompose = p;
+                    auto aux = odompose;
+                    generateCycle(aux,5);
+                    /*
+                    //time
+                    for (int t=0; t< 5; t++){
+                        //primitives
+                        for (int i=0; i <9; i++){
+                            generateMotion(odompose,i);
+                            aux = odompose;
+                            //to odom frame
+                            convert(aux);
+                            position(0) = aux.position.x;
+                            position(1) = aux.position.y;
+                            gridmap.gridmap.getIndex(position, index);
+                            //gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
+                            
+                            for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
+                                gridmap.gridmap.at(id_, *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.5*t));
+                            }
+                        }
+                        odompose = aux;
+                    }
+                    */
+                }
                 }
                 //gridmap.unlock();
+            }
+
+            //TODO create MotionModelClass   
+            void generateCycle(geometry_msgs::Pose& in, int depth){
+                if (depth==0){
+                    return;
+                }
+
+                depth--;
+                generateCycle(in,depth);
+                geometry_msgs::Pose aux;
+                grid_map::Position position;
+                grid_map::Index index;
+                float radius = 0.25;
+
+                 for (int i=0; i <9; i++){
+                    generateMotion(in,i);
+                    aux = in;
+                    //to odom frame
+                    convert(aux);
+                    position(0) = aux.position.x;
+                    position(1) = aux.position.y;
+                    gridmap.gridmap.getIndex(position, index);
+                    //gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
+                    for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
+                        gridmap.gridmap.at(id_, *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.5*depth));
+                    }
+                 }
+            }
+
+            //TODO create MotionModelClass
+            void generateMotion(geometry_msgs::Pose& in, int motion_type){
+                auto distance = 0.5;
+                switch(motion_type){
+                    case 0:
+                        break;
+                    case 1:
+                        in.position.x+=distance;
+                        break;
+                    case 2:
+                        in.position.x-=distance;
+                        break;
+                    case 3:
+                        in.position.y+=distance;
+                        break;
+                    case 4:
+                        in.position.y-=distance;
+                        break;
+                    case 5:
+                        in.position.x+=distance;
+                        in.position.y+=distance;
+                        break;
+                    case 6:
+                        in.position.x-=distance;
+                        in.position.y-=distance;
+                        break;
+                    case 7:
+                        in.position.x-=distance;
+                        in.position.y+=distance;
+                        break;
+                    case 8:
+                        in.position.x+=distance;
+                        in.position.y-=distance;
+                        break;
+                }
             }
 
             void updateLayer(const nav_msgs::Path& path, int behaviour){
