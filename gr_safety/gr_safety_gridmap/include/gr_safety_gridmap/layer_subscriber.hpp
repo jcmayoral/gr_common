@@ -155,7 +155,7 @@ namespace gr_safety_gridmap{
 
                 //MotionModel class TODO
                 double costs[9] ={0.5,1.0,0.3,0.2,0.2,0.5,0.5,0.5,0.5};
-                int nprimitives = 1;
+                int nprimitives = 9;
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
                     //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
@@ -167,8 +167,9 @@ namespace gr_safety_gridmap{
                     gridmap.gridmap.getIndex(position, index);
                     //gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
                     for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
-                        if ((gridmap.gridmap.at(id_, *iterator) - exp(-0.005*(search_depth_-depth))) < 0.01){
+                        if (std::fabs(gridmap.gridmap.at(id_, *iterator) - exp(-0.005*(search_depth_-depth))) < 0.0001){
                             ROS_WARN_STREAM("collision? on time " << (search_depth_-depth)<< " and primitive " << i);
+                            ROS_ERROR_STREAM(gridmap.gridmap.at(id_, *iterator) << " : " << exp(-0.005*(search_depth_-depth)));
                             //continue;
                         }
 
@@ -180,7 +181,7 @@ namespace gr_safety_gridmap{
             //TODO create MotionModelClass
             geometry_msgs::Pose generateMotion(geometry_msgs::Pose in, int motion_type){
                 //this motion is a hack... motion on the sensor frame not the relative path
-                auto distance = 0.5;
+                auto distance = 0.15;
                 geometry_msgs::Pose out;
                 switch(motion_type){
                     case 0:
@@ -264,7 +265,7 @@ namespace gr_safety_gridmap{
                 //tf2_listener_ = other.tf2_listener_;
             }
             
-            LayerSubscriber(std::string input, std::string id): id_(id),tf2_listener_(tf_buffer_), nh_(), search_depth_(3){
+            LayerSubscriber(std::string input, std::string id): id_(id),tf2_listener_(tf_buffer_), nh_(), search_depth_(2){
                 ROS_INFO_STREAM(id_);
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
