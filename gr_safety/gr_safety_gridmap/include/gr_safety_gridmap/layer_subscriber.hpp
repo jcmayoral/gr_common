@@ -47,7 +47,8 @@ namespace gr_safety_gridmap{
                 try{
                     nav_msgs::Path path;
                     path = *ssmsg->instantiate<nav_msgs::Path>();
-                    updateLayer(path, 0);
+                    //local gridmap -> 1
+                    updateLayer(path, 1);
                     return;
                 }
                 catch(...){
@@ -91,7 +92,7 @@ namespace gr_safety_gridmap{
                 reset();
                 int c = 0; 
                 float radius = 0.5;
-                to_global_transform = tf_buffer_.lookupTransform("odom", "velodyne", ros::Time::now(), ros::Duration(0.1) );
+                to_global_transform = tf_buffer_.lookupTransform(map_frame_, local_frame_, ros::Time::now(), ros::Duration(0.1) );
 
                 /*
                 for (auto p : poses.poses){
@@ -181,7 +182,7 @@ namespace gr_safety_gridmap{
             //TODO create MotionModelClass
             geometry_msgs::Pose generateMotion(geometry_msgs::Pose in, int motion_type){
                 //this motion is a hack... motion on the sensor frame not the relative path
-                auto distance = 0.05;
+                auto distance = 0.1;
                 geometry_msgs::Pose out;
                 switch(motion_type){
                     case 0:
@@ -231,8 +232,10 @@ namespace gr_safety_gridmap{
                 {
                 reset();
                 //gridmap.lock();
-                if (behaviour==1)
-                    to_global_transform = tf_buffer_.lookupTransform(map_frame_, local_frame_, ros::Time::now(), ros::Duration(0.1) );
+                if (behaviour==1){
+                    std::string path_frame = path.header.frame_id;
+                    to_global_transform = tf_buffer_.lookupTransform(map_frame_, path_frame, ros::Time::now(), ros::Duration(0.1) );
+                }
 
                 for (auto p : path.poses){
                     if (behaviour==1){
@@ -248,7 +251,8 @@ namespace gr_safety_gridmap{
                 //gridmap.unlock();
             }
             
-            LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_), nh_(), local_frame_(other.local_frame_), map_frame_(other.local_frame_){
+            LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_), nh_(), local_frame_(other.local_frame_), 
+                                                            map_frame_(other.local_frame_), search_depth_(other.search_depth_){
                 id_ = other.id_;
                 topic_ = other.topic_;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
