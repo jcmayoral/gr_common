@@ -111,7 +111,8 @@ namespace gr_safety_gridmap{
                     auto odompose = p;
                     auto aux = odompose;
                     //ROS_WARN_STREAM("person ");
-                    generateCycle(aux,3);
+                    //move search_depth_ to motion model class
+                    generateCycle(aux,search_depth_);
                     /*
                     //time
                     for (int t=0; t< 5; t++){
@@ -154,7 +155,7 @@ namespace gr_safety_gridmap{
 
                 //MotionModel class TODO
                 double costs[9] ={0.5,1.0,0.3,0.2,0.2,0.5,0.5,0.5,0.5};
-                int nprimitives = 9;
+                int nprimitives = 1;
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
                     //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
@@ -166,7 +167,12 @@ namespace gr_safety_gridmap{
                     gridmap.gridmap.getIndex(position, index);
                     //gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
                     for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
-                        gridmap.gridmap.at(id_, *iterator) += 0.01*costs[i]*depth;
+                        if ((gridmap.gridmap.at(id_, *iterator) - exp(-0.005*(search_depth_-depth))) < 0.01){
+                            ROS_WARN_STREAM("collision? on time " << (search_depth_-depth)<< " and primitive " << i);
+                            //continue;
+                        }
+
+                        gridmap.gridmap.at(id_, *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*(search_depth_-depth)));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
                     }
                  }
             }
@@ -258,7 +264,7 @@ namespace gr_safety_gridmap{
                 //tf2_listener_ = other.tf2_listener_;
             }
             
-            LayerSubscriber(std::string input, std::string id): id_(id),tf2_listener_(tf_buffer_), nh_(){
+            LayerSubscriber(std::string input, std::string id): id_(id),tf2_listener_(tf_buffer_), nh_(), search_depth_(3){
                 ROS_INFO_STREAM(id_);
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
@@ -282,6 +288,7 @@ namespace gr_safety_gridmap{
             tf2_ros::TransformListener tf2_listener_;
             boost::mutex mt;
             ros::SubscribeOptions ops;
+            int search_depth_;
 
     };
 };
