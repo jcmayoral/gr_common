@@ -149,7 +149,7 @@ namespace gr_safety_gridmap{
                 geometry_msgs::Pose aux, aux2;
                 grid_map::Position position;
                 grid_map::Index index;
-                float radius = 0.50;
+                float radius = 0.25;
 
                 aux = in;
 
@@ -181,7 +181,7 @@ namespace gr_safety_gridmap{
             //TODO create MotionModelClass
             geometry_msgs::Pose generateMotion(geometry_msgs::Pose in, int motion_type){
                 //this motion is a hack... motion on the sensor frame not the relative path
-                auto distance = 0.15;
+                auto distance = 0.05;
                 geometry_msgs::Pose out;
                 switch(motion_type){
                     case 0:
@@ -232,7 +232,7 @@ namespace gr_safety_gridmap{
                 reset();
                 //gridmap.lock();
                 if (behaviour==1)
-                    to_global_transform = tf_buffer_.lookupTransform("odom", "velodyne", ros::Time::now(), ros::Duration(0.1) );
+                    to_global_transform = tf_buffer_.lookupTransform(map_frame_, local_frame_, ros::Time::now(), ros::Duration(0.1) );
 
                 for (auto p : path.poses){
                     if (behaviour==1){
@@ -248,7 +248,7 @@ namespace gr_safety_gridmap{
                 //gridmap.unlock();
             }
             
-            LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_), nh_(){
+            LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_), nh_(), local_frame_(other.local_frame_), map_frame_(other.local_frame_){
                 id_ = other.id_;
                 topic_ = other.topic_;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
@@ -265,7 +265,8 @@ namespace gr_safety_gridmap{
                 //tf2_listener_ = other.tf2_listener_;
             }
             
-            LayerSubscriber(std::string input, std::string id): id_(id),tf2_listener_(tf_buffer_), nh_(), search_depth_(2){
+            //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
+            LayerSubscriber(std::string input, std::string id, std::string map_frame="odom"): id_(id),tf2_listener_(tf_buffer_), nh_(), search_depth_(4), local_frame_("velodyne"), map_frame_(map_frame){
                 ROS_INFO_STREAM(id_);
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
@@ -290,6 +291,8 @@ namespace gr_safety_gridmap{
             boost::mutex mt;
             ros::SubscribeOptions ops;
             int search_depth_;
+            std::string local_frame_;
+            std::string map_frame_;
 
     };
 };

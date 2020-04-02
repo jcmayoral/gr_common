@@ -5,15 +5,15 @@ using namespace gr_safety_gridmap;
 SafetyGridMap::SafetyGridMap(){
     boost::mutex::scoped_lock(gridmap.mtx);
     {
-    gridmap.gridmap.setFrameId("map");
-    gridmap.gridmap.setGeometry(grid_map::Length(20.0, 20.0), 1.0);
+    gridmap.gridmap.setFrameId("base_link");
+    gridmap.gridmap.setGeometry(grid_map::Length(10.0, 10.0), 0.5);
     }
     ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
     //TODO config file
     layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_0");
-    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", "layer_1");
-    //layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_1");
+    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", "layer_1","base_link");
+    //layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_1", "map_frame");
 
     //layer_subscribers.emplace_back("input", "layer_name");
     //layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", "layer_1");
