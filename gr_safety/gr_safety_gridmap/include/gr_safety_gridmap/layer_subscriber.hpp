@@ -115,7 +115,8 @@ namespace gr_safety_gridmap{
                     c++;
                 }
                 */
-                int person = 0;
+                //index 0 reserved to robot
+                int person = 1;
                 for (auto p : poses.poses){
                     auto odompose = p;
                     auto aux = odompose;
