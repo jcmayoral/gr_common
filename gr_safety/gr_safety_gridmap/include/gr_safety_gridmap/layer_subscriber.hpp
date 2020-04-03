@@ -15,16 +15,6 @@
 namespace gr_safety_gridmap{
     class MainGrid{
         public:
-        /*
-            inline void lock(){
-                std::cout << "lock"<< std::endl;
-                mtx.lock();
-            }
-            inline void unlock(){
-                std::cout << "unlock"<< std::endl;
-                mtx.unlock();
-            }
-            */
             grid_map::GridMap gridmap;
             boost::mutex mtx;
     };
@@ -70,7 +60,7 @@ namespace gr_safety_gridmap{
                 //gridmap.lock();
                 gridmap.gridmap.add("Mask_"+std::to_string(person), -1);
                 gridmap.gridmap.add("Trajectory_"+std::to_string(person), -1);
-                ROS_WARN_STREAM("add layers "<< person);
+                //ROS_WARN_STREAM("add layers "<< person);
                 //gridmap.unlock();
             }
 
@@ -157,9 +147,10 @@ namespace gr_safety_gridmap{
             }
 
             //TODO create MotionModelClass
-            geometry_msgs::Pose generateMotion(geometry_msgs::Pose in, int motion_type){
+            geometry_msgs::Pose generateMotion(const geometry_msgs::Pose in, int motion_type){
                 //this motion is a hack... motion on the sensor frame not the relative path
                 geometry_msgs::Pose out;
+                out = in;
                 switch(motion_type){
                     case 0:
                         out = in;
@@ -243,7 +234,7 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(2), 
+            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(3), 
                                                                                                             local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution){
                 topic_ = "/" + input;

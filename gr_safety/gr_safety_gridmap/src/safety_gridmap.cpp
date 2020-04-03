@@ -3,8 +3,8 @@
 using namespace gr_safety_gridmap;
 
 SafetyGridMap::SafetyGridMap(){
-    bool local_gridmap = false;
-    double resolution = 0.4;
+    bool local_gridmap = true;
+    double resolution = 0.2;
 
     //odom->global base_link->local
 
