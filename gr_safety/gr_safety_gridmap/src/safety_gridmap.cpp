@@ -3,16 +3,33 @@
 using namespace gr_safety_gridmap;
 
 SafetyGridMap::SafetyGridMap(){
+    bool local_gridmap = false;
+
+    //odom->global base_link->local
+
+    std::string map_frame;
+    float map_size = 5.0;
+    int factor;
+
+    if (!local_gridmap){
+        map_frame = "odom";
+        factor = 10;
+    }
+    else{
+        map_frame = "base_link";
+        factor = 1;
+    }
+    
     boost::mutex::scoped_lock(gridmap.mtx);
     {
-    gridmap.gridmap.setFrameId("base_link");
-    gridmap.gridmap.setGeometry(grid_map::Length(5.0, 5.0), 0.25);
+    gridmap.gridmap.setFrameId(map_frame);
+    gridmap.gridmap.setGeometry(grid_map::Length(map_size*factor, map_size*factor), 0.25);
     }
     ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
     //TODO config file
-    layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_0");
-    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", "layer_1","base_link");
+    layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_0", local_gridmap, map_frame);
+    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", "layer_1",local_gridmap, map_frame);
     //layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_1", "map_frame");
 
     //layer_subscribers.emplace_back("input", "layer_name");

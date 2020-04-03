@@ -48,7 +48,7 @@ namespace gr_safety_gridmap{
                     nav_msgs::Path path;
                     path = *ssmsg->instantiate<nav_msgs::Path>();
                     //local gridmap -> 1
-                    updateLayer(path, 1);
+                    updateLayer(path, is_local_);
                     return;
                 }
                 catch(...){
@@ -76,6 +76,13 @@ namespace gr_safety_gridmap{
                 //gridmap.unlock();
             }
 
+            void addLayerTuple(int person){
+                //gridmap.lock();
+                gridmap.gridmap.add("Mask_"+std::to_string(person), -1);
+                gridmap.gridmap.add("Trajectory_"+std::to_string(person), -1);
+                //gridmap.unlock();
+            }
+
             void convert(geometry_msgs::Pose& in){
                 tf2::doTransform(in, in, to_global_transform);
             }
@@ -89,7 +96,7 @@ namespace gr_safety_gridmap{
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 {
                 //gridmap.lock();
-                reset();
+                //reset();
                 int c = 0; 
                 float radius = 0.5;
                 to_global_transform = tf_buffer_.lookupTransform(map_frame_, local_frame_, ros::Time::now(), ros::Duration(0.1) );
@@ -108,12 +115,15 @@ namespace gr_safety_gridmap{
                     c++;
                 }
                 */
-                 for (auto p : poses.poses){
+                int person = 0;
+                for (auto p : poses.poses){
                     auto odompose = p;
                     auto aux = odompose;
                     //ROS_WARN_STREAM("person ");
                     //move search_depth_ to motion model class
-                    generateCycle(aux,search_depth_);
+                    addLayerTuple(person);
+                    generateCycle(aux,search_depth_, person);
+                    person++; //this can be calculated by std::distance
                     /*
                     //time
                     for (int t=0; t< 5; t++){
@@ -141,7 +151,7 @@ namespace gr_safety_gridmap{
             }
 
             //TODO create MotionModelClass   
-            void generateCycle(geometry_msgs::Pose in, int depth){
+            void generateCycle(geometry_msgs::Pose in, int depth, int person){
                 if (depth == -1){
                     return;
                 }
@@ -160,7 +170,7 @@ namespace gr_safety_gridmap{
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
                     //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
-                    generateCycle(aux2,depth-1);
+                    generateCycle(aux2,depth-1,person);
                     //to odom frame
                     convert(aux2);
                     position(0) = aux2.position.x;
@@ -173,8 +183,8 @@ namespace gr_safety_gridmap{
                             ROS_ERROR_STREAM(gridmap.gridmap.at(id_, *iterator) << " : " << exp(-0.005*(search_depth_-depth)));
                             //continue;
                         }
-
-                        gridmap.gridmap.at(id_, *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*(search_depth_-depth)));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                        gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),1.0*depth);//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                        gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*(search_depth_-depth)));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
                     }
                  }
             }
@@ -230,7 +240,7 @@ namespace gr_safety_gridmap{
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 {
-                reset();
+                addLayerTuple(0);
                 //gridmap.lock();
                 if (behaviour==1){
                     std::string path_frame = path.header.frame_id;
@@ -244,7 +254,8 @@ namespace gr_safety_gridmap{
                     position(0) = p.pose.position.x;
                     position(1) = p.pose.position.y;
                     gridmap.gridmap.getIndex(position, index);
-                    gridmap.gridmap.at(id_, index) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*c));
+                    gridmap.gridmap.at("Mask_"+std::to_string(0), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(0),index)),0.1*c);
+                    gridmap.gridmap.at("Trajectory_"+std::to_string(0), index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(0), index)),exp(-0.005*c));
                     c++;
                 }
                 };
@@ -252,7 +263,8 @@ namespace gr_safety_gridmap{
             }
             
             LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_), nh_(), local_frame_(other.local_frame_), 
-                                                            map_frame_(other.local_frame_), search_depth_(other.search_depth_){
+                                                            map_frame_(other.local_frame_), search_depth_(other.search_depth_),
+                                                            is_local_(other.is_local_){
                 id_ = other.id_;
                 topic_ = other.topic_;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
@@ -270,7 +282,8 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, std::string id, std::string map_frame="odom"): id_(id),tf2_listener_(tf_buffer_), nh_(), search_depth_(4), local_frame_("velodyne"), map_frame_(map_frame){
+            LayerSubscriber(std::string input, std::string id, bool local,std::string map_frame="odom"): id_(id),tf2_listener_(tf_buffer_), nh_(), search_depth_(4), 
+                                                                                                            local_frame_("velodyne"), map_frame_(map_frame), is_local_(local){
                 ROS_INFO_STREAM(id_);
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
@@ -297,6 +310,7 @@ namespace gr_safety_gridmap{
             int search_depth_;
             std::string local_frame_;
             std::string map_frame_;
+            bool is_local_;
 
     };
 };
