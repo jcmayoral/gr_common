@@ -4,11 +4,12 @@ using namespace gr_safety_gridmap;
 
 SafetyGridMap::SafetyGridMap(){
     bool local_gridmap = false;
+    double resolution = 0.4;
 
     //odom->global base_link->local
 
     std::string map_frame;
-    float map_size = 5.0;
+    float map_size = 10.0;
     int factor;
 
     if (!local_gridmap){
@@ -23,17 +24,13 @@ SafetyGridMap::SafetyGridMap(){
     boost::mutex::scoped_lock(gridmap.mtx);
     {
     gridmap.gridmap.setFrameId(map_frame);
-    gridmap.gridmap.setGeometry(grid_map::Length(map_size*factor, map_size*factor), 0.25);
+    gridmap.gridmap.setGeometry(grid_map::Length(map_size*factor, map_size*factor), resolution);
     }
     ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
     //TODO config file
-    layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_0", local_gridmap, map_frame);
-    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", "layer_1",local_gridmap, map_frame);
-    //layer_subscribers.emplace_back("move_base/NavfnROS/plan", "layer_1", "map_frame");
-
-    //layer_subscribers.emplace_back("input", "layer_name");
-    //layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", "layer_1");
+    layer_subscribers.emplace_back("move_base/NavfnROS/plan", resolution, local_gridmap, map_frame);
+    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", resolution, local_gridmap, map_frame);
 }
 
 void SafetyGridMap::publishGrid(){
