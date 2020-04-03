@@ -119,7 +119,7 @@ namespace gr_safety_gridmap{
                 geometry_msgs::Pose aux, aux2;
                 grid_map::Position position;
                 grid_map::Index index;
-                float radius = 0.25;
+                float radius = 0.1;
 
                 aux = in;
 
@@ -137,16 +137,22 @@ namespace gr_safety_gridmap{
                     gridmap.gridmap.getIndex(position, index);
                     
                     if (gridmap.gridmap.at("Mask_"+std::to_string(person), index) > 0){
-                        std::cout << "skipping because revisited";
+                        std::cout << "skipping because revisited"<< std::endl;
                         continue;
                     }
 
+                    gridmap.gridmap.at("Mask_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                    gridmap.gridmap.at("Trajectory_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), index)),exp(-0.005*(search_depth_-depth)));//0.01*costs[i]*depth;
+
+                    /*
+                    //Circle is great but requires a smaller resolution -> increase search complexity
                     for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
                         //ROS_WARN_STREAM("person "<< person << "depth "<< depth<< "value "<< gridmap.gridmap.at("Mask_"+std::to_string(person), index));
                         //ROS_WARN_STREAM("person "<< person << "depth "<< depth<< "value t "<< gridmap.gridmap.at("Trajectory_"+std::to_string(person), index));
-                        gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                        gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), index)),exp(-0.005*(search_depth_-depth)));//0.01*costs[i]*depth;
+                        gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                        gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator)),exp(-0.005*(search_depth_-depth)));//0.01*costs[i]*depth;
                     }
+                    */
                 }
             }
 
