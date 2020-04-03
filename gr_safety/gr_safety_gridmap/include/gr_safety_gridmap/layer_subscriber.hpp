@@ -184,8 +184,8 @@ namespace gr_safety_gridmap{
                             ROS_ERROR_STREAM(gridmap.gridmap.at(id_, *iterator) << " : " << exp(-0.005*(search_depth_-depth)));
                             //continue;
                         }
-                        gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),1.0*depth);//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                        gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(id_, index)),exp(-0.005*(search_depth_-depth)));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                        gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), index)),1.0*depth);//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                        gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), index)),exp(-0.005*(search_depth_-depth)));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
                     }
                  }
             }
