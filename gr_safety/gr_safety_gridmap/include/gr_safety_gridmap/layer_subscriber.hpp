@@ -57,11 +57,8 @@ namespace gr_safety_gridmap{
             }
 
             void addLayerTuple(int person){
-                //gridmap.lock();
                 gridmap.gridmap.add("Mask_"+std::to_string(person), -1);
                 gridmap.gridmap.add("Trajectory_"+std::to_string(person), -1);
-                //ROS_WARN_STREAM("add layers "<< person);
-                //gridmap.unlock();
             }
 
             void convert(geometry_msgs::Pose& in){
@@ -69,8 +66,6 @@ namespace gr_safety_gridmap{
             }
 
             void updateLayer(const geometry_msgs::PoseArray& poses, int behaviour){
-                //ROS_INFO_STREAM("NEW MESSAGE");
-                //boost::shared_ptr<grid_map::GridMap> pmap;
                 grid_map::Position position;
                 grid_map::Index index;
 
@@ -89,14 +84,11 @@ namespace gr_safety_gridmap{
                 for (auto p : poses.poses){
                     auto odompose = p;
                     auto aux = odompose;
-                    //ROS_WARN_STREAM("person ");
                     //move search_depth_ to motion model class
                     generateCycle(aux,search_depth_, person);
                     person++; //this can be calculated by std::distance
                 }
                 }
-                //ros::Rate(10).sleep();
-                //gridmap.unlock();
             }
 
             //TODO create MotionModelClass   
@@ -131,7 +123,7 @@ namespace gr_safety_gridmap{
                         continue;
                     }
 
-                    gridmap.gridmap.at("Mask_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                    gridmap.gridmap.at("Mask_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), index)),0.1*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
                     gridmap.gridmap.at("Trajectory_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), index)),exp(-0.005*(search_depth_-depth)));//0.01*costs[i]*depth;
 
                     /*
@@ -211,8 +203,14 @@ namespace gr_safety_gridmap{
                     position(0) = p.pose.position.x;
                     position(1) = p.pose.position.y;
                     gridmap.gridmap.getIndex(position, index);
-                    gridmap.gridmap.at("Mask_"+std::to_string(0), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(0),index)),0.1*c);
+
+
                     gridmap.gridmap.at("Trajectory_"+std::to_string(0), index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(0), index)),exp(-0.005*c));
+
+                    if (gridmap.gridmap.at("Mask_"+std::to_string(0), index) < 0){
+                        gridmap.gridmap.at("Mask_"+std::to_string(0), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(0),index)),0.1*c);
+                    }
+
                     c++;
                 }
                 };
