@@ -9,19 +9,14 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_listener.h>
 
+#include <gr_safety_gridmap/main_gridmap.hpp>
+
 //Based originally from the rosbag c++ implementation
 //https://github.com/ros/ros_comm/tree/noetic-devel/tools/rosbag/src
 //used as tutorial to get into the definition of a message.
+extern gr_safety_gridmap::MainGrid gridmap;
+
 namespace gr_safety_gridmap{
-    class MainGrid{
-        public:
-            grid_map::GridMap gridmap;
-            boost::mutex mtx;
-    };
-
-    static gr_safety_gridmap::MainGrid gridmap;
-
-    //todo pass type geometry_msgs::PoseStamped without template
     class LayerSubscriber{
         public: 
             void layerCB(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event){
@@ -189,6 +184,7 @@ namespace gr_safety_gridmap{
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 {
+                //std::cout << gridmap.id << "PATH OK "<< std::endl;
                 addLayerTuple(0);
                 //gridmap.lock();
                 if (behaviour==1){

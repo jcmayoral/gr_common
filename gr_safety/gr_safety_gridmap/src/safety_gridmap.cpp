@@ -23,11 +23,23 @@ SafetyGridMap::SafetyGridMap(){
     
     boost::mutex::scoped_lock(gridmap.mtx);
     {
+        ROS_INFO_STREAM("Working");
+        
     gridmap.gridmap.setFrameId(map_frame);
     gridmap.gridmap.setGeometry(grid_map::Length(map_size*factor, map_size*factor), resolution);
+    addStaticLayer("safety_regions");
+     
+    
+    std::vector<std::string> layers;
+    layers = gridmap.gridmap.getLayers();
+
+    for (auto l: layers){
+        std::cout << "layers aftert" <<  l << std::endl;
+    }
     }
     ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
+
     //TODO config file
     layer_subscribers.emplace_back("move_base/NavfnROS/plan", resolution, local_gridmap, map_frame);
     layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", resolution, local_gridmap, map_frame);
@@ -42,13 +54,31 @@ void SafetyGridMap::publishGrid(){
     rpub_.publish(message);
 }
 
+
+void SafetyGridMap::addStaticLayer(std::string iid){
+    boost::mutex::scoped_lock(gridmap.mtx);
+    if(!gridmap.gridmap.exists(layer_id)){
+        ROS_ERROR_STREAM("ADD static:"<< iid);
+        gridmap.gridmap.add(iid, grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
+      }
+      /*
+      std::vector<std::string> layers;
+      layers = gridmap.gridmap.getLayers();
+
+      for (auto l: layers){
+        std::cout << "layers" <<  l << " map " << gridmap.id << std::endl;
+      }
+      */
+  };
+}
+
 void SafetyGridMap::updateGrid(){
     //modifications on this pointer get lost when function dies.
     //boost::shared_ptr<grid_map::GridMap> pmap = boost::make_shared<grid_map::GridMap>(cmap_);
     boost::mutex::scoped_lock ltk(gridmap.mtx);{
-
-        if ( gridmap.gridmap.exists("layer_0") &&  gridmap.gridmap.exists("layer_1")){
-            gridmap.gridmap.add("sum",  gridmap.gridmap.get("layer_0") +  gridmap.gridmap.get("layer_1"));
+        //std::cout << "Update " << gridmap.id << std::endl;
+        if ( gridmap.gridmap.exists("Trajectory_0") &&  gridmap.gridmap.exists("Trajectory_1")){
+            gridmap.gridmap.add("sum",  gridmap.gridmap.get("Trajectory_0") +  gridmap.gridmap.get("Trajectory_1"));
         }
     }
     

@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <gr_safety_gridmap/layer_subscriber.hpp>
-
-extern gr_safety_gridmap::MainGrid gridmap;
+//#include <gr_safety_gridmap/main_gridmap.hpp>
 
 namespace gr_safety_gridmap{
     class SafetyGridMap{
@@ -9,6 +8,7 @@ namespace gr_safety_gridmap{
            SafetyGridMap();
            void updateGrid();
            void publishGrid();
+           void addStaticLayer(std::string iid);
         private:
             ros::Publisher rpub_;
             std::vector<LayerSubscriber> layer_subscribers;
