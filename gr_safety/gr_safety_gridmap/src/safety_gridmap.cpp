@@ -57,19 +57,41 @@ void SafetyGridMap::publishGrid(){
 
 void SafetyGridMap::addStaticLayer(std::string iid){
     boost::mutex::scoped_lock(gridmap.mtx);
-    if(!gridmap.gridmap.exists(layer_id)){
+    if(!gridmap.gridmap.exists(iid)){
         ROS_ERROR_STREAM("ADD static:"<< iid);
         gridmap.gridmap.add(iid, grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
-      }
-      /*
-      std::vector<std::string> layers;
-      layers = gridmap.gridmap.getLayers();
+    }
+    /*
+    std::vector<std::string> layers;
+    layers = gridmap.gridmap.getLayers();
 
-      for (auto l: layers){
-        std::cout << "layers" <<  l << " map " << gridmap.id << std::endl;
-      }
-      */
-  };
+    for (auto l: layers){
+    std::cout << "layers" <<  l << " map " << gridmap.id << std::endl;
+    }
+    */
+
+    //map_.clearAll();
+    gridmap.gridmap[iid].setZero();
+    
+    //TODO parametrize
+    grid_map::Polygon polygon;
+    polygon.setFrameId(gridmap.gridmap.getFrameId());
+    polygon.addVertex(grid_map::Position( 0.480,  0.000));
+    polygon.addVertex(grid_map::Position( 0.164,  0.155));
+    polygon.addVertex(grid_map::Position( 0.116,  0.500));
+    polygon.addVertex(grid_map::Position(-0.133,  0.250));
+    polygon.addVertex(grid_map::Position(-0.480,  0.399));
+    polygon.addVertex(grid_map::Position(-0.316,  0.000));
+    polygon.addVertex(grid_map::Position(-0.480, -0.399));
+    polygon.addVertex(grid_map::Position(-0.133, -0.250));
+    polygon.addVertex(grid_map::Position( 0.116, -0.500));
+    polygon.addVertex(grid_map::Position( 0.164, -0.155));
+    polygon.addVertex(grid_map::Position( 0.480,  0.000));
+    //geometry_msgs::PolygonStamped message;
+    //grid_map::PolygonRosConverter::toMessage(polygon, message);
+    for (grid_map::PolygonIterator iterator(gridmap.gridmap, polygon); !iterator.isPastEnd(); ++iterator) {
+        gridmap.gridmap.at(iid, *iterator) = 1.0;
+    }
 }
 
 void SafetyGridMap::updateGrid(){
