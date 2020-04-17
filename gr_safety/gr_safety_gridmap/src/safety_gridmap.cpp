@@ -56,7 +56,7 @@ void SafetyGridMap::publishGrid(){
 
 
 void SafetyGridMap::addStaticLayer(std::string iid){
-    boost::mutex::scoped_lock(gridmap.mtx);
+    //boost::mutex::scoped_lock(gridmap.mtx);
     if(!gridmap.gridmap.exists(iid)){
         ROS_ERROR_STREAM("ADD static:"<< iid);
         gridmap.gridmap.add(iid, grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
