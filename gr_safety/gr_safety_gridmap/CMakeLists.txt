@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(OpenCV 3 REQUIRED)
 find_package(octomap REQUIRED)
+find_package(YAML-CPP 0.6 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -47,6 +48,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   ${OCTOMAP_INCLUDE_DIR}
+  ${YAML_CPP_INCLUDE_DIR}
 )
 
 add_library(
@@ -79,6 +81,7 @@ target_link_libraries(
   ${OCTOMAP_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${catkin_LIBRARIES} 
+  yaml-cpp
 )
 
 

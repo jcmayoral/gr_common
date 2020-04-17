@@ -69,28 +69,31 @@ void SafetyGridMap::addStaticLayer(std::string iid){
     std::cout << "layers" <<  l << " map " << gridmap.id << std::endl;
     }
     */
+    std::string path = ros::package::getPath("gr_safety_gridmap");
+    YAML::Node config_yaml = YAML::LoadFile((path+"/config/safety_regions.yaml").c_str());
 
     //map_.clearAll();
+    //clear safety_regions just in case
     gridmap.gridmap[iid].setZero();
     
-    //TODO parametrize
-    grid_map::Polygon polygon;
-    polygon.setFrameId(gridmap.gridmap.getFrameId());
-    polygon.addVertex(grid_map::Position( 0.480,  0.000));
-    polygon.addVertex(grid_map::Position( 0.164,  0.155));
-    polygon.addVertex(grid_map::Position( 0.116,  0.500));
-    polygon.addVertex(grid_map::Position(-0.133,  0.250));
-    polygon.addVertex(grid_map::Position(-0.480,  0.399));
-    polygon.addVertex(grid_map::Position(-0.316,  0.000));
-    polygon.addVertex(grid_map::Position(-0.480, -0.399));
-    polygon.addVertex(grid_map::Position(-0.133, -0.250));
-    polygon.addVertex(grid_map::Position( 0.116, -0.500));
-    polygon.addVertex(grid_map::Position( 0.164, -0.155));
-    polygon.addVertex(grid_map::Position( 0.480,  0.000));
-    //geometry_msgs::PolygonStamped message;
-    //grid_map::PolygonRosConverter::toMessage(polygon, message);
-    for (grid_map::PolygonIterator iterator(gridmap.gridmap, polygon); !iterator.isPastEnd(); ++iterator) {
-        gridmap.gridmap.at(iid, *iterator) = 1.0;
+
+    for (YAML::const_iterator a= config_yaml.begin(); a != config_yaml.end(); ++a){
+        auto risk_level = a->first.as<int>();
+        std::cout << risk_level << std::endl;
+        //create a polygon
+        grid_map::Polygon polygon;
+        polygon.setFrameId(gridmap.gridmap.getFrameId());
+
+        //Load footprint as a list of pair x y
+        std::list<std::pair<double, double>> markers = a->second.as<std::list<std::pair<double, double>>>();
+        //add each tuple as a vertex
+        for (auto& m : markers){
+            polygon.addVertex(grid_map::Position(m.first, m.second));
+        }
+        //assign values in the gridmap
+        for (grid_map::PolygonIterator iterator(gridmap.gridmap, polygon); !iterator.isPastEnd(); ++iterator) {
+            gridmap.gridmap.at(iid, *iterator) = risk_level;
+        }
     }
 }
 

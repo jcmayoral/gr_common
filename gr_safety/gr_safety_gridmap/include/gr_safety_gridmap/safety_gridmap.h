@@ -1,6 +1,8 @@
 #include <ros/ros.h>
+#include <ros/package.h>
 #include <gr_safety_gridmap/layer_subscriber.hpp>
 //#include <gr_safety_gridmap/main_gridmap.hpp>
+#include <yaml-cpp/yaml.h>
 
 namespace gr_safety_gridmap{
     class SafetyGridMap{
