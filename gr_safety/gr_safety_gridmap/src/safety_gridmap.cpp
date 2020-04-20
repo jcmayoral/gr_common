@@ -16,7 +16,7 @@ SafetyGridMap::SafetyGridMap(bool localgridmap){
 
 void SafetyGridMap::initializeGridMap(bool localgridmap){
     //odom->global base_link->local
-    double resolution = 0.4;
+    double resolution = 1.0;
 
     std::string map_frame;
     float map_size = 30.0;
@@ -103,6 +103,7 @@ void SafetyGridMap::updateGrid(){
     boost::mutex::scoped_lock ltk(gridmap.mtx);{
         //analyze if log or probability can do a better approach
         gridmap.gridmap.add("conv", 0);//gridmap.gridmap.get("safety_regions"));
+        auto safety_layer = gridmap.gridmap.get("safety_regions");
 
         /*
         for (auto l :  gridmap.gridmap.getLayers()){
@@ -116,11 +117,19 @@ void SafetyGridMap::updateGrid(){
         */
         int person = 1;
         std::string obstacle_layer("Trajectory_"+std::to_string(person));
+        std::string mask_layer("Mask_"+std::to_string(person));
+
         while (gridmap.gridmap.exists(obstacle_layer)){
+            //std::cout << "person layer " << person << std::endl;
             auto layer = gridmap.gridmap.get(obstacle_layer);
-            gridmap.gridmap.add("conv", gridmap.gridmap.get("conv") + gridmap.gridmap.get("safety_regions") * layer);
+            auto timed_mask = gridmap.gridmap.get(mask_layer);
+            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + timed_mask * layer;// * timed_mask;
             person++;
             obstacle_layer = "Trajectory_"+std::to_string(person);
+            mask_layer = "Mask_"+std::to_string(person);
+
         }
+        gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safety_regions"));// * safety_layer;
+        ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
     }
 }

@@ -120,8 +120,8 @@ namespace gr_safety_gridmap{
                         continue;
                     }
 
-                    gridmap.gridmap.at("Mask_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), index)),0.1*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                    gridmap.gridmap.at("Trajectory_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), index)),exp(-0.005*(search_depth_-depth)));//0.01*costs[i]*depth;
+                    gridmap.gridmap.at("Mask_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                    gridmap.gridmap.at("Trajectory_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
 
                     /*
                     //Circle is great but requires a smaller resolution -> increase search complexity

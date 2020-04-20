@@ -1,0 +1,8 @@
+<launch>
+  <!-- Launch the grid map tutorial demo node -->
+  <node pkg="gr_safety_gridmap" type="safety_gridmap_node" name="gr_safety_gridmap_node" output="screen" />
+  <!-- Launch the grid map visualizer -->
+  <node pkg="grid_map_visualization" type="grid_map_visualization" name="grid_map_visualization" output="screen">
+    <rosparam command="load" file="$(find gr_safety_gridmap)/config/safety.yaml" />
+  </node>
+</launch>

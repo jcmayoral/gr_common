@@ -1,0 +1,12 @@
+grid_map_topic: /grid_map
+grid_map_visualizations:
+  - name: other_points
+    type: point_cloud
+    params:
+     layer: conv
+  - name: safety_costmap
+    type: occupancy_grid
+    params:
+     layer: conv
+     data_min: 0.0
+     data_max: 15.00
