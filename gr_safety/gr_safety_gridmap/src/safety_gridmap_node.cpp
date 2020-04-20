@@ -3,16 +3,15 @@
 using namespace gr_safety_gridmap;
 
 int main(int argc, char** argv){
+
     ros::init(argc,argv,"gr_safety_gridmap_node");
     SafetyGridMap *safety_gridmap;
-    std::cout << "argc "<< argc <<  argv[1] << std::endl;
     std::string localstr(argv[1]);
     bool localgr = true;
 
     if (localstr.compare("global") == 0){
         localgr = false;
     }
-    std::cout << localstr << localgr <<  std::endl;
 
     safety_gridmap = new SafetyGridMap(localgr);
 
