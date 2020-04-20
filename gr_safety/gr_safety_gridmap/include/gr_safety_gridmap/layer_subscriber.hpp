@@ -114,7 +114,7 @@ namespace gr_safety_gridmap{
                     gridmap.gridmap.getIndex(position, index);
                     
                     if (gridmap.gridmap.at("Mask_"+std::to_string(person), index) > 0){
-                        std::cout << "skipping because revisited"<< std::endl;
+                        //std::cout << "skipping because revisited"<< std::endl;
                         continue;
                     }
 

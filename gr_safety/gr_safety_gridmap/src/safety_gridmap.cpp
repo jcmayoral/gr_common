@@ -4,12 +4,12 @@ using namespace gr_safety_gridmap;
 
 SafetyGridMap::SafetyGridMap(){
     bool local_gridmap = true;
-    double resolution = 0.2;
+    double resolution = 0.4;
 
     //odom->global base_link->local
 
     std::string map_frame;
-    float map_size = 10.0;
+    float map_size = 30.0;
     int factor;
 
     if (!local_gridmap){
@@ -102,19 +102,15 @@ void SafetyGridMap::updateGrid(){
     //boost::shared_ptr<grid_map::GridMap> pmap = boost::make_shared<grid_map::GridMap>(cmap_);
     boost::mutex::scoped_lock ltk(gridmap.mtx);{
         //std::cout << "Update " << gridmap.id << std::endl;
-        if ( gridmap.gridmap.exists("Trajectory_0") &&  gridmap.gridmap.exists("Trajectory_1")){
-            gridmap.gridmap.add("sum",  gridmap.gridmap.get("Trajectory_0") +  gridmap.gridmap.get("Trajectory_1"));
+        //if ( gridmap.gridmap.exists("Trajectory_0") &&  gridmap.gridmap.exists("Trajectory_1")){
+        //
+        //analyze if log or probability can do a better approach
+        gridmap.gridmap.add("conv",  1.0);
+
+        for (auto l :  gridmap.gridmap.getLayers()){
+            ROS_INFO_STREAM(" layer "<< l);
+            auto layer = gridmap.gridmap.get(l);
+            gridmap.gridmap.add("conv",  gridmap.gridmap.get("conv") + layer);
         }
     }
-    
-    //for (auto& it : layer_subscribers){
-       // std::cout << it.second.isMessageReceived();
-        //auto layers = gridmap.gridmap.getLayers();
-
-        /*
-        for (auto l : layers){
-            ROS_INFO_STREAM(" layer "<< l);
-        }
-        */
-    //}
 }
