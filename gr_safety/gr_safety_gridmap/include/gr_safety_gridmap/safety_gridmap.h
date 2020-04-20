@@ -8,6 +8,8 @@ namespace gr_safety_gridmap{
     class SafetyGridMap{
         public:
            SafetyGridMap();
+           SafetyGridMap(bool localgridmap);
+           void initializeGridMap(bool localgridmap);
            void updateGrid();
            void publishGrid();
            void addStaticLayer(std::string iid);

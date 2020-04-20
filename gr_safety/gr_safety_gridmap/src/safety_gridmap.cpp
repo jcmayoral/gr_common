@@ -3,16 +3,26 @@
 using namespace gr_safety_gridmap;
 
 SafetyGridMap::SafetyGridMap(){
-    bool local_gridmap = true;
-    double resolution = 0.4;
+    ROS_INFO_STREAM("Default local gridmap");
+    bool localgridmap = true;
+    initializeGridMap(localgridmap);
+}
 
+SafetyGridMap::SafetyGridMap(bool localgridmap){
+    ROS_INFO_STREAM("Selecting gridmap mode "<< localgridmap);
+
+    initializeGridMap(localgridmap);
+}
+
+void SafetyGridMap::initializeGridMap(bool localgridmap){
     //odom->global base_link->local
+    double resolution = 0.4;
 
     std::string map_frame;
     float map_size = 30.0;
     int factor;
 
-    if (!local_gridmap){
+    if (!localgridmap){
         map_frame = "odom";
         factor = 10;
     }
@@ -22,27 +32,18 @@ SafetyGridMap::SafetyGridMap(){
     }
     
     boost::mutex::scoped_lock(gridmap.mtx);
-    {
-        ROS_INFO_STREAM("Working");
-        
+    {   
     gridmap.gridmap.setFrameId(map_frame);
     gridmap.gridmap.setGeometry(grid_map::Length(map_size*factor, map_size*factor), resolution);
     addStaticLayer("safety_regions");
-     
-    
-    std::vector<std::string> layers;
-    layers = gridmap.gridmap.getLayers();
+    }
 
-    for (auto l: layers){
-        std::cout << "layers aftert" <<  l << std::endl;
-    }
-    }
     ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
 
     //TODO config file
-    layer_subscribers.emplace_back("move_base/NavfnROS/plan", resolution, local_gridmap, map_frame);
-    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", resolution, local_gridmap, map_frame);
+    layer_subscribers.emplace_back("move_base/NavfnROS/plan", resolution, localgridmap, map_frame);
+    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", resolution, localgridmap, map_frame);
 }
 
 void SafetyGridMap::publishGrid(){
@@ -58,7 +59,6 @@ void SafetyGridMap::publishGrid(){
 void SafetyGridMap::addStaticLayer(std::string iid){
     //boost::mutex::scoped_lock(gridmap.mtx);
     if(!gridmap.gridmap.exists(iid)){
-        ROS_ERROR_STREAM("ADD static:"<< iid);
         gridmap.gridmap.add(iid, grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
     }
     /*
@@ -105,10 +105,10 @@ void SafetyGridMap::updateGrid(){
         //if ( gridmap.gridmap.exists("Trajectory_0") &&  gridmap.gridmap.exists("Trajectory_1")){
         //
         //analyze if log or probability can do a better approach
-        gridmap.gridmap.add("conv",  1.0);
+        gridmap.gridmap.add("conv",  0.10);
 
         for (auto l :  gridmap.gridmap.getLayers()){
-            ROS_INFO_STREAM(" layer "<< l);
+            //ROS_INFO_STREAM(" layer "<< l);
             auto layer = gridmap.gridmap.get(l);
             gridmap.gridmap.add("conv",  gridmap.gridmap.get("conv") + layer);
         }
