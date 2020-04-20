@@ -24,7 +24,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
 
     if (!localgridmap){
         map_frame = "odom";
-        factor = 10;
+        factor = 3;
     }
     else{
         map_frame = "base_link";
@@ -34,8 +34,13 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     boost::mutex::scoped_lock(gridmap.mtx);
     {   
     gridmap.gridmap.setFrameId(map_frame);
-    gridmap.gridmap.setGeometry(grid_map::Length(map_size*factor, map_size*factor), resolution);
-    addStaticLayer("safety_regions");
+    gridmap.gridmap.setGeometry(grid_map::Length(map_size*factor, map_size*factor), resolution*factor);
+
+    //TO Reduce complexity just applicable and storing coordinates of polygon on localframe
+    //TODO apply tf transformation to polygon.
+    if (localgridmap){
+        addStaticLayer("safety_regions");
+    }
     }
 
     ros::NodeHandle nh;
@@ -79,7 +84,7 @@ void SafetyGridMap::addStaticLayer(std::string iid){
 
     for (YAML::const_iterator a= config_yaml.begin(); a != config_yaml.end(); ++a){
         auto risk_level = a->first.as<int>();
-        std::cout << risk_level << std::endl;
+        //std::cout << risk_level << std::endl;
         //create a polygon
         grid_map::Polygon polygon;
         polygon.setFrameId(gridmap.gridmap.getFrameId());
