@@ -47,7 +47,11 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
 
     //TODO config file
-    layer_subscribers.emplace_back("move_base/NavfnROS/plan", resolution, localgridmap, map_frame);
+    // Transformin the entire path of location can be computaitonal expensive
+    if(!localgridmap){
+        layer_subscribers.emplace_back("move_base/NavfnROS/plan", resolution, localgridmap, map_frame);
+    }
+
     layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", resolution, localgridmap, map_frame);
 }
 
