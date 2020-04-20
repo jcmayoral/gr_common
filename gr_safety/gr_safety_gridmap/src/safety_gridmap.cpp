@@ -68,16 +68,9 @@ void SafetyGridMap::publishGrid(){
 void SafetyGridMap::addStaticLayer(std::string iid){
     //boost::mutex::scoped_lock(gridmap.mtx);
     if(!gridmap.gridmap.exists(iid)){
-        gridmap.gridmap.add(iid, grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
+        gridmap.gridmap.add(iid, 0);//grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
     }
-    /*
-    std::vector<std::string> layers;
-    layers = gridmap.gridmap.getLayers();
 
-    for (auto l: layers){
-    std::cout << "layers" <<  l << " map " << gridmap.id << std::endl;
-    }
-    */
     std::string path = ros::package::getPath("gr_safety_gridmap");
     YAML::Node config_yaml = YAML::LoadFile((path+"/config/safety_regions.yaml").c_str());
 
@@ -107,19 +100,27 @@ void SafetyGridMap::addStaticLayer(std::string iid){
 }
 
 void SafetyGridMap::updateGrid(){
-    //modifications on this pointer get lost when function dies.
-    //boost::shared_ptr<grid_map::GridMap> pmap = boost::make_shared<grid_map::GridMap>(cmap_);
     boost::mutex::scoped_lock ltk(gridmap.mtx);{
-        //std::cout << "Update " << gridmap.id << std::endl;
-        //if ( gridmap.gridmap.exists("Trajectory_0") &&  gridmap.gridmap.exists("Trajectory_1")){
-        //
         //analyze if log or probability can do a better approach
-        gridmap.gridmap.add("conv",  0.10);
+        gridmap.gridmap.add("conv", 0);//gridmap.gridmap.get("safety_regions"));
 
+        /*
         for (auto l :  gridmap.gridmap.getLayers()){
             //ROS_INFO_STREAM(" layer "<< l);
+            if (l.compare("safety_regions")==0|| l.compare("conv")==0){
+                continue;
+            }
             auto layer = gridmap.gridmap.get(l);
-            gridmap.gridmap.add("conv",  gridmap.gridmap.get("conv") + layer);
+            gridmap.gridmap.add("conv", gridmap.gridmap.get("conv") - gridmap.gridmap.get("safety_regions") * layer);
+        }
+        */
+        int person = 1;
+        std::string obstacle_layer("Trajectory_"+std::to_string(person));
+        while (gridmap.gridmap.exists(obstacle_layer)){
+            auto layer = gridmap.gridmap.get(obstacle_layer);
+            gridmap.gridmap.add("conv", gridmap.gridmap.get("conv") + gridmap.gridmap.get("safety_regions") * layer);
+            person++;
+            obstacle_layer = "Trajectory_"+std::to_string(person);
         }
     }
 }

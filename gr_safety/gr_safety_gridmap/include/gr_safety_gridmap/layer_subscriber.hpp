@@ -52,8 +52,8 @@ namespace gr_safety_gridmap{
             }
 
             void addLayerTuple(int person){
-                gridmap.gridmap.add("Mask_"+std::to_string(person), -1);
-                gridmap.gridmap.add("Trajectory_"+std::to_string(person), -1);
+                gridmap.gridmap.add("Mask_"+std::to_string(person), 0);
+                gridmap.gridmap.add("Trajectory_"+std::to_string(person), 0);
             }
 
             void convert(geometry_msgs::Pose& in){
@@ -70,11 +70,13 @@ namespace gr_safety_gridmap{
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 {
+                if (poses.poses.size()==0){
+                    ROS_WARN_STREAM("No obstacle detected -> potential bug or implementation for memory");
+                }
                 //index 0 reserved to robot
                 int person = 1;
                 for (int i=1; i<poses.poses.size()+1;i++)
                     addLayerTuple(i);
-
 
                 for (auto p : poses.poses){
                     auto odompose = p;
