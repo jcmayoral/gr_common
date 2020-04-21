@@ -131,5 +131,7 @@ void SafetyGridMap::updateGrid(){
         }
         gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safety_regions"));// * safety_layer;
         ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
+        ROS_ERROR_STREAM("risk sum " << gridmap.gridmap["conv"].sum());
+
     }
 }
