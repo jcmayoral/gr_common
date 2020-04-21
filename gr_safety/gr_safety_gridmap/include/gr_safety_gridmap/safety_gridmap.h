@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <ros/package.h>
+#include <std_msgs/Float32.h>
 #include <gr_safety_gridmap/layer_subscriber.hpp>
 //#include <gr_safety_gridmap/main_gridmap.hpp>
 #include <yaml-cpp/yaml.h>
@@ -15,6 +16,7 @@ namespace gr_safety_gridmap{
            void addStaticLayer(std::string iid);
         private:
             ros::Publisher rpub_;
+            ros::Publisher safety_grader_;
             std::vector<LayerSubscriber> layer_subscribers;
     };
 

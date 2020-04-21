@@ -45,6 +45,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
 
     ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
+    safety_grader_ = nh.advertise<std_msgs::Float32>("safety_score", 1, true);
 
     //TODO config file
     // Transformin the entire path of location can be computaitonal expensive
@@ -129,9 +130,14 @@ void SafetyGridMap::updateGrid(){
             mask_layer = "Mask_"+std::to_string(person);
 
         }
+
+        std_msgs::Float32 score;
+        score.data = gridmap.gridmap["conv"].sum();
         gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safety_regions"));// * safety_layer;
         ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
-        ROS_ERROR_STREAM("risk sum " << gridmap.gridmap["conv"].sum());
+        ROS_ERROR_STREAM("risk sum " << score);
 
+        //Publish Score
+        safety_grader_.publish(score);
     }
 }
