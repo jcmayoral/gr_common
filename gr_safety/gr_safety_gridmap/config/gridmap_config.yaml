@@ -1,0 +1,7 @@
+resolution: 1.0
+mapsize: 30
+detection_topics:
+    - /pcl_gpu_tools/detected_objects
+    - /detected_objects
+    - /pointcloud_processing_node/detected_objects
+pathtopic: move_base/NavfnROS/plan

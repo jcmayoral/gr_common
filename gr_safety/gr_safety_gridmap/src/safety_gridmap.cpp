@@ -2,6 +2,8 @@
 
 using namespace gr_safety_gridmap;
 
+
+
 SafetyGridMap::SafetyGridMap(){
     ROS_INFO_STREAM("Default local gridmap");
     bool localgridmap = true;
@@ -10,16 +12,27 @@ SafetyGridMap::SafetyGridMap(){
 
 SafetyGridMap::SafetyGridMap(bool localgridmap){
     ROS_INFO_STREAM("Selecting gridmap mode "<< localgridmap);
-
     initializeGridMap(localgridmap);
 }
 
 void SafetyGridMap::initializeGridMap(bool localgridmap){
-    //odom->global base_link->local
-    double resolution = 1.0;
+    ros::NodeHandle nh;
+
+    //LOAD FROM gridmap_config.yaml
+    std::string path = ros::package::getPath("gr_safety_gridmap");
+    std::string config_path;
+    std::string config_file;
+    nh.param<std::string>("config_path", config_path, "config");
+    nh.param<std::string>("config_file", config_file, "gridmap_config.yaml");
+    YAML::Node config_yaml = YAML::LoadFile((path+"/"+config_path+"/"+config_file).c_str());
+
+    ROS_ERROR_STREAM("USE LOCAL GRIDMAP: "<< localgridmap);
+    auto resolution = config_yaml["resolution"].as<double>();
+    ROS_ERROR_STREAM("RESOLUTION: "<< resolution);
+    auto map_size = config_yaml["mapsize"].as<double>();
+    ROS_ERROR_STREAM("MAP SIZE: "<< map_size);
 
     std::string map_frame;
-    float map_size = 30.0;
     int factor;
 
     if (!localgridmap){
@@ -38,22 +51,28 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
 
     //TO Reduce complexity just applicable and storing coordinates of polygon on localframe
     //TODO apply tf transformation to polygon.
-    if (localgridmap){
-        addStaticLayer("safety_regions");
-    }
+    //TODO INTEGRATE DYNAMIC SAFETY REGIOS FOR GLOBAL GRIDMAP
+    addStaticLayer("safety_regions");
     }
 
-    ros::NodeHandle nh;
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
     safety_grader_ = nh.advertise<std_msgs::Float32>("safety_score", 1, true);
 
-    //TODO config file
     // Transformin the entire path of location can be computaitonal expensive
     if(!localgridmap){
-        layer_subscribers.emplace_back("move_base/NavfnROS/plan", resolution, localgridmap, map_frame);
+        auto pathtopic = config_yaml["pathtopic"].as<std::string>();
+        layer_subscribers.emplace_back(pathtopic.c_str(), resolution, localgridmap, map_frame);
     }
+    
+    
+    const YAML::Node& detection_topics = config_yaml["detection_topics"];
+    std::cout << "Number of Obstacle Topics to Subscribe " << detection_topics.size() << std::endl;
 
-    layer_subscribers.emplace_back("pcl_gpu_tools/detected_objects", resolution, localgridmap, map_frame);
+    for (YAML::const_iterator it= detection_topics.begin(); it != detection_topics.end(); it++){
+      std::string topic = it->as<std::string>();
+      ROS_INFO_STREAM("Subscribing to " << topic);
+      layer_subscribers.emplace_back(topic.c_str(), resolution, localgridmap, map_frame);
+    }
 }
 
 void SafetyGridMap::publishGrid(){
