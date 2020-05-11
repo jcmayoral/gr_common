@@ -20,8 +20,8 @@ namespace gr_safety_policies
     nh.param<std::string>("config_file", config_file, "proximity_monitor.yaml");
     std::cout << path+"/"+config_path+"/"+config_file << std::endl;
     YAML::Node config_yaml = YAML::LoadFile((path+"/"+config_path+"/"+config_file).c_str());
-    std::ifstream fin((path+"/"+config_path+"/"+config_file).c_str());
-    YAML::Parser parser(fin);
+    //std::ifstream fin((path+"/"+config_path+"/"+config_file).c_str());
+    //YAML::Parser parser(fin);
 
     //YAML::Node doc;
     //while(parser.GetNextDocument(doc)) {
