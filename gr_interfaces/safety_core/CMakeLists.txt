@@ -10,7 +10,7 @@ catkin_package(
     INCLUDE_DIRS
         include
     CATKIN_DEPENDS
-            safety_msgs
+        safety_msgs
 )
 
 
