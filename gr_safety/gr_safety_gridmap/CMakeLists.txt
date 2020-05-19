@@ -49,6 +49,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   ${OCTOMAP_INCLUDE_DIR}
+  ${OpenCV_INCLUDE_DIR}
   ${YAML_CPP_INCLUDE_DIR}
 )
 
