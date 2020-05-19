@@ -3,3 +3,4 @@ topics:
     - /pointcloud_processing_node/detected_objects 
     - /test_topic
     - /detected_objects
+    - /pointcloud_lidar_processing/detected_objects
