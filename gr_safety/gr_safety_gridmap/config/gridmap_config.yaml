@@ -4,4 +4,5 @@ detection_topics:
     - /pcl_gpu_tools/detected_objects
     - /detected_objects
     - /pointcloud_processing_node/detected_objects
+    - /pointcloud_lidar_processing/detected_objects
 pathtopic: move_base/NavfnROS/plan
