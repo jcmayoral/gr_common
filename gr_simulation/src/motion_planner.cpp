@@ -16,6 +16,7 @@ bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid,
     double map_size = mapsize; //meters
     std::cout << "Creating Motion model for  " << obstacleid << std::endl;
     std::cout << "Map Size  " << mapsize << std::endl;
+    map_size_ = map_size;
 
     env_ = new EnvironmentNAVXYTHETALAT();
 
@@ -93,8 +94,10 @@ void MotionPlanner::performMotion(){
   auto repetitions = rand() % 10 + 1;
 
   for (auto i = 0; i<repetitions; i++){
-    motionx = rand() % -10 + 10;
-    motiony = rand() % -10 + 10;
+    motionx = (map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
+    motiony = (map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
+    std::cout << "GOAL " << motionx << " , " << motiony<< std::endl;
+
     auto plan_result = planPath(motionx, motiony, 0);
     std::cout << "Planned " << plan_result << " for " << obstacleid_ <<std::endl;
     std::cout << "Plan size " << sbpl_path_.size() << std::endl;
@@ -169,6 +172,8 @@ bool MotionPlanner::planPath(double goalx, double goaly, double goalyaw){
     double theta_start = 0.0;//2 * atan2(start.pose.orientation.z, start.pose.orientation.w);
     offset_ = ncells_/2 * resolution_;
 
+    std::cout << "START " << current_pose_.x()+offset_ << " , " << current_pose_.y()+offset_<< std::endl;
+
   try{
     //Check conversion offset of map start with frame -> gr_map_utils
     //Substract offset
@@ -187,8 +192,8 @@ bool MotionPlanner::planPath(double goalx, double goaly, double goalyaw){
 
   try{
     //Substract offset
-    current_goal_.set_x(current_pose_.x()+goalx);
-    current_goal_.set_y(current_pose_.y()+goaly);
+    current_goal_.set_x(goalx);
+    current_goal_.set_y(goaly);
     
     int ret = env_->SetGoal(current_goal_.x()+offset_, current_goal_.y()+offset_, goalyaw);
 
@@ -213,8 +218,6 @@ bool MotionPlanner::planPath(double goalx, double goaly, double goalyaw){
     }
   }
   */
-
-
   //TODO parametrize
   double allocated_time_ = 1.0;
   double initial_epsilon_ = 3.0;

@@ -26,6 +26,7 @@ namespace gazebo{
                 env_ = motionplanner.env_;
                 current_pose_ = motionplanner.current_pose_;
                 current_goal_ = motionplanner.current_goal_;
+                map_size_ = motionplanner.map_size_;
             }
             void OnMsg(ConstPosePtr &_msg);
             void operator()(gazebo::transport::NodePtr node, std::string obstacleid, double map_size);
@@ -49,6 +50,7 @@ namespace gazebo{
             int ncells_;
             double offset_;
             double error_;
+            double map_size_;
             boost::mutex mtx_;
     };
 }
