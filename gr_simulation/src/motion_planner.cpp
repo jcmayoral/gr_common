@@ -7,14 +7,16 @@ MotionPlanner::MotionPlanner(): obstacleid_("defaults"), initialized_(false),nce
 }
 
 
-void MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obstacleid){
-  run(node, obstacleid);
+void MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize){
+  run(node, obstacleid, mapsize);
 }
 
-bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid){
+bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize){
     obstacleid_ = obstacleid;
-    double map_size = 40.0; //meters
+    double map_size = mapsize; //meters
     std::cout << "Creating Motion model for  " << obstacleid << std::endl;
+    std::cout << "Map Size  " << mapsize << std::endl;
+
     env_ = new EnvironmentNAVXYTHETALAT();
 
     planner_ = new ARAPlanner(env_, false); //forward_search

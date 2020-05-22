@@ -15,7 +15,7 @@
 namespace gazebo{
   class ObstaclesCoordinator{
     public:
-      ObstaclesCoordinator(int nobstacles, std::string rootname="my_person");
+      ObstaclesCoordinator(int nobstacles, double mapsize=40.0,  std::string rootname="my_person");
      ~ObstaclesCoordinator();
      void start();
 

@@ -2,7 +2,7 @@
 
 using namespace gazebo;
 
-ObstaclesCoordinator::ObstaclesCoordinator(int nobstacles, std::string rootname): node_(new gazebo::transport::Node()){
+ObstaclesCoordinator::ObstaclesCoordinator(int nobstacles, double mapsize, std::string rootname): node_(new gazebo::transport::Node()){
     node_->Init();
     //node_ = transport::NodePtr(new transport::Node());
     //node_->Init();
@@ -20,7 +20,7 @@ ObstaclesCoordinator::ObstaclesCoordinator(int nobstacles, std::string rootname)
         }
         //MotionPlanner mp;
         //mp.run(node_, obstacleid);
-        obstacles_motion_planners_.emplace_back(std::thread(MotionPlanner(),node_, obstacleid));
+        obstacles_motion_planners_.emplace_back(std::thread(MotionPlanner(),node_, obstacleid, mapsize));
     }
 }
 

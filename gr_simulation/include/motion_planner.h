@@ -28,10 +28,10 @@ namespace gazebo{
                 current_goal_ = motionplanner.current_goal_;
             }
             void OnMsg(ConstPosePtr &_msg);
-            void operator()(gazebo::transport::NodePtr node, std::string obstacleid);
+            void operator()(gazebo::transport::NodePtr node, std::string obstacleid, double map_size);
             bool planPath(double goalx, double goaly, double goalyaw);
             void ExecuteCommand();
-            bool run(gazebo::transport::NodePtr node, std::string obstacleid);
+            bool run(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize);
             void stop();
             void performMotion();
 
