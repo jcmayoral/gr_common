@@ -1,4 +1,4 @@
-resolution: 1.0
+resolution: 0.2
 mapsize: 30
 detection_topics:
     - /pcl_gpu_tools/detected_objects

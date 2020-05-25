@@ -42,6 +42,8 @@ catkin_package(
 ## Build ##
 ###########
 
+set(OpenCV_INCLUDE_DIRS "${OpenCV_INSTALL_PATH}/include/opencv;${OpenCV_INSTALL_PATH}/include")
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
