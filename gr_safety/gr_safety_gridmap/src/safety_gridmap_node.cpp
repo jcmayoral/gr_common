@@ -20,7 +20,7 @@ int main(int argc, char** argv){
     while(ros::ok()){
         //TODO replace by rate
         //ros::Duration(0.5).sleep();
-        safety_gridmap->publishGrid();
+        //<Wsafety_gridmap->publishGrid();
         r.sleep();
         safety_gridmap->updateGrid();
         ros::spinOnce();

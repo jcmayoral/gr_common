@@ -78,9 +78,9 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
 void SafetyGridMap::publishGrid(){
     gridmap.gridmap.setTimestamp(ros::Time::now().toNSec());
     grid_map_msgs::GridMap message;
-    boost::mutex::scoped_lock ltk(gridmap.mtx);{
+    //boost::mutex::scoped_lock ltk(gridmap.mtx);{
     grid_map::GridMapRosConverter::toMessage(gridmap.gridmap, message);
-    };
+    //};
     rpub_.publish(message);
 }
 
@@ -121,7 +121,15 @@ void SafetyGridMap::addStaticLayer(std::string iid){
 
 void SafetyGridMap::updateGrid(){
     boost::mutex::scoped_lock ltk(gridmap.mtx);{
+        
+        if (!gridmap.isNewDataAvailable()){
+            ROS_ERROR_STREAM("Waiting for new data");
+            return;
+        }
         //analyze if log or probability can do a better approach
+        //if(!gridmap.gridmap.exists("conv")){
+        //gridmap.gridmap.add("conv", 0);//grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
+        //}
         gridmap.gridmap.add("conv", 0);//gridmap.gridmap.get("safety_regions"));
         auto safety_layer = gridmap.gridmap.get("safety_regions");
 
@@ -140,23 +148,25 @@ void SafetyGridMap::updateGrid(){
         std::string mask_layer("Mask_"+std::to_string(person));
 
         while (gridmap.gridmap.exists(obstacle_layer)){
-            //std::cout << "person layer " << person << std::endl;
+            std::cout << "obstacle layer " << obstacle_layer << std::endl;
             auto layer = gridmap.gridmap.get(obstacle_layer);
             auto timed_mask = gridmap.gridmap.get(mask_layer);
             gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + timed_mask * layer;// * timed_mask;
             person++;
             obstacle_layer = "Trajectory_"+std::to_string(person);
             mask_layer = "Mask_"+std::to_string(person);
-
         }
 
         std_msgs::Float32 score;
         score.data = gridmap.gridmap["conv"].sum();
         gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safety_regions"));// * safety_layer;
-        ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
+        //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
         ROS_ERROR_STREAM("risk sum " << score);
 
         //Publish Score
         safety_grader_.publish(score);
+        publishGrid();
+        //ResetFlag
+        gridmap.setDataFlag(false);
     }
 }

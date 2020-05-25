@@ -52,8 +52,8 @@ namespace gr_safety_gridmap{
             }
 
             void addLayerTuple(int person){
-                gridmap.gridmap.add("Mask_"+std::to_string(person), 0);
-                gridmap.gridmap.add("Trajectory_"+std::to_string(person), 0);
+                gridmap.gridmap.add("Mask_"+std::to_string(person), -0.1);
+                gridmap.gridmap.add("Trajectory_"+std::to_string(person), -0.1);
             }
 
             void convert(geometry_msgs::Pose& in){
@@ -85,6 +85,7 @@ namespace gr_safety_gridmap{
                     generateCycle(aux,search_depth_, person);
                     person++; //this can be calculated by std::distance
                 }
+                gridmap.setDataFlag(true);
                 }
             }
 
@@ -114,7 +115,7 @@ namespace gr_safety_gridmap{
                     position(0) = aux2.position.x;
                     position(1) = aux2.position.y;
                     gridmap.gridmap.getIndex(position, index);
-                    
+
                     if (gridmap.gridmap.at("Mask_"+std::to_string(person), index) > 0){
                         //std::cout << "skipping because revisited"<< std::endl;
                         continue;
@@ -209,6 +210,7 @@ namespace gr_safety_gridmap{
 
                     c++;
                 }
+                gridmap.setDataFlag(true);  
                 };
                 //gridmap.unlock();
             }
