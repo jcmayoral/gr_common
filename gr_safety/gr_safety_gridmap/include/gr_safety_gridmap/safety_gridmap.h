@@ -14,18 +14,13 @@ namespace gr_safety_gridmap{
            void updateGrid();
            void publishGrid();
            void addStaticLayer(std::string iid);
+           void loadRegions(std::string iid);
+           void timer_callback(const ros::TimerEvent& event);
         private:
             ros::Publisher rpub_;
             ros::Publisher safety_grader_;
             std::vector<LayerSubscriber> layer_subscribers;
+            ros::Timer clear_timer_;
     };
 
 };
-
-/*
-ros::AdvertiseOptions createAdvertiseOptions(const ConnectionInfo* c, uint32_t queue_size, const std::string& prefix) {
-    ros::AdvertiseOptions opts(prefix + c->topic, queue_size, c->md5sum, c->datatype, c->msg_def);
-    opts.latch = isLatching(c);
-    return opts;
-}
-*/

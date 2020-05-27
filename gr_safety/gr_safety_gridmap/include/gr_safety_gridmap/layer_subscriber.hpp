@@ -52,8 +52,8 @@ namespace gr_safety_gridmap{
             }
 
             void addLayerTuple(int person){
-                gridmap.gridmap.add("Mask_"+std::to_string(person), -0.1);
-                gridmap.gridmap.add("Trajectory_"+std::to_string(person), -0.1);
+                gridmap.gridmap.add("Mask_"+std::to_string(person), 0.0);
+                gridmap.gridmap.add("Trajectory_"+std::to_string(person), -0.0);
             }
 
             void convert(geometry_msgs::Pose& in){

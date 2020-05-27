@@ -2,8 +2,6 @@
 
 using namespace gr_safety_gridmap;
 
-
-
 SafetyGridMap::SafetyGridMap(){
     ROS_INFO_STREAM("Default local gridmap");
     bool localgridmap = true;
@@ -13,6 +11,27 @@ SafetyGridMap::SafetyGridMap(){
 SafetyGridMap::SafetyGridMap(bool localgridmap){
     ROS_INFO_STREAM("Selecting gridmap mode "<< localgridmap);
     initializeGridMap(localgridmap);
+}
+
+void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
+    boost::mutex::scoped_lock ltk(gridmap.mtx);{
+    //Should I clear just obstacle layers
+    //gridmap.gridmap.clearAll();
+    //reload static
+    //addStaticLayer("safety_regions");
+    //loadRegions("safety_regions");
+    int person = 1;
+    std::string obstacle_layer("Trajectory_"+std::to_string(person));
+    std::string mask_layer("Mask_"+std::to_string(person));
+    while (gridmap.gridmap.exists(obstacle_layer)){
+        gridmap.gridmap[obstacle_layer].setZero();
+        gridmap.gridmap[mask_layer].setZero();
+        ROS_WARN_STREAM("CLEANING person "<< person);
+        person++;
+        obstacle_layer = "Trajectory_"+std::to_string(person);
+        mask_layer = "Mask_"+std::to_string(person);
+    }
+    }
 }
 
 void SafetyGridMap::initializeGridMap(bool localgridmap){
@@ -53,6 +72,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     //TODO apply tf transformation to polygon.
     //TODO INTEGRATE DYNAMIC SAFETY REGIOS FOR GLOBAL GRIDMAP
     addStaticLayer("safety_regions");
+    loadRegions("safety_regions");
     }
 
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
@@ -63,8 +83,9 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
         auto pathtopic = config_yaml["pathtopic"].as<std::string>();
         layer_subscribers.emplace_back(pathtopic.c_str(), resolution, localgridmap, map_frame);
     }
-    
-    
+
+    clear_timer_ = nh.createTimer(ros::Duration(5), &SafetyGridMap::timer_callback, this);
+
     const YAML::Node& detection_topics = config_yaml["detection_topics"];
     std::cout << "Number of Obstacle Topics to Subscribe " << detection_topics.size() << std::endl;
 
@@ -90,15 +111,14 @@ void SafetyGridMap::addStaticLayer(std::string iid){
     if(!gridmap.gridmap.exists(iid)){
         gridmap.gridmap.add(iid, 0);//grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
     }
-
-    std::string path = ros::package::getPath("gr_safety_gridmap");
-    YAML::Node config_yaml = YAML::LoadFile((path+"/config/safety_regions.yaml").c_str());
-
-    //map_.clearAll();
     //clear safety_regions just in case
     gridmap.gridmap[iid].setZero();
-    
+}
 
+
+void SafetyGridMap::loadRegions(std::string iid){
+    std::string path = ros::package::getPath("gr_safety_gridmap");
+    YAML::Node config_yaml = YAML::LoadFile((path+"/config/safety_regions.yaml").c_str());
     for (YAML::const_iterator a= config_yaml.begin(); a != config_yaml.end(); ++a){
         auto risk_level = a->first.as<int>();
         //std::cout << risk_level << std::endl;
