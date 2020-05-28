@@ -18,18 +18,16 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
     //Should I clear just obstacle layers
     //gridmap.gridmap.clearAll();
     //reload static
-    //addStaticLayer("safety_regions");
-    //loadRegions("safety_regions");
     int person = 1;
-    std::string obstacle_layer("Trajectory_"+std::to_string(person));
-    std::string mask_layer("Mask_"+std::to_string(person));
+    std::string obstacle_layer(std::to_string(person)+ ":Prediction");
+    std::string mask_layer(std::to_string(person)+":Mask");
     while (gridmap.gridmap.exists(obstacle_layer)){
         gridmap.gridmap[obstacle_layer].setZero();
         gridmap.gridmap[mask_layer].setZero();
         ROS_WARN_STREAM("CLEANING person "<< person);
         person++;
-        obstacle_layer = "Trajectory_"+std::to_string(person);
-        mask_layer = "Mask_"+std::to_string(person);
+        obstacle_layer = std::to_string(person)+":Prediction";
+        mask_layer = std::to_string(person)+":Mask";
     }
     }
 }
@@ -71,8 +69,8 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     //TO Reduce complexity just applicable and storing coordinates of polygon on localframe
     //TODO apply tf transformation to polygon.
     //TODO INTEGRATE DYNAMIC SAFETY REGIOS FOR GLOBAL GRIDMAP
-    addStaticLayer("safety_regions");
-    loadRegions("safety_regions");
+    addStaticLayer("safetyregions");
+    loadRegions("safetyregions");
     }
 
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
@@ -111,7 +109,7 @@ void SafetyGridMap::addStaticLayer(std::string iid){
     if(!gridmap.gridmap.exists(iid)){
         gridmap.gridmap.add(iid, 0);//grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
     }
-    //clear safety_regions just in case
+    //clear safetyregions just in case
     gridmap.gridmap[iid].setZero();
 }
 
@@ -143,7 +141,7 @@ void SafetyGridMap::updateGrid(){
     boost::mutex::scoped_lock ltk(gridmap.mtx);{
         
         if (!gridmap.isNewDataAvailable()){
-            ROS_ERROR_STREAM("Waiting for new data");
+            //ROS_ERROR_STREAM("Waiting for new data");
             return;
         }
         //analyze if log or probability can do a better approach
@@ -151,36 +149,34 @@ void SafetyGridMap::updateGrid(){
         //gridmap.gridmap.add("conv", 0);//grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
         //}
         gridmap.gridmap.add("conv", 0);//gridmap.gridmap.get("safety_regions"));
-        auto safety_layer = gridmap.gridmap.get("safety_regions");
+        auto safety_layer = gridmap.gridmap.get("safetyregions");
+        auto layers =  gridmap.gridmap.getLayers();
 
-        /*
-        for (auto l :  gridmap.gridmap.getLayers()){
-            //ROS_INFO_STREAM(" layer "<< l);
-            if (l.compare("safety_regions")==0|| l.compare("conv")==0){
+        std::string obstacle_layer(":Prediction");
+        std::string mask_layer(":Mask");
+        std::string person_id;
+
+        for (auto l :  layers){
+            std::cout << l << std::endl;
+            if (l.find(":") == std::string::npos) { //I prefere this than storing objects id... could be messy
+                //ROS_ERROR_STREAM("skip "<< l<< ", "<< l.find(mask_layer));
                 continue;
             }
-            auto layer = gridmap.gridmap.get(l);
-            gridmap.gridmap.add("conv", gridmap.gridmap.get("conv") - gridmap.gridmap.get("safety_regions") * layer);
-        }
-        */
-        int person = 1;
-        std::string obstacle_layer("Trajectory_"+std::to_string(person));
-        std::string mask_layer("Mask_"+std::to_string(person));
-
-        while (gridmap.gridmap.exists(obstacle_layer)){
-            std::cout << "obstacle layer " << obstacle_layer << std::endl;
-            auto layer = gridmap.gridmap.get(obstacle_layer);
-            auto timed_mask = gridmap.gridmap.get(mask_layer);
+            //std::cout << l <<  ", " << l.find(mask_layer) + 1 << std::endl;
+            person_id = l.substr(0,l.find(":")); 
+            if(!gridmap.gridmap.exists(person_id+obstacle_layer)){
+                continue;
+            }
+            ROS_WARN_STREAM("obstacle id " << person_id);
+            auto layer = gridmap.gridmap.get(person_id+obstacle_layer);
+            auto timed_mask = gridmap.gridmap.get(person_id+mask_layer);
             gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + timed_mask * layer;// * timed_mask;
-            person++;
-            obstacle_layer = "Trajectory_"+std::to_string(person);
-            mask_layer = "Mask_"+std::to_string(person);
         }
 
         std_msgs::Float32 score;
         score.data = gridmap.gridmap["conv"].sum();
-        gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safety_regions"));// * safety_layer;
-        //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
+        gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safetyregions"));// * safety_layer;
+        ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
         ROS_ERROR_STREAM("risk sum " << score);
 
         //Publish Score

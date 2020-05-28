@@ -63,8 +63,8 @@ namespace gr_safety_gridmap{
             }
 
             void addLayerTuple(std::string person_id){
-                gridmap.gridmap.add("Mask_"+person_id, 0.0);
-                gridmap.gridmap.add("Trajectory_"+person_id, 0.0);
+                gridmap.gridmap.add(person_id+":Mask", 0.0);
+                gridmap.gridmap.add(person_id+":Prediction", 0.0);
             }
 
             void convert(geometry_msgs::Pose& in){
@@ -151,13 +151,13 @@ namespace gr_safety_gridmap{
                     position(1) = aux2.position.y;
                     gridmap.gridmap.getIndex(position, index);
 
-                    if (gridmap.gridmap.at("Mask_"+layer, index) > 0){
+                    if (gridmap.gridmap.at(layer+":Mask", index) > 0){
                         //std::cout << "skipping because revisited"<< std::endl;
                         continue;
                     }
 
-                    gridmap.gridmap.at("Mask_"+ layer, index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+ layer, index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                    gridmap.gridmap.at("Trajectory_"+ layer, index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+ layer, index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
+                    gridmap.gridmap.at(layer+":Mask", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                    gridmap.gridmap.at(layer+":Prediction", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
 
                     /*
                     //Circle is great but requires a smaller resolution -> increase search complexity
@@ -236,11 +236,9 @@ namespace gr_safety_gridmap{
                     position(1) = p.pose.position.y;
                     gridmap.gridmap.getIndex(position, index);
 
-
-                    gridmap.gridmap.at("Trajectory_"+std::to_string(0), index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(0), index)),exp(-0.005*c));
-
-                    if (gridmap.gridmap.at("Mask_"+std::to_string(0), index) < 0){
-                        gridmap.gridmap.at("Mask_"+std::to_string(0), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(0),index)),0.1*c);
+                    gridmap.gridmap.at(std::to_string(0)+":Prediction", index) = std::max(static_cast<double>(gridmap.gridmap.at(std::to_string(0)+":Prediction", index)),exp(-0.005*c));
+                    if (gridmap.gridmap.at(std::to_string(0)+":Mask", index) < 0){
+                        gridmap.gridmap.at(std::to_string(0)+":Mask", index) = std::max(static_cast<double>(gridmap.gridmap.at(std::to_string(0)+":Mask",index)),0.1*c);
                     }
 
                     c++;
