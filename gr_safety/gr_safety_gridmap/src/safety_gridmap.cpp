@@ -18,17 +18,26 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
     //Should I clear just obstacle layers
     //gridmap.gridmap.clearAll();
     //reload static
-    int person = 1;
-    std::string obstacle_layer(std::to_string(person)+ ":Prediction");
-    std::string mask_layer(std::to_string(person)+":Mask");
-    while (gridmap.gridmap.exists(obstacle_layer)){
-        gridmap.gridmap[obstacle_layer].setZero();
-        gridmap.gridmap[mask_layer].setZero();
-        ROS_WARN_STREAM("CLEANING person "<< person);
-        person++;
-        obstacle_layer = std::to_string(person)+":Prediction";
-        mask_layer = std::to_string(person)+":Mask";
+    std::string obstacle_layer(":Prediction");
+    std::string mask_layer(":Mask");
+    std::string person_id;
+
+    auto layers =  gridmap.gridmap.getLayers();
+
+    for (auto l :  layers){
+        std::cout << l << std::endl;
+        if (l.find(":") == std::string::npos) {
+            continue;
+        }
+        person_id = l.substr(0,l.find(":")); 
+        if(!gridmap.gridmap.exists(person_id+obstacle_layer)){
+            continue;
+        }
+        ROS_WARN_STREAM("clear obstacles layers" << person_id);
+        gridmap.gridmap[person_id+obstacle_layer].setZero();
+        gridmap.gridmap[person_id+mask_layer].setZero();
     }
+
     }
 }
 
