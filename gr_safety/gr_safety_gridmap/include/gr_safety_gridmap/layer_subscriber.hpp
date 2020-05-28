@@ -4,6 +4,7 @@
 #include <grid_map_msgs/GridMap.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseArray.h>
+#include <safety_msgs/FoundObjectsArray.h>
 #include <nav_msgs/Path.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -48,16 +49,50 @@ namespace gr_safety_gridmap{
 
                 catch(...){
                 }
+
+                try{
+                    safety_msgs::FoundObjectsArray parr;
+                    parr = *ssmsg->instantiate<safety_msgs::FoundObjectsArray>();
+                    updateLayer(parr, 1);
+                    return;
+                }
+
+                catch(...){
+                }
                 
             }
 
-            void addLayerTuple(int person){
-                gridmap.gridmap.add("Mask_"+std::to_string(person), 0.0);
-                gridmap.gridmap.add("Trajectory_"+std::to_string(person), -0.0);
+            void addLayerTuple(std::string person_id){
+                gridmap.gridmap.add("Mask_"+person_id, 0.0);
+                gridmap.gridmap.add("Trajectory_"+person_id, 0.0);
             }
 
             void convert(geometry_msgs::Pose& in){
                 tf2::doTransform(in, in, to_global_transform);
+            }
+
+            void updateLayer(const safety_msgs::FoundObjectsArray& poses, int behaviour){
+                grid_map::Position position;
+                grid_map::Index index;
+
+                int c = 0; 
+                float radius = 0.5;
+                to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
+
+                boost::mutex::scoped_lock lck(gridmap.mtx);
+                {
+                //index 0 reserved to robot
+                int person = 1;
+                for (auto o : poses.objects){
+                    addLayerTuple(o.object_id);
+                    auto odompose = o.pose;
+                    auto aux = odompose;
+                    //move search_depth_ to motion model class
+                    generateCycle(aux,search_depth_, o.object_id);
+                    person++; //this can be calculated by std::distance
+                }
+                gridmap.setDataFlag(true);
+                }
             }
 
             void updateLayer(const geometry_msgs::PoseArray& poses, int behaviour){
@@ -66,7 +101,7 @@ namespace gr_safety_gridmap{
 
                 int c = 0; 
                 float radius = 0.5;
-                to_global_transform = tf_buffer_.lookupTransform(map_frame_, local_frame_, ros::Time::now(), ros::Duration(0.1) );
+                to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 {
@@ -76,13 +111,13 @@ namespace gr_safety_gridmap{
                 //index 0 reserved to robot
                 int person = 1;
                 for (int i=1; i<poses.poses.size()+1;i++)
-                    addLayerTuple(i);
+                    addLayerTuple(std::to_string(i));
 
                 for (auto p : poses.poses){
                     auto odompose = p;
                     auto aux = odompose;
                     //move search_depth_ to motion model class
-                    generateCycle(aux,search_depth_, person);
+                    generateCycle(aux,search_depth_, std::to_string(person));
                     person++; //this can be calculated by std::distance
                 }
                 gridmap.setDataFlag(true);
@@ -90,7 +125,7 @@ namespace gr_safety_gridmap{
             }
 
             //TODO create MotionModelClass   
-            void generateCycle(geometry_msgs::Pose in, int depth, int person){
+            void generateCycle(geometry_msgs::Pose in, int depth, std::string layer){
                 if (depth == -1){
                     return;
                 }
@@ -109,20 +144,20 @@ namespace gr_safety_gridmap{
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
                     //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
-                    generateCycle(aux2,depth-1,person);
+                    generateCycle(aux2,depth-1,layer);
                     //to odom frame
                     convert(aux2);
                     position(0) = aux2.position.x;
                     position(1) = aux2.position.y;
                     gridmap.gridmap.getIndex(position, index);
 
-                    if (gridmap.gridmap.at("Mask_"+std::to_string(person), index) > 0){
+                    if (gridmap.gridmap.at("Mask_"+layer, index) > 0){
                         //std::cout << "skipping because revisited"<< std::endl;
                         continue;
                     }
 
-                    gridmap.gridmap.at("Mask_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                    gridmap.gridmap.at("Trajectory_"+std::to_string(person), index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
+                    gridmap.gridmap.at("Mask_"+ layer, index) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+ layer, index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                    gridmap.gridmap.at("Trajectory_"+ layer, index) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+ layer, index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
 
                     /*
                     //Circle is great but requires a smaller resolution -> increase search complexity
@@ -186,7 +221,7 @@ namespace gr_safety_gridmap{
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 {
                 //std::cout << gridmap.id << "PATH OK "<< std::endl;
-                addLayerTuple(0);
+                addLayerTuple(std::to_string(0));
                 //gridmap.lock();
                 if (behaviour==1){
                     std::string path_frame = path.header.frame_id;

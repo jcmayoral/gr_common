@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   nav_msgs
   std_msgs
+  safety_msgs
   cv_bridge
   octomap_msgs
   filters

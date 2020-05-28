@@ -1,2 +1,2 @@
-string class_name
-geometry_msgs/PointStamped centroid
+string object_id
+geometry_msgs/Pose pose
