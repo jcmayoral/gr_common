@@ -3,5 +3,6 @@ mapsize: 30
 detection_topics:
     - /detected_objects
     - /pointcloud_processing_node/detected_objects
+    - /pointcloud_lidar_processing/found_object 
     - /pointcloud_lidar_processing/detected_objects
 pathtopic: move_base/NavfnROS/plan
