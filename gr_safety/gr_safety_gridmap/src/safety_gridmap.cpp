@@ -36,6 +36,9 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
         ROS_WARN_STREAM("clear obstacles layers" << person_id);
         gridmap.gridmap[person_id+obstacle_layer].setZero();
         gridmap.gridmap[person_id+mask_layer].setZero();
+        //TEST
+        gridmap.gridmap.erase(person_id+obstacle_layer);
+        gridmap.gridmap.erase(person_id+mask_layer);
     }
 
     }
