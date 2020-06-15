@@ -16,7 +16,6 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <geometry_msgs/PoseArray.h>
-#include <pcl_conversions/pcl_conversions.h>
 
 #include <gr_safety_policies/safe_actions/publisher_safe_action.h>
 #include <gr_safety_policies/safe_actions/dynamic_reconfigure_safe_action.h>

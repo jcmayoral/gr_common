@@ -16,7 +16,6 @@ find_package(catkin REQUIRED
         std_msgs
 	#cv_bridge
         message_filters
-	pcl_conversions
 )
 
 find_package(OpenCV 3.2 REQUIRED)
@@ -54,7 +53,6 @@ catkin_package(
         std_msgs
 	#cv_bridge
         message_filters
-	pcl_conversions
 )
 
 file(GLOB POLICIES src/policies/*.cpp)

@@ -1,8 +1,10 @@
-resolution: 1.0
-mapsize: 30
+resolution: 0.5
+mapsize: 15
 detection_topics:
     #- /detected_objects
     #- /pointcloud_processing_node/detected_objects
-    - /pointcloud_lidar_processing/found_object 
+    #- /pointcloud_lidar_processing/found_object 
     #- /pointcloud_lidar_processing/detected_objects
+    #- /pointcloud_nodelet/found_object
+    - /fusion_manager/detected_objects
 pathtopic: move_base/NavfnROS/plan
