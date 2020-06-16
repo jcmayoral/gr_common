@@ -72,6 +72,7 @@ namespace gr_safety_gridmap{
             }
 
             void updateLayer(const safety_msgs::FoundObjectsArray& poses, int behaviour){
+                //while (!gridmap.isNewDataAvailable());
                 grid_map::Position position;
                 grid_map::Index index;
 
@@ -80,7 +81,6 @@ namespace gr_safety_gridmap{
                 to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);
-                {
                 //index 0 reserved to robot
                 int person = 1;
                 for (auto o : poses.objects){
@@ -91,8 +91,7 @@ namespace gr_safety_gridmap{
                     generateCycle(aux,search_depth_, o.object_id);
                     person++; //this can be calculated by std::distance
                 }
-                gridmap.setDataFlag(true);
-                }
+                //gridmap.setDataFlag(true);
             }
 
             void updateLayer(const geometry_msgs::PoseArray& poses, int behaviour){
@@ -104,7 +103,6 @@ namespace gr_safety_gridmap{
                 to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);
-                {
                 if (poses.poses.size()==0){
                     ROS_WARN_STREAM("No obstacle detected -> potential bug or implementation for memory");
                 }
@@ -120,8 +118,7 @@ namespace gr_safety_gridmap{
                     generateCycle(aux,search_depth_, std::to_string(person));
                     person++; //this can be calculated by std::distance
                 }
-                gridmap.setDataFlag(true);
-                }
+                //gridmap.setDataFlag(true);
             }
 
             //TODO create MotionModelClass   
@@ -134,7 +131,7 @@ namespace gr_safety_gridmap{
                 geometry_msgs::Pose aux, aux2;
                 grid_map::Position position;
                 grid_map::Index index;
-                float radius = 0.1;
+                float radius = 1.0;
 
                 aux = in;
 
@@ -143,6 +140,7 @@ namespace gr_safety_gridmap{
                 int nprimitives = 9;
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
+                    //aux2=in;
                     //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
                     generateCycle(aux2,depth-1,layer);
                     //to odom frame
@@ -155,17 +153,17 @@ namespace gr_safety_gridmap{
                         //std::cout << "skipping because revisited"<< std::endl;
                         continue;
                     }
+                    //gridmap.gridmap.at(layer+":Mask", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                    //gridmap.gridmap.at(layer+":Prediction", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
 
-                    gridmap.gridmap.at(layer+":Mask", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                    gridmap.gridmap.at(layer+":Prediction", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
-
-                    /*
                     //Circle is great but requires a smaller resolution -> increase search complexity
                     for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
-                        gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                        gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator)),exp(-0.005*(search_depth_-depth)));//0.01*costs[i]*depth;
+                        gridmap.gridmap.at(layer+":Mask", *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                        gridmap.gridmap.at(layer+":Prediction", *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
+
+                        //gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                        //gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator)),exp(-0.005*(search_depth_-depth)));//0.01*costs[i]*depth;
                     }
-                    */
                 }
             }
 
@@ -212,14 +210,14 @@ namespace gr_safety_gridmap{
 
             void updateLayer(const nav_msgs::Path& path, int behaviour){
                 //boost::shared_ptr<grid_map::GridMap> pmap;
+                boost::mutex::scoped_lock lck(gridmap.mtx);
                 grid_map::Position position;
                 grid_map::Index index;
                 //std::cout << "updateLayer" << id_ << std::endl;
 
                 int c = 0;
 
-                boost::mutex::scoped_lock lck(gridmap.mtx);
-                {
+
                 //std::cout << gridmap.id << "PATH OK "<< std::endl;
                 addLayerTuple(std::to_string(0));
                 //gridmap.lock();
@@ -243,8 +241,7 @@ namespace gr_safety_gridmap{
 
                     c++;
                 }
-                gridmap.setDataFlag(true);  
-                };
+                //gridmap.setDataFlag(true);  
                 //gridmap.unlock();
             }
             
@@ -263,7 +260,7 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(3), 
+            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(2), 
                                                                                                             local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution){
                 topic_ = "/" + input;
