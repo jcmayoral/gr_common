@@ -81,7 +81,7 @@ namespace gr_safety_gridmap{
                 float radius = 0.5;
                 to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
 
-                boost::mutex::scoped_lock lck(gridmap.mtx);
+                boost::mutex::scoped_lock lck(gridmap.mtx);{
                 fb_msgs_.header.frame_id = map_frame_;
                 fb_msgs_.poses.clear();
                 //index 0 reserved to robot
@@ -94,6 +94,7 @@ namespace gr_safety_gridmap{
                 }
                 rpub_.publish(fb_msgs_);
                 //gridmap.setDataFlag(true);
+                };
             }
 
             void updateLayer(const geometry_msgs::PoseArray& poses, int behaviour){
@@ -145,8 +146,8 @@ namespace gr_safety_gridmap{
                     //aux2=in;
                     //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
                     generateCycle(aux2,depth-1,layer);
-                    //to odom frame
-                    //convert(aux2);
+                    //to mapframef
+                    convert(aux2);
                     position(0) = aux2.position.x;
                     position(1) = aux2.position.y;
                     gridmap.gridmap.getIndex(position, index);
