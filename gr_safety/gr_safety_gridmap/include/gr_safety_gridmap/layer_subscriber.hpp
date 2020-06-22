@@ -9,6 +9,7 @@
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_listener.h>
+#include <tf2/utils.h>
 
 #include <gr_safety_gridmap/main_gridmap.hpp>
 
@@ -134,7 +135,7 @@ namespace gr_safety_gridmap{
                 aux = in;
 
                 //MotionModel class TODO
-                double costs[9] ={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
+                double costs[9] ={1.0,1.0,0.5,0.5,0.5,0.5,0.5,0.10,0.10};
                 int nprimitives = 9;
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
@@ -158,8 +159,8 @@ namespace gr_safety_gridmap{
                     //}
                     //std::cout << "UPDATING " << layer << " MASK: " << 1.0*(1+depth) << "PRED: " << exp(-0.5*(search_depth_-depth)) << "INDEX "<< index << std::endl;
  
-                    gridmap.gridmap.at(layer+":Mask", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)), 1.0*(1+depth));
-                    gridmap.gridmap.at(layer+":Prediction", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)), exp(-0.5*(1+search_depth_-depth)));
+                    gridmap.gridmap.at(layer+":Mask", index) += 1.0*(depth *costs[i]);
+                    gridmap.gridmap.at(layer+":Prediction", index) += exp(-0.5*(search_depth_-depth))*costs[i];
                     //std::cout << gridmap.gridmap[layer+":Mask"].maxCoeff() << ", "<< gridmap.gridmap[layer+":Prediction"].maxCoeff() << std::endl;
                     //Circle is great but requires a smaller resolution -> increase search complexity
                     //for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
@@ -177,13 +178,12 @@ namespace gr_safety_gridmap{
 
                 //double dt = (current_time - last_time).toSec();
                 auto dt = 0.1;
-                double vx = 0.2;
-                double vy = 0.2;
+                double vx = 1.0;
+                double vy = 1.0;
                 auto vth = 0.05;
 
                 tf2::Quaternion quat_tf;
-                tf2::fromMsg(in.orientation, quat_tf);
-                auto th = 0.0;
+                auto th = tf2::getYaw(in.orientation);
 
                 double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
                 double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
@@ -234,6 +234,7 @@ namespace gr_safety_gridmap{
                         th -= delta_th;
                         break;
                 }
+                tf2::fromMsg(in.orientation, quat_tf);
                 out.orientation = tf2::toMsg(quat_tf);
                 return out;
             }
@@ -287,7 +288,7 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(3), 
+            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(4), 
                                                                                                             local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution){
                 topic_ = "/" + input;

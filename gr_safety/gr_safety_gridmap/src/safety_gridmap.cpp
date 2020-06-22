@@ -210,7 +210,7 @@ void SafetyGridMap::updateGrid(){
             ROS_INFO_STREAM("mask " << timed_mask.maxCoeff());
             ROS_INFO_STREAM("part conv" << (layer*timed_mask).maxCoeff());
 
-            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + timed_mask + layer;// * timed_mask;
+            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + (timed_mask.array() + layer.array()).matrix();// * timed_mask;
         }
         std_msgs::Float32 score;
         score.data = gridmap.gridmap["conv"].sum();
