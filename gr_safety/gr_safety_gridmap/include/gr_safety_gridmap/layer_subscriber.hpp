@@ -72,24 +72,22 @@ namespace gr_safety_gridmap{
             }
 
             void updateLayer(const safety_msgs::FoundObjectsArray& poses, int behaviour){
+                //boost::mutex::scoped_lock lc(mt);
                 //while (!gridmap.isNewDataAvailable());
                 grid_map::Position position;
                 grid_map::Index index;
 
-                int c = 0; 
                 float radius = 0.5;
                 to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 //index 0 reserved to robot
-                int person = 1;
                 for (auto o : poses.objects){
                     addLayerTuple(o.object_id);
                     auto odompose = o.pose;
                     auto aux = odompose;
                     //move search_depth_ to motion model class
                     generateCycle(aux,search_depth_, o.object_id);
-                    person++; //this can be calculated by std::distance
                 }
                 //gridmap.setDataFlag(true);
             }
@@ -136,7 +134,7 @@ namespace gr_safety_gridmap{
                 aux = in;
 
                 //MotionModel class TODO
-                double costs[9] ={0.5,1.0,0.3,0.2,0.2,0.5,0.5,0.5,0.5};
+                double costs[9] ={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
                 int nprimitives = 9;
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
@@ -149,21 +147,25 @@ namespace gr_safety_gridmap{
                     position(1) = aux2.position.y;
                     gridmap.gridmap.getIndex(position, index);
 
-                    if (gridmap.gridmap.at(layer+":Mask", index) > 0){
+                    //if (gridmap.gridmap.isValid(index)){
+                    //    ROS_WARN_STREAM("index not valid");
+                    //    continue;
+                    //}
+
+                    //if (gridmap.gridmap.at(layer+":Mask", index) > 0){
                         //std::cout << "skipping because revisited"<< std::endl;
-                        continue;
-                    }
-                    //gridmap.gridmap.at(layer+":Mask", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                    //gridmap.gridmap.at(layer+":Prediction", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
-
+                    //    continue;
+                    //}
+                    //std::cout << "UPDATING " << layer << " MASK: " << 1.0*(1+depth) << "PRED: " << exp(-0.5*(search_depth_-depth)) << "INDEX "<< index << std::endl;
+ 
+                    gridmap.gridmap.at(layer+":Mask", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)), 1.0*(1+depth));
+                    gridmap.gridmap.at(layer+":Prediction", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)), exp(-0.5*(1+search_depth_-depth)));
+                    //std::cout << gridmap.gridmap[layer+":Mask"].maxCoeff() << ", "<< gridmap.gridmap[layer+":Prediction"].maxCoeff() << std::endl;
                     //Circle is great but requires a smaller resolution -> increase search complexity
-                    for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
-                        gridmap.gridmap.at(layer+":Mask", *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                        gridmap.gridmap.at(layer+":Prediction", *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)),exp(-0.5*(search_depth_-depth)));//0.01*costs[i]*depth;
-
-                        //gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Mask_"+std::to_string(person), *iterator)),1.0*(depth));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
-                        //gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator) = std::max(static_cast<double>(gridmap.gridmap.at("Trajectory_"+std::to_string(person), *iterator)),exp(-0.005*(search_depth_-depth)));//0.01*costs[i]*depth;
-                    }
+                    //for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
+                    //    gridmap.gridmap.at(layer+":Mask", *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)),1.0*(depth*costs[i]));//+= 0.1*exp(-0.005*(3-depth));//0.01*costs[i]*depth;
+                    //    gridmap.gridmap.at(layer+":Prediction", *iterator) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)),exp(-0.5*(search_depth_-depth))*costs[i]);//0.01*costs[i]*depth;
+                    //} 
                 }
             }
 
@@ -172,39 +174,67 @@ namespace gr_safety_gridmap{
                 //this motion is a hack... motion on the sensor frame not the relative path
                 geometry_msgs::Pose out;
                 out = in;
+
+                //double dt = (current_time - last_time).toSec();
+                auto dt = 0.1;
+                double vx = 0.2;
+                double vy = 0.2;
+                auto vth = 0.05;
+
+                tf2::Quaternion quat_tf;
+                tf2::fromMsg(in.orientation, quat_tf);
+                auto th = 0.0;
+
+                double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
+                double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
+                double delta_th = vth * dt;
+
+                //x += delta_x;
+                //y += delta_y;
+
+
                 switch(motion_type){
                     case 0:
                         out = in;
                         break;
                     case 1:
-                        out.position.x = in.position.x+resolution_;
+                        out.position.x = in.position.x+(vx*dt);
                         break;
                     case 2:
-                        out.position.x = in.position.x-resolution_;
+                        out.position.x = in.position.x-(vx*dt);
                         break;
                     case 3:
-                        out.position.y = in.position.y+resolution_;
+                        out.position.x = in.position.x+delta_x;
+                        out.position.y = in.position.y+delta_y;
+                        th += delta_th;
                         break;
                     case 4:
-                        out.position.y = in.position.y-resolution_;
+                        out.position.x = in.position.x-delta_x;
+                        out.position.y = in.position.y-delta_y;
+                        th -= delta_th;
                         break;
                     case 5:
-                        out.position.x = in.position.x+resolution_;
-                        out.position.y = in.position.y+resolution_;
+                        out.position.x = in.position.x+delta_x;
+                        out.position.y = in.position.y-delta_y;
+                        th += delta_th;
                         break;
                     case 6:
-                        out.position.x = in.position.x-resolution_;
-                        out.position.y =in.position.y-resolution_;
+                        out.position.x = in.position.x-delta_x;
+                        out.position.y = in.position.y+delta_x;
+                        th += delta_th;
                         break;
                     case 7:
-                        out.position.x = in.position.x-resolution_;
-                        out.position.y = in.position.y+resolution_;
+                        //out.position.x = in.position.x-resolution_;
+                        //out.position.y = in.position.y+resolution
+                        th += delta_th;
                         break;
                     case 8:
-                        out.position.x = in.position.x+resolution_;
-                        out.position.y = in.position.y-resolution_;
+                        //out.position.x = in.position.x+resolution_;
+                        //out.position.y = in.position.y-resolution_;
+                        th -= delta_th;
                         break;
                 }
+                out.orientation = tf2::toMsg(quat_tf);
                 return out;
             }
 
@@ -214,10 +244,6 @@ namespace gr_safety_gridmap{
                 grid_map::Position position;
                 grid_map::Index index;
                 //std::cout << "updateLayer" << id_ << std::endl;
-
-                int c = 0;
-
-
                 //std::cout << gridmap.id << "PATH OK "<< std::endl;
                 addLayerTuple(std::to_string(0));
                 //gridmap.lock();
@@ -226,6 +252,7 @@ namespace gr_safety_gridmap{
                     to_global_transform = tf_buffer_.lookupTransform(map_frame_, path_frame, ros::Time::now(), ros::Duration(0.1) );
                 }
 
+                int c = 0;
                 for (auto p : path.poses){
                     if (behaviour==1){
                         convert(p.pose);
@@ -260,7 +287,7 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(2), 
+            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(3), 
                                                                                                             local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution){
                 topic_ = "/" + input;
