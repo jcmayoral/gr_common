@@ -135,7 +135,7 @@ namespace gr_safety_gridmap{
                 aux = in;
 
                 //MotionModel class TODO
-                double costs[9] ={1.0,1.0,0.5,0.5,0.5,0.5,0.5,0.10,0.10};
+                double costs[9] ={1.0,0.05,0.5,0.5,0.5,0.5,0.5,0.05,0.05};
                 int nprimitives = 9;
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
@@ -159,8 +159,8 @@ namespace gr_safety_gridmap{
                     //}
                     //std::cout << "UPDATING " << layer << " MASK: " << 1.0*(1+depth) << "PRED: " << exp(-0.5*(search_depth_-depth)) << "INDEX "<< index << std::endl;
  
-                    gridmap.gridmap.at(layer+":Mask", index) += 1.0*(depth *costs[i]);
-                    gridmap.gridmap.at(layer+":Prediction", index) += exp(-0.5*(search_depth_-depth))*costs[i];
+                    gridmap.gridmap.at(layer+":Mask", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)), 1.0*(depth *costs[i]));
+                    gridmap.gridmap.at(layer+":Prediction", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)), exp(-0.5*(search_depth_-depth))*costs[i]);
                     //std::cout << gridmap.gridmap[layer+":Mask"].maxCoeff() << ", "<< gridmap.gridmap[layer+":Prediction"].maxCoeff() << std::endl;
                     //Circle is great but requires a smaller resolution -> increase search complexity
                     //for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
@@ -234,7 +234,8 @@ namespace gr_safety_gridmap{
                         th -= delta_th;
                         break;
                 }
-                tf2::fromMsg(in.orientation, quat_tf);
+                quat_tf.setEuler(0,0,th);
+                //tf2::fromMsg(in.orientation, quat_tf);
                 out.orientation = tf2::toMsg(quat_tf);
                 return out;
             }
