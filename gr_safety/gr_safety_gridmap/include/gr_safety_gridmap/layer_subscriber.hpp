@@ -82,6 +82,8 @@ namespace gr_safety_gridmap{
                 to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);
+                fb_msgs_.header.frame_id = map_frame_;
+                fb_msgs_.poses.clear();
                 //index 0 reserved to robot
                 for (auto o : poses.objects){
                     addLayerTuple(o.object_id);
@@ -90,6 +92,7 @@ namespace gr_safety_gridmap{
                     //move search_depth_ to motion model class
                     generateCycle(aux,search_depth_, o.object_id);
                 }
+                rpub_.publish(fb_msgs_);
                 //gridmap.setDataFlag(true);
             }
 
@@ -135,32 +138,32 @@ namespace gr_safety_gridmap{
                 aux = in;
 
                 //MotionModel class TODO
-                double costs[9] ={1.0,0.05,0.5,0.5,0.5,0.5,0.5,0.05,0.05};
-                int nprimitives = 9;
+                double costs[9] ={1.0,1.0,1.0,0.5,0.5,0.5,0.5,0.05,0.05};
+                int nprimitives = 3;
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
                     //aux2=in;
                     //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
                     generateCycle(aux2,depth-1,layer);
                     //to odom frame
-                    convert(aux2);
+                    //convert(aux2);
                     position(0) = aux2.position.x;
                     position(1) = aux2.position.y;
                     gridmap.gridmap.getIndex(position, index);
+                    if (!gridmap.gridmap.isValid(index,layer+":Mask")){
+                        ROS_WARN_STREAM("index not valid"<<index<< map_frame_);
+                        continue;
+                    }
+                    fb_msgs_.poses.push_back(aux2);
 
-                    //if (gridmap.gridmap.isValid(index)){
-                    //    ROS_WARN_STREAM("index not valid");
-                    //    continue;
-                    //}
 
                     //if (gridmap.gridmap.at(layer+":Mask", index) > 0){
                         //std::cout << "skipping because revisited"<< std::endl;
                     //    continue;
                     //}
                     //std::cout << "UPDATING " << layer << " MASK: " << 1.0*(1+depth) << "PRED: " << exp(-0.5*(search_depth_-depth)) << "INDEX "<< index << std::endl;
- 
-                    gridmap.gridmap.at(layer+":Mask", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Mask", index)), 1.0*(depth *costs[i]));
-                    gridmap.gridmap.at(layer+":Prediction", index) = std::max(static_cast<double>(gridmap.gridmap.at(layer+":Prediction", index)), exp(-0.5*(search_depth_-depth))*costs[i]);
+                    gridmap.gridmap.at(layer+":Mask", index) +=  1.0*(depth *costs[i]);
+                    gridmap.gridmap.at(layer+":Prediction", index) += exp(-0.5*(search_depth_-depth))*costs[i];
                     //std::cout << gridmap.gridmap[layer+":Mask"].maxCoeff() << ", "<< gridmap.gridmap[layer+":Prediction"].maxCoeff() << std::endl;
                     //Circle is great but requires a smaller resolution -> increase search complexity
                     //for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
@@ -177,66 +180,68 @@ namespace gr_safety_gridmap{
                 out = in;
 
                 //double dt = (current_time - last_time).toSec();
-                auto dt = 0.1;
-                double vx = 1.0;
-                double vy = 1.0;
-                auto vth = 0.05;
+                auto dt = 1;
+                double vx = 0;
+                double vy = 0;
+                auto vth = 0.2;
 
-                tf2::Quaternion quat_tf;
-                auto th = tf2::getYaw(in.orientation);
-
-                double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
-                double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
-                double delta_th = vth * dt;
 
                 //x += delta_x;
                 //y += delta_y;
+                auto th = tf2::getYaw(in.orientation);
+                double delta_th = vth * dt;
 
 
                 switch(motion_type){
                     case 0:
-                        out = in;
+                        //th += delta_th;
+                        vx = resolution_;
                         break;
                     case 1:
-                        out.position.x = in.position.x+(vx*dt);
+                        vx = resolution_;
+                        th += delta_th;
                         break;
                     case 2:
-                        out.position.x = in.position.x-(vx*dt);
-                        break;
-                    case 3:
-                        out.position.x = in.position.x+delta_x;
-                        out.position.y = in.position.y+delta_y;
-                        th += delta_th;
-                        break;
-                    case 4:
-                        out.position.x = in.position.x-delta_x;
-                        out.position.y = in.position.y-delta_y;
+                        vx = resolution_;
                         th -= delta_th;
                         break;
-                    case 5:
-                        out.position.x = in.position.x+delta_x;
-                        out.position.y = in.position.y-delta_y;
+                    case 3:
+                        vx = -resolution_;
+                        th -= delta_th;
+                        break;
+                    case 4:
+                        vx = -resolution_;
                         th += delta_th;
+                        break;
+                    case 5:
+                        vx = -resolution_;
+                        //vy = 1;
+                        //th -= delta_th;
                         break;
                     case 6:
-                        out.position.x = in.position.x-delta_x;
-                        out.position.y = in.position.y+delta_x;
-                        th += delta_th;
-                        break;
-                    case 7:
                         //out.position.x = in.position.x-resolution_;
                         //out.position.y = in.position.y+resolution
                         th += delta_th;
                         break;
-                    case 8:
                         //out.position.x = in.position.x+resolution_;
                         //out.position.y = in.position.y-resolution_;
                         th -= delta_th;
                         break;
+                    case 8:
+                        //out = in;
+                        break;
+
                 }
+
+                tf2::Quaternion quat_tf;
+                double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
+                double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
+                out.position.x = in.position.x+delta_x;
+                out.position.y = in.position.y+delta_y;
                 quat_tf.setEuler(0,0,th);
+                //std::cout << th << " normalize?" << std::endl;
                 //tf2::fromMsg(in.orientation, quat_tf);
-                out.orientation = tf2::toMsg(quat_tf);
+                out.orientation = tf2::toMsg(quat_tf.normalize());
                 return out;
             }
 
@@ -289,9 +294,10 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(4), 
+            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(2), 
                                                                                                             local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution){
+                rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
                 ops.queue_size = 1;
@@ -307,7 +313,9 @@ namespace gr_safety_gridmap{
             std::string topic_;
             boost::shared_ptr<ros::Subscriber> sub_;
             ros::NodeHandle nh_;  
-            ros::Subscriber rsub_;  
+            ros::Subscriber rsub_;
+            ros::Publisher rpub_; 
+            geometry_msgs::PoseArray fb_msgs_;
             geometry_msgs::TransformStamped to_global_transform;
             tf2_ros::Buffer tf_buffer_;
             tf2_ros::TransformListener tf2_listener_;
