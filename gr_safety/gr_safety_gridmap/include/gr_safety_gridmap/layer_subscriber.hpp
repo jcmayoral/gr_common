@@ -139,8 +139,8 @@ namespace gr_safety_gridmap{
                 aux = in;
 
                 //MotionModel class TODO
-                double costs[9] ={1.0,1.0,1.0,0.5,0.5,0.5,0.5,0.05,0.05};
-                int nprimitives = 3;
+                double costs[9] ={0.1,0.1,0.1,0.1,0.5,0.5,0.5,0.05,0.05};
+                int nprimitives = 4;
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
                     //aux2=in;
@@ -164,7 +164,7 @@ namespace gr_safety_gridmap{
                     //}
                     //std::cout << "UPDATING " << layer << " MASK: " << 1.0*(1+depth) << "PRED: " << exp(-0.5*(search_depth_-depth)) << "INDEX "<< index << std::endl;
                     gridmap.gridmap.at(layer+":Mask", index) +=  1.0*(depth *costs[i]);
-                    gridmap.gridmap.at(layer+":Prediction", index) += exp(-0.5*(search_depth_-depth))*costs[i];
+                    gridmap.gridmap.at(layer+":Prediction", index) += exp(-0.01*(search_depth_-depth))*costs[i];
                     //std::cout << gridmap.gridmap[layer+":Mask"].maxCoeff() << ", "<< gridmap.gridmap[layer+":Prediction"].maxCoeff() << std::endl;
                     //Circle is great but requires a smaller resolution -> increase search complexity
                     //for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
@@ -207,31 +207,31 @@ namespace gr_safety_gridmap{
                         th -= delta_th;
                         break;
                     case 3:
-                        vx = -resolution_;
-                        th -= delta_th;
+                        //out = in;
                         break;
                     case 4:
                         vx = -resolution_;
-                        th += delta_th;
+                        th -= delta_th;
                         break;
                     case 5:
+                        vx = -resolution_;
+                        th += delta_th;
+                        break;
+                    case 6:
                         vx = -resolution_;
                         //vy = 1;
                         //th -= delta_th;
                         break;
-                    case 6:
+                    case 7:
                         //out.position.x = in.position.x-resolution_;
                         //out.position.y = in.position.y+resolution
                         th += delta_th;
                         break;
+                    case 8:
                         //out.position.x = in.position.x+resolution_;
                         //out.position.y = in.position.y-resolution_;
                         th -= delta_th;
                         break;
-                    case 8:
-                        //out = in;
-                        break;
-
                 }
 
                 tf2::Quaternion quat_tf;

@@ -206,17 +206,14 @@ void SafetyGridMap::updateGrid(){
             std::cout << person_id << " layer has been read " << std::endl;
             auto layer = gridmap.gridmap.get(person_id+obstacle_layer);
             auto timed_mask = gridmap.gridmap.get(person_id+mask_layer);
-            ROS_INFO_STREAM("pred " << layer.maxCoeff());
-            ROS_INFO_STREAM("mask " << timed_mask.maxCoeff());
-            ROS_INFO_STREAM("part conv" << (layer*timed_mask).maxCoeff());
-
-            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + (timed_mask.array() + layer.array()).matrix();// * timed_mask;
+            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + (timed_mask.array() * layer.array()).matrix();// * timed_mask;
         }
         std_msgs::Float32 score;
-        score.data = gridmap.gridmap["conv"].sum();
         gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safetyregions"));// * safety_layer;
         //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
-        //ROS_ERROR_STREAM("risk sum " << score);
+        score.data = gridmap.gridmap.get("conv").sum();
+
+        ROS_ERROR_STREAM("risk sum " << score);
 
         //Publish Score
         safety_grader_.publish(score);
