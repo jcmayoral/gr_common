@@ -1,4 +1,4 @@
-resolution: 0.5
+resolution: 1.0
 mapsize: 25
 detection_topics:
     #- /detected_objects

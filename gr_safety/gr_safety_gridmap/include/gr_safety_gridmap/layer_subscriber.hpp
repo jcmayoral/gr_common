@@ -150,8 +150,8 @@ namespace gr_safety_gridmap{
                     convert(aux2);
                     position(0) = aux2.position.x;
                     position(1) = aux2.position.y;
-                    gridmap.gridmap.getIndex(position, index);
-                    if (!gridmap.gridmap.isValid(index,layer+":Mask")){
+                    bool validindex = gridmap.gridmap.getIndex(position, index);
+                    if (!validindex){
                         ROS_WARN_STREAM("index not valid"<<index<< map_frame_);
                         continue;
                     }
@@ -164,7 +164,7 @@ namespace gr_safety_gridmap{
                     //}
                     //std::cout << "UPDATING " << layer << " MASK: " << 1.0*(1+depth) << "PRED: " << exp(-0.5*(search_depth_-depth)) << "INDEX "<< index << std::endl;
                     gridmap.gridmap.at(layer+":Mask", index) +=  1.0*(depth *costs[i]);
-                    gridmap.gridmap.at(layer+":Prediction", index) += exp(-0.01*(search_depth_-depth))*costs[i];
+                    gridmap.gridmap.at(layer+":Prediction", index) += exp(-0.4*(search_depth_-depth))*costs[i];
                     //std::cout << gridmap.gridmap[layer+":Mask"].maxCoeff() << ", "<< gridmap.gridmap[layer+":Prediction"].maxCoeff() << std::endl;
                     //Circle is great but requires a smaller resolution -> increase search complexity
                     //for (grid_map::CircleIterator iterator(gridmap.gridmap, position, radius);!iterator.isPastEnd(); ++iterator) {
@@ -295,7 +295,7 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(2), 
+            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(5), 
                                                                                                             local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution){
                 rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);

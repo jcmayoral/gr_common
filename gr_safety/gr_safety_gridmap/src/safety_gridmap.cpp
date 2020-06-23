@@ -190,6 +190,7 @@ void SafetyGridMap::updateGrid(){
         std::string obstacle_layer(":Prediction");
         std::string mask_layer(":Mask");
         std::string person_id;
+        int nobjects = 0;
 
         for (auto l :  layers){
             //std::cout << l << std::endl;
@@ -197,8 +198,18 @@ void SafetyGridMap::updateGrid(){
                 //ROS_ERROR_STREAM("skip "<< l<< ", "<< l.find(mask_layer));
                 continue;
             }
+            if (l.find(mask_layer) == std::string::npos) { //skip time mask to process object nu
+                //ROS_ERROR_STREAM("skip mask "<< l);
+                continue;
+            }
             //std::cout << l <<  ", " << l.find(mask_layer) + 1 << std::endl;
             person_id = l.substr(0,l.find(":")); 
+
+            //TODO fix this`
+            if (person_id.empty()){
+                continue;
+            }
+
             if(!gridmap.gridmap.exists(person_id+obstacle_layer)){
                 std::cout << "avoid "<<std::endl;
                 continue;
@@ -207,13 +218,14 @@ void SafetyGridMap::updateGrid(){
             auto layer = gridmap.gridmap.get(person_id+obstacle_layer);
             auto timed_mask = gridmap.gridmap.get(person_id+mask_layer);
             gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + (timed_mask.array() * layer.array()).matrix();// * timed_mask;
+            nobjects++;
         }
         std_msgs::Float32 score;
         gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safetyregions"));// * safety_layer;
         //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
         score.data = gridmap.gridmap.get("conv").sum();
 
-        ROS_ERROR_STREAM("risk sum " << score);
+        ROS_ERROR_STREAM("risk sum " << score.data << " and nobjects processed " << nobjects);
 
         //Publish Score
         safety_grader_.publish(score);
