@@ -296,7 +296,7 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local,std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(5), 
+            LayerSubscriber(std::string input, double resolution, bool local, int desired_depth=5, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(desired_depth), 
                                                                                                             local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution){
                 rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);

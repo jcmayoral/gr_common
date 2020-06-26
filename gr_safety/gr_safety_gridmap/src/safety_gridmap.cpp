@@ -85,6 +85,8 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     ROS_ERROR_STREAM("MAP SIZE: "<< map_size);
     auto clearing_timeout = config_yaml["timeout"].as<double>();
     ROS_ERROR_STREAM("Clearing Timeout: "<< clearing_timeout);
+    int desired_depth = config_yaml["searchdepth"].as<int>();
+    ROS_ERROR_STREAM("Search Depth: "<< desired_depth);
 
     std::string map_frame;
     int factor;
@@ -123,7 +125,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     // Transformin the entire path of location can be computaitonal expensive
     if(!localgridmap){
         auto pathtopic = config_yaml["pathtopic"].as<std::string>();
-        layer_subscribers.emplace_back(pathtopic.c_str(), resolution, localgridmap, map_frame);
+        layer_subscribers.emplace_back(pathtopic.c_str(), resolution, localgridmap, desired_depth, map_frame);
     }
 
     const YAML::Node& detection_topics = config_yaml["detection_topics"];
@@ -132,7 +134,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     for (YAML::const_iterator it= detection_topics.begin(); it != detection_topics.end(); it++){
       std::string topic = it->as<std::string>();
       ROS_INFO_STREAM("Subscribing to " << topic);
-      layer_subscribers.emplace_back(topic.c_str(), resolution, localgridmap, map_frame);
+      layer_subscribers.emplace_back(topic.c_str(), resolution, localgridmap, desired_depth, map_frame);
     }
 
     clear_timer_ = nh.createTimer(ros::Duration(clearing_timeout), &SafetyGridMap::timer_callback, this);
@@ -163,7 +165,7 @@ void SafetyGridMap::loadRegions(std::string iid){
     std::string path = ros::package::getPath("gr_safety_gridmap");
     YAML::Node config_yaml = YAML::LoadFile((path+"/config/safety_regions.yaml").c_str());
     for (YAML::const_iterator a= config_yaml.begin(); a != config_yaml.end(); ++a){
-        auto risk_level = a->first.as<int>();
+        auto risk_level = a->first.as<float>();
         //std::cout << risk_level << std::endl;
         //create a polygon
         grid_map::Polygon polygon;
