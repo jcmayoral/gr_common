@@ -87,6 +87,7 @@ namespace gr_safety_gridmap{
                 //index 0 reserved to robot
                 for (auto o : poses.objects){
                     addLayerTuple(o.object_id);
+                    gridmap.update_times_[o.object_id] = ros::Time::now();                        
                     auto odompose = o.pose;
                     auto aux = odompose;
                     //move search_depth_ to motion model class

@@ -27,22 +27,27 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
 
     auto layers =  gridmap.gridmap.getLayers();
     for (auto l :  layers){
+        if (l.find(mask_layer) == std::string::npos) {
+            continue;
+        }
+
         if (l.find(":") == std::string::npos) {
             continue;
         }
         person_id = l.substr(0,l.find(":"));
         std::map<std::string,ros::Time>::iterator it;
-        it = update_times_.find(person_id);
+        it = gridmap.update_times_.find(person_id);
 
-        if (it == update_times_.end()){
-            update_times_[person_id] = ros::Time::now();                        
-            continue;
-        }
+        //if (it == update_times_.end()){
+        //    ROS_INFO_STREAM("Adding "<< person_id);
+        //    update_times_[person_id] = ros::Time::now();                        
+        //    continue;
+        //}
 
-        auto transcurred_time = (ros::Time::now() - update_times_[person_id]).toSec();
+        auto transcurred_time = (ros::Time::now() - gridmap.update_times_[person_id]).toSec();
         std::cout << "transcurred time since update " << transcurred_time << " id " << person_id << std::endl;
         if (transcurred_time < 5.0){
-             update_times_[person_id] = ros::Time::now();  
+        //     update_times_[person_id] = ros::Time::now();  
              continue;
         }
 
@@ -56,7 +61,9 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
         if(gridmap.gridmap.exists(person_id+mask_layer)){
             gridmap.gridmap.erase(person_id+mask_layer);
         } 
-        update_times_.erase(it);
+        if (it != gridmap.update_times_.end()){
+            gridmap.update_times_.erase(it);
+        }
     }
 }
 
@@ -76,6 +83,8 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     ROS_ERROR_STREAM("RESOLUTION: "<< resolution);
     auto map_size = config_yaml["mapsize"].as<double>();
     ROS_ERROR_STREAM("MAP SIZE: "<< map_size);
+    auto clearing_timeout = config_yaml["timeout"].as<double>();
+    ROS_ERROR_STREAM("Clearing Timeout: "<< clearing_timeout);
 
     std::string map_frame;
     int factor;
@@ -126,7 +135,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
       layer_subscribers.emplace_back(topic.c_str(), resolution, localgridmap, map_frame);
     }
 
-    clear_timer_ = nh.createTimer(ros::Duration(5.0), &SafetyGridMap::timer_callback, this);
+    clear_timer_ = nh.createTimer(ros::Duration(clearing_timeout), &SafetyGridMap::timer_callback, this);
     //ros::spin();
 }
 
@@ -200,6 +209,8 @@ void SafetyGridMap::updateGrid(){
                 continue;
             }
 
+            //update_times_[person_id] = ros::Time::now();                        
+
             if(!gridmap.gridmap.exists(person_id+obstacle_layer)){
                 std::cout << "avoid "<<std::endl;
                 continue;
@@ -225,6 +236,8 @@ void SafetyGridMap::updateGrid(){
 
         //Publish Score
         safety_grader_.publish(score);
-        objects_risk_pub_.publish(indexes);
+        if (nobjects >0){
+            objects_risk_pub_.publish(indexes);
+        }
         publishGrid();
 }

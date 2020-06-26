@@ -19,6 +19,7 @@ namespace gr_safety_gridmap{
             std::string id;
             bool is_new_data_;
             boost::mutex mtx;
+            std::map<std::string, ros::Time> update_times_;
     };
 };
 static gr_safety_gridmap::MainGrid gridmap("thisismymap");

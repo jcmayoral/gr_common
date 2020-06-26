@@ -23,7 +23,6 @@ namespace gr_safety_gridmap{
             std::vector<LayerSubscriber> layer_subscribers;
             ros::Timer clear_timer_;
             boost::mutex smtx;
-            std::map<std::string, ros::Time> update_times_;
     };
 
 };
