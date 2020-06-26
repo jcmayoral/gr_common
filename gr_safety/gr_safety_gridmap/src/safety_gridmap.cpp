@@ -109,6 +109,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
 
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
     safety_grader_ = nh.advertise<std_msgs::Float32>("safety_score", 1, true);
+    objects_risk_pub_ = nh.advertise<safety_msgs::RiskIndexes>("safety_indexes", 1, true);
 
     // Transformin the entire path of location can be computaitonal expensive
     if(!localgridmap){
@@ -175,14 +176,6 @@ void SafetyGridMap::loadRegions(std::string iid){
 void SafetyGridMap::updateGrid(){
     boost::mutex::scoped_lock lltk(smtx);
     boost::mutex::scoped_lock ltk(gridmap.mtx);
-        //if (!gridmap.isNewDataAvailable()){
-            //ROS_ERROR_STREAM("Waiting for new data");
-          //  return;
-        //}
-        //analyze if log or probability can do a better approach
-        //if(!gridmap.gridmap.exists("conv")){
-        //gridmap.gridmap.add("conv", 0);//grid_map::Matrix::Random(gridmap.gridmap.getSize()(0), gridmap.gridmap.getSize()(1)));
-        //}
         gridmap.gridmap.add("conv", 0);
         auto safety_layer = gridmap.gridmap.get("safetyregions");
         auto layers =  gridmap.gridmap.getLayers();
@@ -191,18 +184,15 @@ void SafetyGridMap::updateGrid(){
         std::string mask_layer(":Mask");
         std::string person_id;
         int nobjects = 0;
+        safety_msgs::RiskIndexes indexes;
 
         for (auto l :  layers){
-            //std::cout << l << std::endl;
-            if (l.find(":") == std::string::npos) { //I prefere this than storing objects id... could be messy
-                //ROS_ERROR_STREAM("skip "<< l<< ", "<< l.find(mask_layer));
+            if (l.find(":") == std::string::npos) {
                 continue;
             }
-            if (l.find(mask_layer) == std::string::npos) { //skip time mask to process object nu
-                //ROS_ERROR_STREAM("skip mask "<< l);
+            if (l.find(mask_layer) == std::string::npos) {
                 continue;
             }
-            //std::cout << l <<  ", " << l.find(mask_layer) + 1 << std::endl;
             person_id = l.substr(0,l.find(":")); 
 
             //TODO fix this`
@@ -217,8 +207,14 @@ void SafetyGridMap::updateGrid(){
             std::cout << person_id << " layer has been read " << std::endl;
             auto layer = gridmap.gridmap.get(person_id+obstacle_layer);
             auto timed_mask = gridmap.gridmap.get(person_id+mask_layer);
-            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + (timed_mask.array() * layer.array()).matrix();// * timed_mask;
+            auto object_risk_layer = (timed_mask.array() * layer.array()).matrix();
+            float object_risk_index = object_risk_layer.cwiseProduct(gridmap.gridmap.get("safetyregions")).sum();
+            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + object_risk_layer;
             nobjects++;
+
+            indexes.objects_id.push_back(person_id);
+            indexes.risk_indexes.push_back(object_risk_index);
+
         }
         std_msgs::Float32 score;
         gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safetyregions"));// * safety_layer;
@@ -229,8 +225,6 @@ void SafetyGridMap::updateGrid(){
 
         //Publish Score
         safety_grader_.publish(score);
+        objects_risk_pub_.publish(indexes);
         publishGrid();
-        //ResetFlag
-        //gridmap.setDataFlag(false);
-
 }

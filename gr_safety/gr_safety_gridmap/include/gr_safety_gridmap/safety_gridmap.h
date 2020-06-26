@@ -2,8 +2,8 @@
 #include <ros/package.h>
 #include <std_msgs/Float32.h>
 #include <gr_safety_gridmap/layer_subscriber.hpp>
-//#include <gr_safety_gridmap/main_gridmap.hpp>
 #include <yaml-cpp/yaml.h>
+#include <safety_msgs/RiskIndexes.h>
 
 namespace gr_safety_gridmap{
     class SafetyGridMap{
@@ -19,6 +19,7 @@ namespace gr_safety_gridmap{
         private:
             ros::Publisher rpub_;
             ros::Publisher safety_grader_;
+            ros::Publisher objects_risk_pub_;
             std::vector<LayerSubscriber> layer_subscribers;
             ros::Timer clear_timer_;
             boost::mutex smtx;

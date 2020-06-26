@@ -1,5 +1,5 @@
 resolution: 1.0
-mapsize: 25
+mapsize: 15
 detection_topics:
     #- /detected_objects
     #- /pointcloud_processing_node/detected_objects
