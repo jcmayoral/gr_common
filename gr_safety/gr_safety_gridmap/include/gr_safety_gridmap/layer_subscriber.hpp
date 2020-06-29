@@ -164,7 +164,7 @@ namespace gr_safety_gridmap{
                     //    continue;
                     //}
                     //std::cout << "UPDATING " << layer << " MASK: " << 1.0*(1+depth) << "PRED: " << exp(-0.5*(search_depth_-depth)) << "INDEX "<< index << std::endl;
-                    gridmap.gridmap.at(layer+":Mask", index) +=  1.0*(depth *costs[i]);
+                    gridmap.gridmap.at(layer+":Mask", index) +=  1.0*((search_depth_-depth) *costs[i]);
                     gridmap.gridmap.at(layer+":Prediction", index) += exp(-0.4*(search_depth_-depth))*costs[i];
                     //std::cout << gridmap.gridmap[layer+":Mask"].maxCoeff() << ", "<< gridmap.gridmap[layer+":Prediction"].maxCoeff() << std::endl;
                     //Circle is great but requires a smaller resolution -> increase search complexity
