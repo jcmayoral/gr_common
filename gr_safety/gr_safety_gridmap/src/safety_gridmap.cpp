@@ -25,10 +25,11 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
 
     auto layers =  gridmap.gridmap.getLayers();
     for (auto l :  layers){
-        if (l.find(":") == std::string::npos) {
+        if (l.find("person_") == std::string::npos) {
             continue;
         }
-        person_id = l.substr(0,l.find(":"));
+        person_id = l.substr(l.find("person_")); 
+
         std::map<std::string,ros::Time>::iterator it;
         it = gridmap.update_times_.find(person_id);
 
@@ -186,12 +187,11 @@ void SafetyGridMap::updateGrid(){
         safety_msgs::RiskIndexes indexes;
 
         for (auto l :  layers){
-            if (l.find(":") == std::string::npos) {
+            if (l.find("person_") == std::string::npos) {
                 continue;
             }
         
-            person_id = l.substr(0,l.find(":")); 
-
+            person_id = l.substr(l.find("person_")); 
             //TODO fix this`
             if (person_id.empty()){
                 continue;

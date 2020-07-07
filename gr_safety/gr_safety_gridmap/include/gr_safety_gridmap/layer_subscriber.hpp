@@ -139,8 +139,10 @@ namespace gr_safety_gridmap{
                 aux = in;
 
                 //MotionModel class TODO
-                double costs[9] ={0.1,0.1,0.1,0.1,0.5,0.5,0.5,0.05,0.05};
+                double costs[9] ={0.5,0.1,0.1,0.1,0.5,0.5,0.5,0.05,0.05};
                 int nprimitives = 4;
+                auto norm = nprimitives*exp(0.4*(search_depth_-depth));
+
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
                     //aux2=in;
@@ -156,8 +158,9 @@ namespace gr_safety_gridmap{
                         continue;
                     }
                     fb_msgs_.poses.push_back(aux2);
-                    auto prob = (search_depth_-depth) * exp(-0.4*(search_depth_-depth))*costs[i];
-                    gridmap.gridmap.at(layer, index) += log(prob/(1-prob));
+                    auto val = (search_depth_-depth) * exp(0.4*(search_depth_-depth))*costs[i];
+                    val /=norm;
+                    gridmap.gridmap.at(layer, index) += val;//log10(prob/(1-prob));
                 }
             }
 
@@ -178,7 +181,6 @@ namespace gr_safety_gridmap{
                 //y += delta_y;
                 auto th = tf2::getYaw(in.orientation);
                 double delta_th = vth * dt;
-
 
                 switch(motion_type){
                     case 0:
