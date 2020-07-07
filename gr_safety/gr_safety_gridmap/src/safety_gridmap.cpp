@@ -217,7 +217,7 @@ void SafetyGridMap::updateGrid(){
         //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
         score.data = gridmap.gridmap.get("conv").sum();
 
-        ROS_ERROR_STREAM_THROTTLE(5,"risk sum " << score.data << " MEAN SAFETY " << score.data/nobjects);
+        ROS_ERROR_STREAM_THROTTLE(5,"risk sum " << score.data << " MEAN SAFETY " << score.data/nobjects << "MAX COEFF "<<gridmap.gridmap.get("conv").maxCoeff());
 
         //Publish Score
         safety_grader_.publish(score);

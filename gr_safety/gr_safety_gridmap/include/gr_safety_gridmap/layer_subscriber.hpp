@@ -121,7 +121,6 @@ namespace gr_safety_gridmap{
                     generateCycle(aux,search_depth_, std::to_string(person));
                     person++; //this can be calculated by std::distance
                 }
-                //gridmap.setDataFlag(true);
             }
 
             void generateCycle(geometry_msgs::Pose in, int depth, std::string layer){
@@ -136,9 +135,9 @@ namespace gr_safety_gridmap{
                 float radius = 1.0;
                 aux = in;
                 //MotionModel class TODO
-                double costs[9] ={1.0,0.25,0.25,0.25,0.5,0.5,0.5,0.05,0.05};
-                int nprimitives = 4;
-                auto norm = search_depth_*nprimitives*exp(-0.1*(search_depth_-depth));
+                double prob[9] ={1.0,0.25,0.25,0.25,0.5,0.5,0.5,0.05,0.05};
+                int nprimitives = 6;
+                auto norm = search_depth_*nprimitives*exp(0.1*(search_depth_-depth));
 
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
@@ -153,7 +152,7 @@ namespace gr_safety_gridmap{
                         continue;
                     }
                     fb_msgs_.poses.push_back(aux2);
-                    auto val = (search_depth_-depth)* exp(-0.1*(search_depth_-depth))*costs[i];
+                    auto val = (search_depth_-depth)* exp(0.1*(search_depth_-depth))*prob[i];
                     val /=norm;
                     gridmap.gridmap.at(layer, index) += val;//log(prob/(1-prob));
                 }
@@ -194,12 +193,12 @@ namespace gr_safety_gridmap{
                         //out = in;
                         break;
                     case 4:
-                        vx = -resolution_;
-                        th -= delta_th;
+                        vx = resolution_;
+                        th -= M_PI+delta_th;
                         break;
                     case 5:
-                        vx = -resolution_;
-                        th += delta_th;
+                        vx = resolution_;
+                        th += M_PI+delta_th;
                         break;
                     case 6:
                         vx = -resolution_;

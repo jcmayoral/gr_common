@@ -1,7 +1,7 @@
-resolution: 0.4
-mapsize: 25
-timeout: 5.0
-searchdepth: 4
+resolution: 0.5
+mapsize: 20
+timeout: 2.0
+searchdepth: 3
 detection_topics:
     #- /detected_objects
     #- /pointcloud_processing_node/detected_objects
