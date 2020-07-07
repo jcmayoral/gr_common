@@ -40,7 +40,7 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
         //}
 
         auto transcurred_time = (ros::Time::now() - gridmap.update_times_[person_id]).toSec();
-        std::cout << "transcurred time since update " << transcurred_time << " id " << person_id << std::endl;
+        //std::cout << "transcurred time since update " << transcurred_time << " id " << person_id << std::endl;
         if (transcurred_time < 5.0){
         //     update_times_[person_id] = ros::Time::now();  
              continue;
@@ -203,7 +203,6 @@ void SafetyGridMap::updateGrid(){
                 std::cout << "avoid "<<std::endl;
                 continue;
             }
-            std::cout << person_id << " layer has been read " << std::endl;
             auto layer = gridmap.gridmap.get(person_id).array().matrix();
             float object_risk_index = layer.cwiseProduct(gridmap.gridmap.get("safetyregions")).sum();
             gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + layer;
@@ -218,12 +217,10 @@ void SafetyGridMap::updateGrid(){
         //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
         score.data = gridmap.gridmap.get("conv").sum();
 
-        ROS_ERROR_STREAM("risk sum " << score.data << " and nobjects processed " << nobjects);
+        ROS_ERROR_STREAM_THROTTLE(5,"risk sum " << score.data << " MEAN SAFETY " << score.data/nobjects);
 
         //Publish Score
         safety_grader_.publish(score);
-        //if (nobjects >0){
-            objects_risk_pub_.publish(indexes);
-        //}
+        objects_risk_pub_.publish(indexes);
         publishGrid();
 }

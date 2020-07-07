@@ -124,9 +124,8 @@ namespace gr_safety_gridmap{
                 //gridmap.setDataFlag(true);
             }
 
-            //TODO create MotionModelClass   
             void generateCycle(geometry_msgs::Pose in, int depth, std::string layer){
-                if (depth == -1){
+                if (depth == 0){
                     return;
                 }
 
@@ -135,20 +134,16 @@ namespace gr_safety_gridmap{
                 grid_map::Position position;
                 grid_map::Index index;
                 float radius = 1.0;
-
                 aux = in;
-
                 //MotionModel class TODO
-                double costs[9] ={0.5,0.1,0.1,0.1,0.5,0.5,0.5,0.05,0.05};
+                double costs[9] ={1.0,0.25,0.25,0.25,0.5,0.5,0.5,0.05,0.05};
                 int nprimitives = 4;
-                auto norm = nprimitives*exp(0.4*(search_depth_-depth));
+                auto norm = search_depth_*nprimitives*exp(-0.1*(search_depth_-depth));
 
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
-                    //aux2=in;
-                    //ROS_WARN_STREAM("primitive "<< i << "depth " <<depth);
                     generateCycle(aux2,depth-1,layer);
-                    //to mapframef
+                    //to mapframe
                     convert(aux2);
                     position(0) = aux2.position.x;
                     position(1) = aux2.position.y;
@@ -158,9 +153,9 @@ namespace gr_safety_gridmap{
                         continue;
                     }
                     fb_msgs_.poses.push_back(aux2);
-                    auto val = (search_depth_-depth) * exp(0.4*(search_depth_-depth))*costs[i];
+                    auto val = (search_depth_-depth)* exp(-0.1*(search_depth_-depth))*costs[i];
                     val /=norm;
-                    gridmap.gridmap.at(layer, index) += val;//log10(prob/(1-prob));
+                    gridmap.gridmap.at(layer, index) += val;//log(prob/(1-prob));
                 }
             }
 
@@ -288,6 +283,7 @@ namespace gr_safety_gridmap{
             LayerSubscriber(std::string input, double resolution, bool local, int desired_depth=5, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(desired_depth), 
                                                                                                             local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution){
+
                 rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
