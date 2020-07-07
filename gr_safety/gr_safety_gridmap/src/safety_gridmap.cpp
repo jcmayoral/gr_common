@@ -21,16 +21,10 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
     //gridmap.gridmap.clearAll();
     //reload static
     
-    std::string obstacle_layer(":Prediction");
-    std::string mask_layer(":Mask");
     std::string person_id;
 
     auto layers =  gridmap.gridmap.getLayers();
     for (auto l :  layers){
-        if (l.find(mask_layer) == std::string::npos) {
-            continue;
-        }
-
         if (l.find(":") == std::string::npos) {
             continue;
         }
@@ -53,14 +47,10 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
 
         ROS_ERROR_STREAM("Erase "<< person_id);
        
-        if(gridmap.gridmap.exists(person_id+obstacle_layer)){
-            gridmap.gridmap.erase(person_id+obstacle_layer);
+        if(gridmap.gridmap.exists(person_id)){
+            gridmap.gridmap.erase(person_id);
         }
-        //gridmap.gridmap[person_id+obstacle_layer].setZero();
-        //gridmap.gridmap[person_id+mask_layer].setZero();
-        if(gridmap.gridmap.exists(person_id+mask_layer)){
-            gridmap.gridmap.erase(person_id+mask_layer);
-        } 
+        //gridmap.gridmap[person_id].setZero();
         if (it != gridmap.update_times_.end()){
             gridmap.update_times_.erase(it);
         }
@@ -191,8 +181,6 @@ void SafetyGridMap::updateGrid(){
         auto safety_layer = gridmap.gridmap.get("safetyregions");
         auto layers =  gridmap.gridmap.getLayers();
 
-        std::string obstacle_layer(":Prediction");
-        std::string mask_layer(":Mask");
         std::string person_id;
         int nobjects = 0;
         safety_msgs::RiskIndexes indexes;
@@ -201,9 +189,7 @@ void SafetyGridMap::updateGrid(){
             if (l.find(":") == std::string::npos) {
                 continue;
             }
-            if (l.find(mask_layer) == std::string::npos) {
-                continue;
-            }
+        
             person_id = l.substr(0,l.find(":")); 
 
             //TODO fix this`
@@ -213,16 +199,14 @@ void SafetyGridMap::updateGrid(){
 
             //update_times_[person_id] = ros::Time::now();                        
 
-            if(!gridmap.gridmap.exists(person_id+obstacle_layer)){
+            if(!gridmap.gridmap.exists(person_id)){
                 std::cout << "avoid "<<std::endl;
                 continue;
             }
             std::cout << person_id << " layer has been read " << std::endl;
-            auto layer = gridmap.gridmap.get(person_id+obstacle_layer);
-            auto timed_mask = gridmap.gridmap.get(person_id+mask_layer);
-            auto object_risk_layer = (timed_mask.array() * layer.array()).matrix();
-            float object_risk_index = object_risk_layer.cwiseProduct(gridmap.gridmap.get("safetyregions")).sum();
-            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + object_risk_layer;
+            auto layer = gridmap.gridmap.get(person_id).array().matrix();
+            float object_risk_index = layer.cwiseProduct(gridmap.gridmap.get("safetyregions")).sum();
+            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + layer;
             nobjects++;
 
             indexes.objects_id.push_back(person_id);
@@ -238,8 +222,8 @@ void SafetyGridMap::updateGrid(){
 
         //Publish Score
         safety_grader_.publish(score);
-        if (nobjects >0){
+        //if (nobjects >0){
             objects_risk_pub_.publish(indexes);
-        }
+        //}
         publishGrid();
 }
