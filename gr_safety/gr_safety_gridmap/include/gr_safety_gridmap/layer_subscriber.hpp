@@ -73,7 +73,6 @@ namespace gr_safety_gridmap{
                 boost::mutex::scoped_lock lck(gridmap.mtx);{
                 fb_msgs_.header.frame_id = map_frame_;
                 fb_msgs_.poses.clear();
-                int nprimitives =1;//3;
 
                 //index 0 reserved to robot
                 for (auto o : poses.objects){
@@ -81,10 +80,10 @@ namespace gr_safety_gridmap{
                     gridmap.update_times_[o.object_id] = ros::Time::now();                        
                     auto currentpose = o.pose;
                     auto aux = currentpose;
-                    int searchdepth = std::max(search_depth_, int(2.0/resolution_));
+                    int searchdepth = std::max(search_depth_, int(tracking_distance_/resolution_));
                     //recursivity
                     search_depth_ = searchdepth;
-                    generateCycle(aux,searchdepth, o.object_id, nprimitives);
+                    generateCycle(aux,searchdepth, o.object_id);
                     
                     //Update current position
                     convert(currentpose);
@@ -95,7 +94,7 @@ namespace gr_safety_gridmap{
                 };
             }
 
-            void generateCycle(geometry_msgs::Pose in, int depth, std::string layer, int nprimitives){
+            void generateCycle(geometry_msgs::Pose in, int depth, std::string layer){
                 if (depth == 0){
                     return;
                 }
@@ -107,7 +106,7 @@ namespace gr_safety_gridmap{
                 double prob[9] ={1.0,1.0,1.0,1.0,1.0,0.5,0.5,0.05,0.05};
                 //auto norm = nprimitives*exp(-0.3*(search_depth_-depth));
 
-                for (int i=0; i <nprimitives; i++){
+                for (int i=0; i <nprimitives_; i++){
                     aux2 = generateMotion(in,i);
                     //to mapframe
                     convert(aux2);
@@ -117,7 +116,7 @@ namespace gr_safety_gridmap{
                     if (updateGridLayer(layer, aux2, val )){
                         fb_msgs_.poses.push_back(aux2);
                     }
-                    generateCycle(aux2,depth-1,layer, nprimitives);
+                    generateCycle(aux2,depth-1,layer);
 
                 }
             }
@@ -131,7 +130,7 @@ namespace gr_safety_gridmap{
                 position(1) = p.position.y;
                 bool validindex = gridmap.gridmap.getIndex(position, index);
                 if (!validindex){
-                    ROS_WARN_STREAM("index not valid"<<index<< map_frame_);
+                    //ROS_WARN_STREAM("index not valid"<<index<< map_frame_);
                     return false;
                 }
                 //gridmap.gridmap.at(layer_id, index) += val;
@@ -248,7 +247,8 @@ namespace gr_safety_gridmap{
             
             LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_), nh_(), local_frame_(other.local_frame_), 
                                                             map_frame_(other.local_frame_), search_depth_(other.search_depth_),
-                                                            is_local_(other.is_local_), resolution_(other.resolution_){
+                                                            is_local_(other.is_local_), resolution_(other.resolution_),
+                                                            tracking_distance_(other.tracking_distance_), nprimitives_(other.nprimitives_){
                 topic_ = other.topic_;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
                 ops.queue_size = 1;
@@ -261,9 +261,9 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local, int desired_depth=5, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), search_depth_(desired_depth), 
-                                                                                                            local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
-                                                                                                            resolution_(resolution){
+            LayerSubscriber(std::string input, double resolution, bool local, int tracking_distance=2.0, int nprimitives=3, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), 
+                                                                                                            search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
+                                                                                                            resolution_(resolution), tracking_distance_(tracking_distance),nprimitives_(nprimitives){
 
                 rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);
                 topic_ = "/" + input;
@@ -290,9 +290,11 @@ namespace gr_safety_gridmap{
             boost::mutex mt;
             ros::SubscribeOptions ops;
             int search_depth_;
+            int nprimitives_;
             std::string local_frame_;
             std::string map_frame_;
             bool is_local_;
+            float tracking_distance_;
             double resolution_;
 
     };

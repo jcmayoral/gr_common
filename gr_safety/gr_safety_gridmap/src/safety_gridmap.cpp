@@ -76,8 +76,10 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     ROS_ERROR_STREAM("MAP SIZE: "<< map_size);
     auto clearing_timeout = config_yaml["timeout"].as<double>();
     ROS_ERROR_STREAM("Clearing Timeout: "<< clearing_timeout);
-    int desired_depth = config_yaml["searchdepth"].as<int>();
-    ROS_ERROR_STREAM("Search Depth: "<< desired_depth);
+    float tracking_distance = config_yaml["trackingdistance"].as<float>();
+    ROS_ERROR_STREAM("Distance ot Track: "<< tracking_distance);
+    auto nprimitives = config_yaml["nprimitives"].as<int>();
+    ROS_ERROR_STREAM("Number of Primitives: "<< nprimitives);
 
     std::string map_frame;
     int factor;
@@ -116,7 +118,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     // Transformin the entire path of location can be computaitonal expensive
     if(!localgridmap){
         auto pathtopic = config_yaml["pathtopic"].as<std::string>();
-        layer_subscribers.emplace_back(pathtopic.c_str(), resolution, localgridmap, desired_depth, map_frame);
+        layer_subscribers.emplace_back(pathtopic.c_str(), resolution, localgridmap, tracking_distance, nprimitives, map_frame);
     }
 
     const YAML::Node& detection_topics = config_yaml["detection_topics"];
@@ -125,7 +127,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     for (YAML::const_iterator it= detection_topics.begin(); it != detection_topics.end(); it++){
       std::string topic = it->as<std::string>();
       ROS_INFO_STREAM("Subscribing to " << topic);
-      layer_subscribers.emplace_back(topic.c_str(), resolution, localgridmap, desired_depth, map_frame);
+      layer_subscribers.emplace_back(topic.c_str(), resolution, localgridmap, tracking_distance, nprimitives, map_frame);
     }
 
     clear_timer_ = nh.createTimer(ros::Duration(clearing_timeout), &SafetyGridMap::timer_callback, this);
