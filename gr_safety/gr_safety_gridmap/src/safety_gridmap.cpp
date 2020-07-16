@@ -80,7 +80,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     ROS_ERROR_STREAM("Distance ot Track: "<< tracking_distance);
     auto nprimitives = config_yaml["nprimitives"].as<int>();
     ROS_ERROR_STREAM("Number of Primitives: "<< nprimitives);
-    ROS_ERROR_STREAM("Effective depth limit " << int(tracking_distance_/resolution_));
+    ROS_ERROR_STREAM("Effective depth limit " << int(tracking_distance/resolution));
 
 
     std::string map_frame;
