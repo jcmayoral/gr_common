@@ -1,5 +1,5 @@
 resolution: 0.5
-mapsize: 20
+mapsize: 15
 timeout: 2.0
 searchdepth: 3
 detection_topics:
