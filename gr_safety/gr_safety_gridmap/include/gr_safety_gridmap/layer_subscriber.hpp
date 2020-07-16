@@ -80,7 +80,7 @@ namespace gr_safety_gridmap{
                     gridmap.update_times_[o.object_id] = ros::Time::now();                        
                     auto currentpose = o.pose;
                     auto aux = currentpose;
-                    int searchdepth = std::max(search_depth_, int(tracking_distance_/resolution_));
+                    int searchdepth = int(tracking_distance_/resolution_);
                     //recursivity
                     search_depth_ = searchdepth;
                     generateCycle(aux,searchdepth, o.object_id);
