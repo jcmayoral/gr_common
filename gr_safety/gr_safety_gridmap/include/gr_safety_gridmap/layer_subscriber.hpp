@@ -41,19 +41,6 @@ namespace gr_safety_gridmap{
                 catch(...){
                 }
 
-
-                /*
-                try{
-                    geometry_msgs::PoseArray parr;
-                    parr = *ssmsg->instantiate<geometry_msgs::PoseArray>();
-                    updateLayer(parr, 1);
-                    return;
-                }
-
-                catch(...){
-                }
-                */
-
                 try{
                     safety_msgs::FoundObjectsArray parr;
                     parr = *ssmsg->instantiate<safety_msgs::FoundObjectsArray>();
@@ -86,7 +73,7 @@ namespace gr_safety_gridmap{
                 boost::mutex::scoped_lock lck(gridmap.mtx);{
                 fb_msgs_.header.frame_id = map_frame_;
                 fb_msgs_.poses.clear();
-                int nprimitives = 3;
+                int nprimitives =1;//3;
 
                 //index 0 reserved to robot
                 for (auto o : poses.objects){
@@ -94,71 +81,44 @@ namespace gr_safety_gridmap{
                     gridmap.update_times_[o.object_id] = ros::Time::now();                        
                     auto currentpose = o.pose;
                     auto aux = currentpose;
-                    int searchdepth = 2;//std::max(search_depth_, int(2.0/resolution_));
+                    int searchdepth = std::max(search_depth_, int(2.0/resolution_));
+                    //recursivity
+                    search_depth_ = searchdepth;
+                    generateCycle(aux,searchdepth, o.object_id, nprimitives);
+                    
                     //Update current position
                     convert(currentpose);
-                    updateGridLayer(o.object_id, currentpose, 6.0);
-                    //recursivity
-                    generateCycle(aux,searchdepth, o.object_id, nprimitives);
+                    updateGridLayer(o.object_id, currentpose,  exp(0));
                 }
                 rpub_.publish(fb_msgs_);
                 //gridmap.setDataFlag(true);
                 };
             }
-            /*
-            void updateLayer(const geometry_msgs::PoseArray& poses, int behaviour){
-                grid_map::Position position;
-                grid_map::Index index;
 
-                int c = 0; 
-                float radius = 0.5;
-                to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
-
-                boost::mutex::scoped_lock lck(gridmap.mtx);
-                if (poses.poses.size()==0){
-                    ROS_WARN_STREAM("No obstacle detected -> potential bug or implementation for memory");
-                }
-                //index 0 reserved to robot
-                int person = 1;
-                for (int i=1; i<poses.poses.size()+1;i++)
-                    addLayerTuple(std::to_string(i));
-
-                int nprimitives = 3;
-
-                for (auto p : poses.poses){
-                    auto odompose = p;
-                    auto aux = odompose;
-                    //move search_depth_ to motion model class
-                    int searchdepth = std::max(search_depth_, int(2.0/resolution_));
-                    generateCycle(aux,searchdepth, std::to_string(person), nprimitives);
-                    person++; //this can be calculated by std::distance
-                }
-            }
-            */
             void generateCycle(geometry_msgs::Pose in, int depth, std::string layer, int nprimitives){
                 if (depth == 0){
                     return;
                 }
-
                 //generateCycle(in,depth);
                 geometry_msgs::Pose aux, aux2;
                 float radius = 1.0;
                 aux = in;
                 //MotionModel class TODO
                 double prob[9] ={1.0,1.0,1.0,1.0,1.0,0.5,0.5,0.05,0.05};
-                auto norm = search_depth_*nprimitives*exp(0.1*(search_depth_-depth));
+                //auto norm = nprimitives*exp(-0.3*(search_depth_-depth));
 
                 for (int i=0; i <nprimitives; i++){
                     aux2 = generateMotion(in,i);
-                    generateCycle(aux2,depth-1,layer, nprimitives);
                     //to mapframe
                     convert(aux2);
-                   
-                    auto val = (search_depth_-depth)* exp(0.1*(search_depth_-depth))*prob[i];
+                    auto val = exp(-0.3*(search_depth_-depth))*prob[i];
                     //val /=norm;
+
                     if (updateGridLayer(layer, aux2, val )){
                         fb_msgs_.poses.push_back(aux2);
                     }
+                    generateCycle(aux2,depth-1,layer, nprimitives);
+
                 }
             }
 
