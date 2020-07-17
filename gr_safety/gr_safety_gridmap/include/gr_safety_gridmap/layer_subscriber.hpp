@@ -95,10 +95,12 @@ namespace gr_safety_gridmap{
             void updateDynamic(safety_msgs::Object o){
                 auto currentpose = o.pose;
                 auto aux = currentpose;
-                int searchdepth = int(tracking_distance_/resolution_);
+                float ospeed = sqrt(pow(o.speed.x,2) + pow(o.speed.y,2));
+                int searchdepth = tracking_time_;//int(tracking_distance_/(nprimitives_*ospeed));
+                std::cout << "D" << searchdepth << std::endl;
                 //recursivity
                 search_depth_ = searchdepth;
-                generateCycle(aux,searchdepth, o.object_id);
+                generateCycle(aux,searchdepth, o.object_id, o.speed.x, o.speed.y);
                     
                 //Update current position
                 convert(currentpose);
@@ -118,13 +120,12 @@ namespace gr_safety_gridmap{
                     return;
                 }
 
-                auto radius = resolution_*2;
-                for (grid_map::CircleIterator iterator(gridmap.gridmap, center, radius);!iterator.isPastEnd(); ++iterator) {
-                    gridmap.gridmap.at(o.object_id, *iterator) = 1.0;
+                for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
+                    gridmap.gridmap.at(o.object_id, *iterator) = 0.5;
                 }
             }
 
-            void generateCycle(geometry_msgs::Pose in, int depth, std::string layer){
+            void generateCycle(geometry_msgs::Pose in, int depth, std::string layer, const float vx, const float vy){
                 if (depth == 0){
                     return;
                 }
@@ -137,16 +138,16 @@ namespace gr_safety_gridmap{
                 //auto norm = nprimitives*exp(-0.3*(search_depth_-depth));
 
                 for (int i=0; i <nprimitives_; i++){
-                    aux2 = generateMotion(in,i);
+                    aux2 = generateMotion(in,i, vx, vy);
                     //to mapframe
                     convert(aux2);
-                    auto val = exp(-0.3*(search_depth_-depth))*prob[i];
+                    auto val = 2*exp(-0.3*(search_depth_-depth))*prob[i];
                     //val /=norm;
 
                     if (updateGridLayer(layer, aux2, val )){
                         fb_msgs_.poses.push_back(aux2);
                     }
-                    generateCycle(aux2,depth-1,layer);
+                    generateCycle(aux2,depth-1,layer, vx,vy);
 
                 }
             }
@@ -170,16 +171,17 @@ namespace gr_safety_gridmap{
             }
 
             //TODO create MotionModelClass
-            geometry_msgs::Pose generateMotion(const geometry_msgs::Pose in, int motion_type){
+            geometry_msgs::Pose generateMotion(const geometry_msgs::Pose in, int motion_type, const float ovx, const float ovy){
                 //this motion is a hack... motion on the sensor frame not the relative path
                 geometry_msgs::Pose out;
                 out = in;
 
                 //double dt = (current_time - last_time).toSec();
                 auto dt = 1;
-                double vx = 0;
-                double vy = 0;
                 auto vth = 0.2;
+
+                float vx =0.0;
+                float vy =0.0;
 
 
                 //x += delta_x;
@@ -190,29 +192,29 @@ namespace gr_safety_gridmap{
                 switch(motion_type){
                     case 0:
                         //th += delta_th;
-                        vx = resolution_;
+                        vx = ovx;
                         break;
                     case 1:
-                        vx = resolution_;
+                        vx = ovx;
                         th += delta_th;
                         break;
                     case 2:
-                        vx = resolution_;
+                        vx = ovx;
                         th -= delta_th;
                         break;
                     case 3:
-                        vx = resolution_;
+                        vx = ovx;
                         th -= M_PI+delta_th;
                         break;
                     case 4:
-                        vx = resolution_;
+                        vx = ovx;
                         th += M_PI+delta_th;
                         break;
                     case 5:
                         //out = in;
                         break;
                     case 6:
-                        vx = -resolution_;
+                        vx = -ovx;
                         //vy = 1;
                         //th -= delta_th;
                         break;
@@ -278,7 +280,8 @@ namespace gr_safety_gridmap{
             LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_), nh_(), local_frame_(other.local_frame_), 
                                                             map_frame_(other.local_frame_), search_depth_(other.search_depth_),
                                                             is_local_(other.is_local_), resolution_(other.resolution_),
-                                                            tracking_distance_(other.tracking_distance_), nprimitives_(other.nprimitives_){
+                                                            tracking_time_(other.tracking_time_), nprimitives_(other.nprimitives_),
+                                                            proxemic_distance_(other.proxemic_distance_){
                 topic_ = other.topic_;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
                 ops.queue_size = 1;
@@ -291,9 +294,10 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local, int tracking_distance=2.0, int nprimitives=3, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), 
+            LayerSubscriber(std::string input, double resolution, bool local, int tracking_time=2.0, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), 
                                                                                                             search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
-                                                                                                            resolution_(resolution), tracking_distance_(tracking_distance),nprimitives_(nprimitives){
+                                                                                                            resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
+                                                                                                            proxemic_distance_(proxemic_distance){
 
                 rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);
                 topic_ = "/" + input;
@@ -324,8 +328,9 @@ namespace gr_safety_gridmap{
             std::string local_frame_;
             std::string map_frame_;
             bool is_local_;
-            float tracking_distance_;
+            float tracking_time_;
             double resolution_;
+            float proxemic_distance_;
 
     };
 };

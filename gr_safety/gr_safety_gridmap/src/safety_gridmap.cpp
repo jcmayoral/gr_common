@@ -21,37 +21,30 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
     //gridmap.gridmap.clearAll();
     //reload static
     
-    std::string person_id;
+    std::string object_id;
 
     auto layers =  gridmap.gridmap.getLayers();
     for (auto l :  layers){
-        if (l.find("person_") == std::string::npos) {
+        if (l.find("object_") == std::string::npos) {
             continue;
         }
-        person_id = l.substr(l.find("person_")); 
+        object_id = l.substr(l.find("object_")); 
 
         std::map<std::string,ros::Time>::iterator it;
-        it = gridmap.update_times_.find(person_id);
+        it = gridmap.update_times_.find(object_id);
 
-        //if (it == update_times_.end()){
-        //    ROS_INFO_STREAM("Adding "<< person_id);
-        //    update_times_[person_id] = ros::Time::now();                        
-        //    continue;
-        //}
+        auto transcurred_time = (ros::Time::now() - gridmap.update_times_[object_id]).toSec();
 
-        auto transcurred_time = (ros::Time::now() - gridmap.update_times_[person_id]).toSec();
-        //std::cout << "transcurred time since update " << transcurred_time << " id " << person_id << std::endl;
         if (transcurred_time < 5.0){
-        //     update_times_[person_id] = ros::Time::now();  
              continue;
         }
 
-        ROS_ERROR_STREAM("Erase "<< person_id);
+        ROS_ERROR_STREAM("Erase "<< object_id);
        
-        if(gridmap.gridmap.exists(person_id)){
-            gridmap.gridmap.erase(person_id);
+        if(gridmap.gridmap.exists(object_id)){
+            gridmap.gridmap.erase(object_id);
         }
-        //gridmap.gridmap[person_id].setZero();
+
         if (it != gridmap.update_times_.end()){
             gridmap.update_times_.erase(it);
         }
@@ -76,12 +69,13 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     ROS_ERROR_STREAM("MAP SIZE: "<< map_size);
     auto clearing_timeout = config_yaml["timeout"].as<double>();
     ROS_ERROR_STREAM("Clearing Timeout: "<< clearing_timeout);
-    float tracking_distance = config_yaml["trackingdistance"].as<float>();
-    ROS_ERROR_STREAM("Distance ot Track: "<< tracking_distance);
+    int tracking_time = config_yaml["trackingtime"].as<int>();
+    ROS_ERROR_STREAM("Time to Track: "<< tracking_time);
     auto nprimitives = config_yaml["nprimitives"].as<int>();
     ROS_ERROR_STREAM("Number of Primitives: "<< nprimitives);
-    ROS_ERROR_STREAM("Effective depth limit " << int(tracking_distance/resolution));
 
+    float proxemicdistance = config_yaml["proxemicradius"].as<float>();
+    ROS_ERROR_STREAM("Proxemic Distance: "<< proxemicdistance);
 
     std::string map_frame;
     int factor;
@@ -120,7 +114,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     // Transformin the entire path of location can be computaitonal expensive
     if(!localgridmap){
         auto pathtopic = config_yaml["pathtopic"].as<std::string>();
-        layer_subscribers.emplace_back(pathtopic.c_str(), resolution, localgridmap, tracking_distance, nprimitives, map_frame);
+        layer_subscribers.emplace_back(pathtopic.c_str(), resolution, localgridmap, tracking_time, nprimitives, proxemicdistance, map_frame);
     }
 
     const YAML::Node& detection_topics = config_yaml["detection_topics"];
@@ -129,7 +123,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     for (YAML::const_iterator it= detection_topics.begin(); it != detection_topics.end(); it++){
       std::string topic = it->as<std::string>();
       ROS_INFO_STREAM("Subscribing to " << topic);
-      layer_subscribers.emplace_back(topic.c_str(), resolution, localgridmap, tracking_distance, nprimitives, map_frame);
+      layer_subscribers.emplace_back(topic.c_str(), resolution, localgridmap, tracking_time, nprimitives, proxemicdistance, map_frame);
     }
 
     clear_timer_ = nh.createTimer(ros::Duration(clearing_timeout), &SafetyGridMap::timer_callback, this);
@@ -186,34 +180,33 @@ void SafetyGridMap::updateGrid(){
         auto safety_layer = gridmap.gridmap.get("safetyregions");
         auto layers =  gridmap.gridmap.getLayers();
 
-        std::string person_id;
+        std::string object_id;
         int nobjects = 0;
         safety_msgs::RiskIndexes indexes;
 
         for (auto l :  layers){
-            if (l.find("person_") == std::string::npos) {
-                continue;
-            }
-        
-            person_id = l.substr(l.find("person_")); 
-            //TODO fix this`
-            if (person_id.empty()){
+            if (l.find("object_") == std::string::npos) {
                 continue;
             }
 
-            //update_times_[person_id] = ros::Time::now();                        
+            object_id = l.substr(l.find("object_")); 
 
-            if(!gridmap.gridmap.exists(person_id)){
+            if (object_id.empty()){
+                continue;
+            }
+
+
+            if(!gridmap.gridmap.exists(object_id)){
                 std::cout << "avoid "<<std::endl;
                 continue;
             }
-            auto layer = gridmap.gridmap.get(person_id).array().matrix();
+            auto layer = gridmap.gridmap.get(object_id).array().matrix();
             float object_risk_index = layer.cwiseProduct(gridmap.gridmap.get("safetyregions")).sum();
             gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + layer;
             nobjects++;
 
             safety_msgs::RiskObject robj;
-            robj.object_id = person_id;
+            robj.object_id = object_id;
             robj.risk_index =object_risk_index;
             indexes.objects.push_back(robj);
         }
