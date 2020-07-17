@@ -21,6 +21,7 @@ add_message_files(
    Object.msg
    FoundObjectsArray.msg
    RiskIndexes.msg
+   RiskObject.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
