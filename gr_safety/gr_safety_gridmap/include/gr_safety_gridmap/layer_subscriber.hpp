@@ -95,12 +95,12 @@ namespace gr_safety_gridmap{
             void updateDynamic(safety_msgs::Object o){
                 auto currentpose = o.pose;
                 auto aux = currentpose;
-                float ospeed = sqrt(pow(o.speed.x,2) + pow(o.speed.y,2));
+                //float ospeed = sqrt(pow(o.speed.x,2) + pow(o.speed.y,2));
                 int searchdepth = tracking_time_;//int(tracking_distance_/(nprimitives_*ospeed));
                 std::cout << "D" << searchdepth << std::endl;
                 //recursivity
                 search_depth_ = searchdepth;
-                generateCycle(aux,searchdepth, o.object_id, o.speed.x, o.speed.y);
+                generateCycle(aux,searchdepth, o.object_id, o.speed);
                     
                 //Update current position
                 convert(currentpose);
@@ -125,7 +125,7 @@ namespace gr_safety_gridmap{
                 }
             }
 
-            void generateCycle(geometry_msgs::Pose in, int depth, std::string layer, const float vx, const float vy){
+            void generateCycle(geometry_msgs::Pose in, int depth, std::string layer, const geometry_msgs::Vector3 v){
                 if (depth == 0){
                     return;
                 }
@@ -138,7 +138,7 @@ namespace gr_safety_gridmap{
                 //auto norm = nprimitives*exp(-0.3*(search_depth_-depth));
 
                 for (int i=0; i <nprimitives_; i++){
-                    aux2 = generateMotion(in,i, vx, vy);
+                    aux2 = generateMotion(in,i, v);
                     //to mapframe
                     convert(aux2);
                     auto val = 2*exp(-0.3*(search_depth_-depth))*prob[i];
@@ -147,7 +147,7 @@ namespace gr_safety_gridmap{
                     if (updateGridLayer(layer, aux2, val )){
                         fb_msgs_.poses.push_back(aux2);
                     }
-                    generateCycle(aux2,depth-1,layer, vx,vy);
+                    generateCycle(aux2,depth-1,layer, v);
 
                 }
             }
@@ -171,14 +171,14 @@ namespace gr_safety_gridmap{
             }
 
             //TODO create MotionModelClass
-            geometry_msgs::Pose generateMotion(const geometry_msgs::Pose in, int motion_type, const float ovx, const float ovy){
+            geometry_msgs::Pose generateMotion(const geometry_msgs::Pose in, int motion_type, const geometry_msgs::Vector3 ov){
                 //this motion is a hack... motion on the sensor frame not the relative path
                 geometry_msgs::Pose out;
                 out = in;
 
                 //double dt = (current_time - last_time).toSec();
                 auto dt = 1;
-                auto vth = 0.2;
+                auto vth = ov.z;
 
                 float vx =0.0;
                 float vy =0.0;
@@ -192,29 +192,29 @@ namespace gr_safety_gridmap{
                 switch(motion_type){
                     case 0:
                         //th += delta_th;
-                        vx = ovx;
+                        vx = ov.x;
                         break;
                     case 1:
-                        vx = ovx;
+                        vx = ov.x;
                         th += delta_th;
                         break;
                     case 2:
-                        vx = ovx;
+                        vx = ov.x;
                         th -= delta_th;
                         break;
                     case 3:
-                        vx = ovx;
+                        vx = ov.x;
                         th -= M_PI+delta_th;
                         break;
                     case 4:
-                        vx = ovx;
+                        vx = ov.x;
                         th += M_PI+delta_th;
                         break;
                     case 5:
                         //out = in;
                         break;
                     case 6:
-                        vx = -ovx;
+                        vx = -ov.x;
                         //vy = 1;
                         //th -= delta_th;
                         break;

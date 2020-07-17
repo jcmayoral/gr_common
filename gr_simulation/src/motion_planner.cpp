@@ -94,8 +94,8 @@ void MotionPlanner::performMotion(){
   auto repetitions = rand() % 10 + 1;
 
   for (auto i = 0; i<repetitions; i++){
-    motionx = (map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
-    motiony = (map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
+    motionx = 0.10;//(map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
+    motiony = 0.0;//(map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
     std::cout << "GOAL " << motionx << " , " << motiony<< std::endl;
 
     auto plan_result = planPath(motionx, motiony, 0);
