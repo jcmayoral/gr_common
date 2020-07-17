@@ -78,20 +78,50 @@ namespace gr_safety_gridmap{
                 for (auto o : poses.objects){
                     addLayerTuple(o.object_id);
                     gridmap.update_times_[o.object_id] = ros::Time::now();                        
-                    auto currentpose = o.pose;
-                    auto aux = currentpose;
-                    int searchdepth = int(tracking_distance_/resolution_);
-                    //recursivity
-                    search_depth_ = searchdepth;
-                    generateCycle(aux,searchdepth, o.object_id);
-                    
-                    //Update current position
-                    convert(currentpose);
-                    updateGridLayer(o.object_id, currentpose,  exp(0));
+
+                    if (o.is_dynamic){
+                        updateDynamic(o);
+                    }
+                    else{
+                        updateStatic(o);
+                    }
                 }
                 rpub_.publish(fb_msgs_);
                 //gridmap.setDataFlag(true);
                 };
+            }
+
+
+            void updateDynamic(safety_msgs::Object o){
+                auto currentpose = o.pose;
+                auto aux = currentpose;
+                int searchdepth = int(tracking_distance_/resolution_);
+                //recursivity
+                search_depth_ = searchdepth;
+                generateCycle(aux,searchdepth, o.object_id);
+                    
+                //Update current position
+                convert(currentpose);
+                updateGridLayer(o.object_id, currentpose,  exp(0));
+            }
+
+            void updateStatic(safety_msgs::Object o){
+                grid_map::Position center;
+                grid_map::Index index;
+                auto currentpose = o.pose;
+                convert(currentpose);
+                center(0) = currentpose.position.x;
+                center(1) = currentpose.position.y;
+                
+                bool validindex = gridmap.gridmap.getIndex(center, index);
+                if (!validindex){
+                    return;
+                }
+
+                auto radius = resolution_*2;
+                for (grid_map::CircleIterator iterator(gridmap.gridmap, center, radius);!iterator.isPastEnd(); ++iterator) {
+                    gridmap.gridmap.at(o.object_id, *iterator) = 1.0;
+                }
             }
 
             void generateCycle(geometry_msgs::Pose in, int depth, std::string layer){

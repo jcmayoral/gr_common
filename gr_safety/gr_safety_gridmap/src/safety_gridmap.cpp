@@ -212,9 +212,10 @@ void SafetyGridMap::updateGrid(){
             gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + layer;
             nobjects++;
 
-            indexes.objects_id.push_back(person_id);
-            indexes.risk_indexes.push_back(object_risk_index);
-
+            safety_msgs::RiskObject robj;
+            robj.object_id = person_id;
+            robj.risk_index =object_risk_index;
+            indexes.objects.push_back(robj);
         }
         std_msgs::Float32 score;
         gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safetyregions"));// * safety_layer;
