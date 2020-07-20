@@ -4,5 +4,6 @@ bool setstart
 geometry_msgs/PoseStamped startpose
 geometry_msgs/PoseStamped goalPose
 ---
----
 bool succeeded
+---
+bool is_alive
