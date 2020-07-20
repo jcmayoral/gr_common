@@ -1,0 +1,8 @@
+string object_id
+string motion_type
+bool setstart
+geometry_msgs/PoseStamped startpose
+geometry_msgs/PoseStamped goalPose
+---
+---
+bool succeeded

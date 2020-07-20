@@ -4,22 +4,24 @@ project(gr_action_msgs)
 find_package(catkin REQUIRED
         COMPONENTS
             std_msgs
+            geometry_msgs
             actionlib_msgs
 )
 
 
 add_action_files(
   DIRECTORY action
-  FILES GRNavigation.action
+  FILES GRNavigation.action SimMotionService.action
 )
 
 generate_messages(
-  DEPENDENCIES actionlib_msgs std_msgs
+  DEPENDENCIES actionlib_msgs std_msgs geometry_msgs
 )
 
 catkin_package(
     CATKIN_DEPENDS
         std_msgs
+        geometry_msgs
         actionlib_msgs
 )
 
