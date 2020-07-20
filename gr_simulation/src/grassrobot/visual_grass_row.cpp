@@ -1,4 +1,4 @@
-#include <visual_grass_row.h>
+#include <gazebo/visual_grass_row.h>
 #include <gtest/gtest.h>
 
 

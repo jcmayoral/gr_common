@@ -1,4 +1,4 @@
-#include <obstacle_coordinator.h>
+#include <gazebo/obstacle_coordinator.h>
 
 using namespace gazebo;
 

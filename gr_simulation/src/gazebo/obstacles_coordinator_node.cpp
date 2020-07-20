@@ -1,4 +1,4 @@
-#include <obstacle_coordinator.h>
+#include <gazebo/obstacle_coordinator.h>
 
 int main (int argc, char** argv){
     gazebo::client::setup(argc, argv);

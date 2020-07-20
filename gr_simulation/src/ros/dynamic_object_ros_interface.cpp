@@ -1,4 +1,4 @@
-#include <dynamic_object_ros_interface.h>
+#include <ros/dynamic_object_ros_interface.h>
 using namespace gazebo;
 
 GazeboROSDynamicObject::GazeboROSDynamicObject(){

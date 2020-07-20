@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 add_compile_options(-std=c++17)
 
-find_package(roscpp REQUIRED)
-find_package(std_msgs REQUIRED)
+find_package(roscpp REQUIRED COMPONENTS std_msgs geometry_msgs gr_action_msgs)
 find_package(gazebo REQUIRED)
+
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SBPL REQUIRED sbpl)
@@ -38,10 +38,10 @@ target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simula
 add_library(visualgrassrow SHARED src/grassrobot/visual_grass_row.cpp)
 target_link_libraries(visualgrassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
 
-add_library(motionplanner SHARED src/common/motion_planner.cpp)
+add_library(motionplanner SHARED src/gazebo/motion_planner.cpp)
 target_link_libraries(motionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY})
 
-add_library(obstaclescoordinator SHARED src/common/obstacles_coordinator.cpp)
+add_library(obstaclescoordinator SHARED src/gazebo/obstacles_coordinator.cpp)
 target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} motionplanner)
 
 add_executable(personvel_pub src/gazebo/grdyn_pub.cpp)

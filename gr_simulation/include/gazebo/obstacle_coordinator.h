@@ -9,7 +9,7 @@
 
 #include <gazebo/gazebo_config.h>
 #include <gazebo/gazebo_client.hh>
-#include <motion_planner.h>
+#include <gazebo/motion_planner.h>
 #include <thread>
 
 namespace gazebo{

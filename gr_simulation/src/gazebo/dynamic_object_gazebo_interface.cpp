@@ -1,4 +1,4 @@
-#include<dynamic_object_gazebo_interface.h>
+#include<gazebo/dynamic_object_gazebo_interface.h>
 
 using namespace gazebo;
 

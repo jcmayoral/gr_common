@@ -1,4 +1,4 @@
-#include <motion_planner.h>
+#include <gazebo/motion_planner.h>
 
 using namespace gazebo;
 

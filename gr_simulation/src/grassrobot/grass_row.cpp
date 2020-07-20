@@ -1,4 +1,4 @@
-#include <grass_row.h>
+#include <gazebo/grass_row.h>
 using namespace gazebo;
 
 GrassRow::GrassRow(): gznode(new transport::Node()){
