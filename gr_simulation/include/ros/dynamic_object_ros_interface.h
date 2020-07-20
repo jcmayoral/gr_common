@@ -25,6 +25,17 @@ namespace gazebo
     /// \brief Constructor
     public: 
         GazeboROSDynamicObject();
+        virtual ~GazeboROSDynamicObject(){
+          aserver->shutdown();
+          delete aserver;
+          rosSub.shutdown();
+          rosPub.shutdown();
+          std::cout << "destroyed0"<< std::endl;
+          is_ok = false;
+          rosQueueThread.join();
+          std::cout << "destroyed"<< std::endl;
+        }
+
         void SetAngVelocity(const double &_vel);
         void SetLinearVelocityX(const double &_vel);
         void SetLinearVelocityY(const double &_vel);
@@ -62,9 +73,9 @@ namespace gazebo
         ros::CallbackQueue rosQueue;
         /// \brief A thread the keeps running the rosQueue
         std::thread rosQueueThread;
+        bool is_ok;
 
         //
-        ros::NodeHandle nhh;
         actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>* aserver;
   };
 

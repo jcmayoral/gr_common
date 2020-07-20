@@ -1,9 +1,10 @@
 #include <ros/dynamic_object_ros_interface.h>
 using namespace gazebo;
 
-GazeboROSDynamicObject::GazeboROSDynamicObject(): nhh("~"){
+GazeboROSDynamicObject::GazeboROSDynamicObject(): is_ok(true){
     // Initialize ros, if it has not already bee initialized.
     if (!ros::isInitialized()){
+        std::cout << "Initializer called"<<std::endl;
         int argc = 0;
         char **argv = NULL;
         ros::init(argc, argv, "gazebo_client",
@@ -77,6 +78,7 @@ void GazeboROSDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     // Spin up the queue helper thread.
     this->rosQueueThread =
     std::thread(std::bind(&GazeboROSDynamicObject::QueueThread, this));
+    aserver->start();
 }
 
 void GazeboROSDynamicObject::OnRosMsg(const geometry_msgs::TwistConstPtr &_msg){
@@ -97,7 +99,7 @@ void GazeboROSDynamicObject::OnRosMsg(const geometry_msgs::TwistConstPtr &_msg){
 
 void GazeboROSDynamicObject::QueueThread(){
     static const double timeout = 0.01;
-    while (this->nh->ok()){
+    while (this->nh->ok() && is_ok){
         this->rosQueue.callAvailable(ros::WallDuration(timeout));
     }
 }
