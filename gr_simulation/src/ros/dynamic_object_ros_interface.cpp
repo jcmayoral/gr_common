@@ -28,6 +28,26 @@ void GazeboROSDynamicObject::executeCB(const gr_action_msgs::SimMotionPlannerGoa
         return;
     }
 
+    //Set Start Pose
+    const ignition::math::Pose3d pose;
+    //this->model->SetLinkWorldPose (pose);
+
+    uint32_t visualid;
+    /*
+    if (this->link->VisualId("visual", visualid)){
+       ignition::math::Pose3d pose;//(0,0,wz,0,0,0);
+       if(this->link->VisualPose(visualid,pose)){
+           pose.Pos().X() = 0.0;
+           pose.Pos().Y() = 1.0;
+           pose.Pos().Z() = 1.0;
+           if(this->link->SetVisualPose(visualid,pose)){
+               std::cout << "WORKS?"<<std::endl;
+           }
+       }
+    }
+    */
+    this->model->SetWorldPose(pose);
+
     // publish the feedback
     std::cout << "DONE" << std::endl;
 
