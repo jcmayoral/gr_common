@@ -27,12 +27,13 @@ namespace gazebo
         GazeboROSDynamicObject();
         virtual ~GazeboROSDynamicObject(){
           aserver->shutdown();
-          delete aserver;
+          //delete aserver;
+          aserver.reset();
           rosSub.shutdown();
           rosPub.shutdown();
           std::cout << "destroyed0"<< std::endl;
           is_ok = false;
-          rosQueueThread.join();
+          //rosQueueThread.join();
           std::cout << "destroyed"<< std::endl;
         }
 
@@ -50,6 +51,8 @@ namespace gazebo
 
         void executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal);
 
+        void goalCB();
+
     private: 
         void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg);
         void QueueThread();
@@ -64,7 +67,7 @@ namespace gazebo
 
         //For ROS
         /// \brief A node use for ROS transpor
-        ros::NodeHandlePtr nh;
+        //ros::NodeHandle nh;
         ros::Timer poseTimer;
         /// \brief A ROS subscriber
         ros::Subscriber rosSub;
@@ -73,10 +76,12 @@ namespace gazebo
         ros::CallbackQueue rosQueue;
         /// \brief A thread the keeps running the rosQueue
         std::thread rosQueueThread;
+        ros::CallbackQueue my_callback_queue;
+        
         bool is_ok;
+        boost::shared_ptr<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>> aserver;
+        //actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>* aserver;
 
-        //
-        actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>* aserver;
   };
 
   // Tell Gazebo about this plugin, so that Gazebo can call Load on this plugin.

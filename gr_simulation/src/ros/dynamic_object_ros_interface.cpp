@@ -2,20 +2,37 @@
 using namespace gazebo;
 
 GazeboROSDynamicObject::GazeboROSDynamicObject(): is_ok(true){
-    // Initialize ros, if it has not already bee initialized.
+    // Initialize ros, if it has not already bee initialized
     if (!ros::isInitialized()){
-        std::cout << "Initializer called"<<std::endl;
         int argc = 0;
         char **argv = NULL;
-        ros::init(argc, argv, "gazebo_client",
-        ros::init_options::NoSigintHandler);
+        ros::init(argc, argv, "gazebo_client");//,ros::init_options::NoSigintHandler);
+        ros::spinOnce();
     }
-    ros::NodeHandle nhh("~");
-    aserver = new actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>(nhh, std::string("SimMotionPlanner"), boost::bind(&GazeboROSDynamicObject::executeCB, this, _1), false);
+
 }
 
 void GazeboROSDynamicObject::executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal){
-    ROS_ERROR("here");
+    std::cout << "OK execute cb " << this->model->GetName() << std::endl;
+    gr_action_msgs::SimMotionPlannerFeedback feedback;
+    gr_action_msgs::SimMotionPlannerResult result;
+
+    if (this->model->GetName().compare(goal->object_id)){
+        std::cout<<  "WRONG ID "<<std::endl;
+        aserver->setAborted();
+        return;
+    }
+
+    if (aserver->isPreemptRequested() || !ros::ok()){
+        aserver->setPreempted();
+        return;
+    }
+
+    // publish the feedback
+    std::cout << "DONE" << std::endl;
+
+    aserver->publishFeedback(feedback);
+    aserver->setSucceeded(result);
 }
 
 void GazeboROSDynamicObject::SetAngVelocity(const double &_vel){
@@ -49,7 +66,6 @@ void GazeboROSDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
         lin_vely = _sdf->Get<double>("lin_vely");
     }
 
-
     //CallBack for Gazebo
     this->model = _model;
     this->model->SetGravityMode(false);
@@ -58,10 +74,21 @@ void GazeboROSDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,ang_velocity));
     std::string topicName = "~/" + this->model->GetName() + "/vel_cmd";
 
-    //Once all setup is finished
+    //}
+
     //Callback for ROS
     //this->nh.reset(new ros::NodeHandle("gazebo_client"));
-    this->nh = boost::make_shared<ros::NodeHandle>();
+    //this->nh = boost::make_shared<ros::NodeHandle>("~");
+    ros::NodeHandle nh;// = boost::make_shared<ros::NodeHandle>("~");
+    nh.setCallbackQueue(&my_callback_queue);
+    aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, std::string("SimMotionPlanner")+"/" + this->model->GetName(), 
+                                                                boost::bind(&GazeboROSDynamicObject::executeCB, this, _1), false);
+
+    //aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, std::string("SimMotionPlanner")+ "/" + this->model->GetName(), false);
+    //aserver->registerGoalCallback(boost::bind(&GazeboROSDynamicObject::goalCB, this));
+                                  
+    //aserver =  new actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>(*this->nh, std::string("SimMotionPlanner") , 
+    //                                                            boost::bind(&GazeboROSDynamicObject::executeCB, this, _1), false);
 
     //NOT WORKING TEST WITH full simulation
     //this->poseTimer = this->nh->createTimer(ros::Duration(0.1), &GRDynObstaclePlugin::updatePose, this);
@@ -71,14 +98,29 @@ void GazeboROSDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
             boost::bind(&GazeboROSDynamicObject::OnRosMsg, this, _1),
             ros::VoidPtr(), &this->rosQueue);
 
-    this->rosPub = this->nh->advertise<std_msgs::Bool>( "/" + this->model->GetName() + "/rrrrr", 1);
-    this->rosSub = this->nh->subscribe(so);
+    this->rosPub = nh.advertise<std_msgs::Bool>( "/" + this->model->GetName() + "/rrrrr", 1);
+    this->rosSub = nh.subscribe(so);
 
-    //update pose TODO fancy stuff
+    std::cout << "MODEL NAME " << this->model->GetName() << std::endl;
+
     // Spin up the queue helper thread.
-    this->rosQueueThread =
-    std::thread(std::bind(&GazeboROSDynamicObject::QueueThread, this));
+    this->rosQueueThread = std::thread(std::bind(&GazeboROSDynamicObject::QueueThread, this));
     aserver->start();
+    //ros::spinOnce();
+
+}
+
+void GazeboROSDynamicObject::goalCB(){
+    gr_action_msgs::SimMotionPlannerGoal goal = *(aserver->acceptNewGoal());
+    gr_action_msgs::SimMotionPlannerFeedback feedback;
+    gr_action_msgs::SimMotionPlannerResult result;
+
+    if (aserver->isPreemptRequested() || !ros::ok()){
+        aserver->setPreempted();
+    }
+    aserver->publishFeedback(feedback);
+    aserver->setSucceeded(result);
+
 }
 
 void GazeboROSDynamicObject::OnRosMsg(const geometry_msgs::TwistConstPtr &_msg){
@@ -99,7 +141,10 @@ void GazeboROSDynamicObject::OnRosMsg(const geometry_msgs::TwistConstPtr &_msg){
 
 void GazeboROSDynamicObject::QueueThread(){
     static const double timeout = 0.01;
-    while (this->nh->ok() && is_ok){
-        this->rosQueue.callAvailable(ros::WallDuration(timeout));
-    }
+    while (is_ok){
+        //ros::getGlobalCallbackQueue()->callAvailable(ros::WallDuration(0));
+        my_callback_queue.callAvailable(ros::WallDuration());
+       this->rosQueue.callAvailable(ros::WallDuration(timeout));
+       ros::Duration(0.5).sleep();
+      }
 }
