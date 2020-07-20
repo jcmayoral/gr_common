@@ -1,7 +1,7 @@
 #include <ros/dynamic_object_ros_interface.h>
 using namespace gazebo;
 
-GazeboROSDynamicObject::GazeboROSDynamicObject(){
+GazeboROSDynamicObject::GazeboROSDynamicObject(): nhh("~"){
     // Initialize ros, if it has not already bee initialized.
     if (!ros::isInitialized()){
         int argc = 0;
@@ -9,6 +9,12 @@ GazeboROSDynamicObject::GazeboROSDynamicObject(){
         ros::init(argc, argv, "gazebo_client",
         ros::init_options::NoSigintHandler);
     }
+    ros::NodeHandle nhh("~");
+    aserver = new actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>(nhh, std::string("SimMotionPlanner"), boost::bind(&GazeboROSDynamicObject::executeCB, this, _1), false);
+}
+
+void GazeboROSDynamicObject::executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal){
+    ROS_ERROR("here");
 }
 
 void GazeboROSDynamicObject::SetAngVelocity(const double &_vel){

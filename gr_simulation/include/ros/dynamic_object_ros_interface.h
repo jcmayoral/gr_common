@@ -7,6 +7,8 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 
+#include <gr_action_msgs/SimMotionPlannerAction.h>
+#include <actionlib/server/simple_action_server.h>
 
 #include <thread>
 #include <ros/ros.h>
@@ -35,6 +37,8 @@ namespace gazebo
         virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
         void updatePose(const ros::TimerEvent& event);
 
+        void executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal);
+
     private: 
         void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg);
         void QueueThread();
@@ -58,6 +62,10 @@ namespace gazebo
         ros::CallbackQueue rosQueue;
         /// \brief A thread the keeps running the rosQueue
         std::thread rosQueueThread;
+
+        //
+        ros::NodeHandle nhh;
+        actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>* aserver;
   };
 
   // Tell Gazebo about this plugin, so that Gazebo can call Load on this plugin.

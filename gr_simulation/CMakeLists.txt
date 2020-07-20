@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 add_compile_options(-std=c++17)
 
 find_package(roscpp REQUIRED COMPONENTS std_msgs geometry_msgs gr_action_msgs)
+find_package(gr_action_msgs REQUIRED)
+find_package(actionlib REQUIRED)
+
 find_package(gazebo REQUIRED)
 
 
@@ -13,11 +16,13 @@ find_library(SBPL_LIBRARY NAMES sbpl PATHS ${SBPL_LIBRARY_DIRS} NO_DEFAULT_PATH)
 include_directories(include
                     ${roscpp_INCLUDE_DIRS}
                     ${geometry_msgs_INCLUDE_DIRS}
+                    ${gr_action_msgs_INCLUDE_DIRS}
                     ${GAZEBO_INCLUDE_DIRS}
                     ${CMAKE_CURRENT_BINARY_DIR}/msgs
                     ${SBPL_INCLUDE_DIRS})
 
-link_directories(${GAZEBO_LIBRARY_DIRS} 
+link_directories(${Boost_INCLUDE_DIRS}
+                 ${GAZEBO_LIBRARY_DIRS} 
                  ${CMAKE_CURRENT_BINARY_DIR}/msgs
                  ${SBPL_LIBRARY_DIRS})
 add_subdirectory(msgs)
@@ -30,7 +35,8 @@ add_library(dynobjectgazebo SHARED src/gazebo/dynamic_object_gazebo_interface.cp
 target_link_libraries(dynobjectgazebo ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
 add_library(dynobjectros SHARED src/ros/dynamic_object_ros_interface.cpp)
-target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
+target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES})
+#add_dependencies(dynobjectros   ${gr_action_msgs_EXPORTED_TARGETS})
 
 add_library(grassrow SHARED src/grassrobot/grass_row.cpp)
 target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
