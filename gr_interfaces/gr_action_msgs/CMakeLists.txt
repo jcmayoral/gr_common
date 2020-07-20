@@ -11,7 +11,7 @@ find_package(catkin REQUIRED
 
 add_action_files(
   DIRECTORY action
-  FILES GRNavigation.action SimMotionService.action
+  FILES GRNavigation.action SimMotionPlanner.action
 )
 
 generate_messages(
