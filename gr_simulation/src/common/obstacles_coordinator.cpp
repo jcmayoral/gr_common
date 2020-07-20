@@ -33,7 +33,7 @@ void ObstaclesCoordinator::start(){
     for (auto it = obstacles_motion_planners_.begin(); it!= obstacles_motion_planners_.end(); it++){
         it->join();
     }
-    std::cout << "ending start";
+    std::cout << "ending start" << std::endl;
     //while(true){
     //    sleep(3);
     //    std::cout << obstacles_motion_planners_.size() << std::endl;

@@ -26,33 +26,27 @@ add_subdirectory(msgs)
 #list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 
-add_library(hello_world SHARED tutorial/hello_world.cc)
-target_link_libraries(hello_world ${GAZEBO_LIBRARIES})
-
-add_library(model_push SHARED tutorial/model_push.cc)
-target_link_libraries(model_push ${GAZEBO_LIBRARIES})
-
-add_library(dynobjectgazebo SHARED src/dynamic_object_gazebo_interface.cpp)
+add_library(dynobjectgazebo SHARED src/gazebo/dynamic_object_gazebo_interface.cpp)
 target_link_libraries(dynobjectgazebo ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
-add_library(dynobjectros SHARED src/dynamic_object_ros_interface.cpp)
+add_library(dynobjectros SHARED src/ros/dynamic_object_ros_interface.cpp)
 target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
-add_library(grassrow SHARED src/grass_row.cpp)
+add_library(grassrow SHARED src/grassrobot/grass_row.cpp)
 target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
 
-add_library(visualgrassrow SHARED src/visual_grass_row.cpp)
+add_library(visualgrassrow SHARED src/grassrobot/visual_grass_row.cpp)
 target_link_libraries(visualgrassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
 
-add_library(motionplanner SHARED src/motion_planner.cpp)
+add_library(motionplanner SHARED src/common/motion_planner.cpp)
 target_link_libraries(motionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY})
 
-add_library(obstaclescoordinator SHARED src/obstacles_coordinator.cpp)
+add_library(obstaclescoordinator SHARED src/common/obstacles_coordinator.cpp)
 target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} motionplanner)
 
-add_executable(personvel_pub src/grdyn_pub.cpp)
-add_executable(grass_cutter src/grass_event_caller.cpp)
-add_executable(run_obstacle_coordinator src/obstacles_coordinator_node.cpp)
+add_executable(personvel_pub src/gazebo/grdyn_pub.cpp)
+add_executable(grass_cutter src/grassrobot/grass_event_caller.cpp)
+add_executable(run_obstacle_coordinator src/gazebo/obstacles_coordinator_node.cpp)
 #include(FindBoost)
 #  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)
 #  target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
