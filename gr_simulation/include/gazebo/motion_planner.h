@@ -29,12 +29,13 @@ namespace gazebo{
                 map_size_ = motionplanner.map_size_;
             }
             void OnMsg(ConstPosePtr &_msg);
-            void operator()(gazebo::transport::NodePtr node, std::string obstacleid, double map_size);
-            bool planPath(double goalx, double goaly, double goalyaw);
+            bool operator()(gazebo::transport::NodePtr node, std::string obstacleid, double map_size, const msgs::Vector3d* goal = NULL);
+            bool planPath();
             void ExecuteCommand();
             bool run(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize);
             void stop();
-            void performMotion();
+            bool performMotion();
+            void setupMap(std::string obstacleid, double mapsize);
 
         private:
             transport::SubscriberPtr odom_sub_;

@@ -16,7 +16,7 @@
 #include <ros/subscribe_options.h>
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Bool.h>
-
+#include <gazebo/motion_planner.h>
 namespace gazebo
 {
   /// \brief A plugin to control a GR Dynamic Obstacle sensor.
@@ -53,6 +53,9 @@ namespace gazebo
 
         void goalCB();
 
+        void OnMsg(ConstVector3dPtr &_msg);
+        void OnUpdate();
+
     private: 
         void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg);
         void QueueThread();
@@ -67,7 +70,6 @@ namespace gazebo
 
         //For ROS
         /// \brief A node use for ROS transpor
-        //ros::NodeHandle nh;
         ros::Timer poseTimer;
         /// \brief A ROS subscriber
         ros::Subscriber rosSub;
@@ -80,7 +82,14 @@ namespace gazebo
         
         bool is_ok;
         boost::shared_ptr<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>> aserver;
+        MotionPlanner motionplanner;
         //actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>* aserver;
+
+        transport::NodePtr node;
+        transport::SubscriberPtr sub;
+        transport::PublisherPtr pub;
+        event::ConnectionPtr updateConnection;
+
 
   };
 

@@ -6,122 +6,130 @@ MotionPlanner::MotionPlanner(): obstacleid_("defaults"), initialized_(false),nce
   std::cout << "constructor";
 }
 
+bool MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize, const msgs::Vector3d* goal){
+  std::cout << "OPERATOR "<<std::endl;
+  if (goal == NULL){
+    current_goal_.set_x(10.0);
+  }
 
-void MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize){
-  run(node, obstacleid, mapsize);
+  else{
+    current_goal_ = *goal;
+  }
+  
+  return run(node, obstacleid, mapsize);
+}
+
+void MotionPlanner::setupMap(std::string obstacleid, double mapsize){
+  obstacleid_ = obstacleid;
+  double map_size = mapsize; //meters
+  std::cout << "Creating Motion model for  " << obstacleid << std::endl;
+  std::cout << "Map Size  " << mapsize << std::endl;
+  map_size_ = map_size;
+
+  env_ = new EnvironmentNAVXYTHETALAT();
+
+  planner_ = new ARAPlanner(env_, false); //forward_search
+  //TODO PARAMETRIZE
+
+  resolution_ = 0.1;
+  double nominalvel_mpersecs = 0.1;
+  double timetoturn45degsinplace_secs = 0.1;
+  int obst_cost_thresh= 2.0;
+
+  if(!env_->SetEnvParameter("cost_inscribed_thresh",2.0)){
+    exit(1);
+  }
+
+  unsigned char cost_possibly_circumscribed_tresh = 0;
+  if(!env_->SetEnvParameter("cost_possibly_circumscribed_thresh", cost_possibly_circumscribed_tresh)){
+    exit(1);
+  }
+
+  //circular footprint
+  std::vector<sbpl_2Dpt_t> perimeterptsV;
+  perimeterptsV.reserve(1);//circle;
+  sbpl_2Dpt_t pt_m;
+  double halfwidth = 0.01; //0.3;
+  double halflength = 0.01; //0.45;
+  pt_m.x = -halflength;
+  pt_m.y = -halfwidth;
+  perimeterptsV.push_back(pt_m);
+  pt_m.x = halflength;
+  pt_m.y = -halfwidth;
+  perimeterptsV.push_back(pt_m);
+  pt_m.x = halflength;
+  pt_m.y = halfwidth;
+  perimeterptsV.push_back(pt_m);
+  pt_m.x = -halflength;
+  pt_m.y = halfwidth;
+  perimeterptsV.push_back(pt_m);
+
+  bool ret;
+  std::string primitive_filename_;
+  primitive_filename_ = "my_mprim_test.mprim";
+
+  ncells_ = int(map_size/resolution_ + 1);
+
+  try{
+    ret = env_->InitializeEnv(ncells_,
+                              ncells_,
+                              0, // mapdata
+                              0, 0, 0, // start (x, y, theta, t)
+                              0, 0, 0, // goal (x, y, theta)
+                              0, 0, 0, //goal tolerance
+                              perimeterptsV, resolution_, nominalvel_mpersecs,
+                              timetoturn45degsinplace_secs, obst_cost_thresh,
+                              primitive_filename_.c_str());
+  }
+  catch(SBPL_Exception e){
+    std::cerr << e.what() << std::endl;
+    std::cerr << "SBPL encountered a fatal exception!"<< std::endl;
+    ret = false;
+  }
 }
 
 bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize){
-    obstacleid_ = obstacleid;
-    double map_size = mapsize; //meters
-    std::cout << "Creating Motion model for  " << obstacleid << std::endl;
-    std::cout << "Map Size  " << mapsize << std::endl;
-    map_size_ = map_size;
-
-    env_ = new EnvironmentNAVXYTHETALAT();
-
-    planner_ = new ARAPlanner(env_, false); //forward_search
-    //TODO PARAMETRIZE
-
-    resolution_ = 0.1;
-    double nominalvel_mpersecs = 0.1;
-    double timetoturn45degsinplace_secs = 0.1;
-    int obst_cost_thresh= 2.0;
-
-    if(!env_->SetEnvParameter("cost_inscribed_thresh",2.0)){
-      exit(1);
-    }
-
-    unsigned char cost_possibly_circumscribed_tresh = 0;
-    if(!env_->SetEnvParameter("cost_possibly_circumscribed_thresh", cost_possibly_circumscribed_tresh)){
-      exit(1);
-    }
-
-    //circular footprint
-    std::vector<sbpl_2Dpt_t> perimeterptsV;
-    perimeterptsV.reserve(1);//circle;
-    sbpl_2Dpt_t pt_m;
-    double halfwidth = 0.01; //0.3;
-    double halflength = 0.01; //0.45;
-    pt_m.x = -halflength;
-    pt_m.y = -halfwidth;
-    perimeterptsV.push_back(pt_m);
-    pt_m.x = halflength;
-    pt_m.y = -halfwidth;
-    perimeterptsV.push_back(pt_m);
-    pt_m.x = halflength;
-    pt_m.y = halfwidth;
-    perimeterptsV.push_back(pt_m);
-    pt_m.x = -halflength;
-    pt_m.y = halfwidth;
-    perimeterptsV.push_back(pt_m);
-
-    bool ret;
-    std::string primitive_filename_;
-    primitive_filename_ = "my_mprim_test.mprim";
-
-    ncells_ = int(map_size/resolution_ + 1);
-
-    try{
-      ret = env_->InitializeEnv(ncells_,
-                                ncells_,
-                                0, // mapdata
-                                0, 0, 0, // start (x, y, theta, t)
-                                0, 0, 0, // goal (x, y, theta)
-                                0, 0, 0, //goal tolerance
-                                perimeterptsV, resolution_, nominalvel_mpersecs,
-                                timetoturn45degsinplace_secs, obst_cost_thresh,
-                                primitive_filename_.c_str());
-    }
-    catch(SBPL_Exception e){
-      std::cerr << e.what() << std::endl;
-      std::cerr << "SBPL encountered a fatal exception!"<< std::endl;
-      ret = false;
-    }
-
-    vel_pub_ = node->Advertise<gazebo::msgs::Vector3d>("/" + obstacleid + "/vel_cmd");
-    vel_pub_->WaitForConnection();
-    odom_sub_ = node->Subscribe("/" + obstacleid + "/odom",&MotionPlanner::OnMsg, this);
-    std::cout << odom_sub_->GetTopic() << std::endl;
-    performMotion();
+  setupMap(obstacleid, mapsize);
+  vel_pub_ = node->Advertise<gazebo::msgs::Vector3d>("/" + obstacleid + "/vel_cmd");
+  vel_pub_->WaitForConnection();
+  odom_sub_ = node->Subscribe("/" + obstacleid + "/odom",&MotionPlanner::OnMsg, this);
+  return performMotion();
 }
 
-void MotionPlanner::performMotion(){
+bool MotionPlanner::performMotion(){
+  std::cout << "performing motion "<< std::endl;
 
   double motionx;
   double motiony;
 
-  auto repetitions = rand() % 10 + 1;
+  //motionx = 0.10;//(map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
+  //motiony = 0.0;//(map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
+  //std::cout << "GOAL " << motionx << " , " << motiony<< std::endl;
 
-  for (auto i = 0; i<repetitions; i++){
-    motionx = 0.10;//(map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
-    motiony = 0.0;//(map_size_) *(rand()/(double)RAND_MAX) - map_size_/2;
-    std::cout << "GOAL " << motionx << " , " << motiony<< std::endl;
+  auto plan_result = planPath();
+  std::cout << "Planned " << plan_result << " for " << obstacleid_ <<std::endl;
+  std::cout << "Plan size " << sbpl_path_.size() << std::endl;
+  error_ = -1;
+  double dist2Goal = 10000;
 
-    auto plan_result = planPath(motionx, motiony, 0);
-    std::cout << "Planned " << plan_result << " for " << obstacleid_ <<std::endl;
-    std::cout << "Plan size " << sbpl_path_.size() << std::endl;
-    error_ = -1;
-    double dist2Goal = 10000;
-
-    if (!plan_result){
-      std::cout << "failuire on path planning motion " << i << std::endl;
-      continue;
-    }
-
-    while(sbpl_path_.size()>1 && dist2Goal> 0.25){
-      ExecuteCommand();
-      std::this_thread::sleep_for(std::chrono::milliseconds(80));
-      dist2Goal = sqrt(pow(current_goal_.x() - current_pose_.x() ,2) + pow(current_goal_.y() - current_pose_.y() ,2)); 
-      std::cout << dist2Goal << " : " << obstacleid_ << "and " << sbpl_path_.size() << std::endl;
-    }
-    stop();
-
-    std::cout << "END motion number" << i+1 << " of " << repetitions << " person id:  " << obstacleid_ << std::endl;
-    //std::cout << " x " << current_pose_.x() << " , " << current_pose_.y() << std::endl;
-
-    //going backwards
+  if (!plan_result){
+    std::cout << "failuire on path planning motion " << std::endl;
+    return false;
   }
+
+  while(sbpl_path_.size()>1 && dist2Goal> 0.25){
+    ExecuteCommand();
+    std::this_thread::sleep_for(std::chrono::milliseconds(80));
+    dist2Goal = sqrt(pow(current_goal_.x() - current_pose_.x() ,2) + pow(current_goal_.y() - current_pose_.y() ,2)); 
+    std::cout << dist2Goal << " : " << obstacleid_ << "and " << sbpl_path_.size() << std::endl;
+  }
+  stop();
+
+  std::cout << "END motion number person id:  " << obstacleid_ << std::endl;
+  return true;
+  //std::cout << " x " << current_pose_.x() << " , " << current_pose_.y() << std::endl;
+
+  //going backwards
 }
 
 void MotionPlanner::ExecuteCommand(){
@@ -156,16 +164,13 @@ void MotionPlanner::stop(){
 void MotionPlanner::OnMsg(ConstPosePtr &_msg){
     //boost::mutex::scoped_lock lck(mtx_);
     initialized_ = true;
-    //mutex crashes -> it is a thread not so sure how to do it here.
     //std::lock_guard<std::mutex> guard(mtx_);
-    //std::cout << "odometry received on "<< odom_sub_->GetTopic() << std::endl;
     current_pose_ = _msg->position();
-    // Create a a vector3 message
 }
 
-bool MotionPlanner::planPath(double goalx, double goaly, double goalyaw){
+bool MotionPlanner::planPath(){
     while(!initialized_){
-      //std::cout << "wait for initialization" << std::endl;
+      std::cout << "wait for initialization" << std::endl;
     }
     sbpl_path_.clear();
 
@@ -192,9 +197,9 @@ bool MotionPlanner::planPath(double goalx, double goaly, double goalyaw){
 
   try{
     //Substract offset
-    current_goal_.set_x(goalx);
-    current_goal_.set_y(goaly);
-    
+    //current_goal_.set_x(goalx);
+    //current_goal_.set_y(goaly);
+    float goalyaw = 0.0;
     int ret = env_->SetGoal(current_goal_.x()+offset_, current_goal_.y()+offset_, goalyaw);
 
     if(ret < 0 || planner_->set_goal(ret) == 0){

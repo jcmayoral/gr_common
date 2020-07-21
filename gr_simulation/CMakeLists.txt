@@ -34,10 +34,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
 add_library(dynobjectgazebo SHARED src/gazebo/dynamic_object_gazebo_interface.cpp)
 target_link_libraries(dynobjectgazebo ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 
-add_library(dynobjectros SHARED src/ros/dynamic_object_ros_interface.cpp)
-target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES})
-#add_dependencies(dynobjectros   ${gr_action_msgs_EXPORTED_TARGETS})
-
 add_library(grassrow SHARED src/grassrobot/grass_row.cpp)
 target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
 
@@ -49,6 +45,12 @@ target_link_libraries(motionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SB
 
 add_library(obstaclescoordinator SHARED src/gazebo/obstacles_coordinator.cpp)
 target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} motionplanner)
+
+#ROS
+add_library(dynobjectros SHARED src/ros/dynamic_object_ros_interface.cpp)
+target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} motionplanner)
+#add_dependencies(dynobjectros   ${gr_action_msgs_EXPORTED_TARGETS})
+
 
 add_executable(personvel_pub src/gazebo/grdyn_pub.cpp)
 add_executable(grass_cutter src/grassrobot/grass_event_caller.cpp)
