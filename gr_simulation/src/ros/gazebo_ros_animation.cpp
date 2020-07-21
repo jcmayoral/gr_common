@@ -103,10 +103,28 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
 
 void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal){
-    start = !start;
-    if (!start){
+    
+    ignition::math::Pose3d pose;
+    if(goal->setstart){
+        pose.Pos().X(goal->startpose.pose.position.x);
+        pose.Pos().Y(goal->startpose.pose.position.y);
+        pose.Pos().Z(1.25);
+        this->model->SetWorldPose(pose);
+        this->actor->SetWorldPose(pose, true, true);
         this->Reset();
     }
+
+
+    ignition::math::Vector3d newTarget;
+    newTarget.X(goal->goalPose.pose.position.x);
+    newTarget.Y(goal->goalPose.pose.position.y);
+    newTarget.Z(1.25);
+    this->target = newTarget;
+    this->Reset();
+
+
+
+
     gr_action_msgs::SimMotionPlannerFeedback feedback;
     gr_action_msgs::SimMotionPlannerResult result;
     aserver->setSucceeded(result);
@@ -114,14 +132,16 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
 
 /////////////////////////////////////////////////
 void GazeboROSAnimation::Reset(){
-    start = false;
+  start = false;
   this->velocity = 0.8;
   this->lastUpdate = 0;
 
+  /*
   if (this->sdf && this->sdf->HasElement("target"))
     this->target = this->sdf->Get<ignition::math::Vector3d>("target");
   else
     this->target = ignition::math::Vector3d(0, -5, 1.2138);
+    */
 
   auto skelAnims = this->actor->SkeletonAnimations();
   if (skelAnims.find(WALKING_ANIMATION) == skelAnims.end())
@@ -188,9 +208,6 @@ void GazeboROSAnimation::HandleObstacles(ignition::math::Vector3d &_pos)
 /////////////////////////////////////////////////
 void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
 {
-  if (!start){
-      return;
-  }
   // Time delta
   double dt = (_info.simTime - this->lastUpdate).Double();
 
@@ -199,14 +216,20 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
   ignition::math::Vector3d rpy = pose.Rot().Euler();
 
   double distance = pos.Length();
+  std::cout << "DIST TO TARGET "<< distance << std::endl;
+  if (distance < 0.1){
+      return;
+  }
 
   // Choose a new target position if the actor has reached its current
   // target.
+  /*
   if (distance < 0.3)
   {
     this->ChooseNewTarget();
     pos = this->target - pose.Pos();
   }
+  */
 
   // Normalize the direction vector, and apply the target weight
   pos = pos.Normalize() * this->targetWeight;
@@ -231,9 +254,11 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
   }
 
   // Make sure the actor stays within bounds
+  /*
   pose.Pos().X(std::max(-3.0, std::min(3.5, pose.Pos().X())));
   pose.Pos().Y(std::max(-10.0, std::min(2.0, pose.Pos().Y())));
   pose.Pos().Z(1.2138);
+  */
 
   // Distance traveled is used to coordinate motion with the walking
   // animation
