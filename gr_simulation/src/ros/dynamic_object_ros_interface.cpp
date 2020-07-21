@@ -44,7 +44,7 @@ void GazeboROSDynamicObject::executeCB(const gr_action_msgs::SimMotionPlannerGoa
     gazebo::transport::NodePtr node(new gazebo::transport::Node);
     node->Init();
 
-    bool res = this->motionplanner(node,this->model->GetName(), 30.0);
+    bool res = this->motionplanner(node,this->model->GetName(), 100.0);
     if (res){
         aserver->setSucceeded(result);
     }

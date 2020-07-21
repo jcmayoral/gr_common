@@ -50,7 +50,8 @@ target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIE
 add_library(dynobjectros SHARED src/ros/dynamic_object_ros_interface.cpp)
 target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} motionplanner)
 #add_dependencies(dynobjectros   ${gr_action_msgs_EXPORTED_TARGETS})
-
+add_library(myrosgazeboanimation SHARED src/ros/gazebo_ros_animation.cpp)
+target_link_libraries(myrosgazeboanimation ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} motionplanner)
 
 add_executable(personvel_pub src/gazebo/grdyn_pub.cpp)
 add_executable(grass_cutter src/grassrobot/grass_event_caller.cpp)
@@ -66,4 +67,10 @@ file(GLOB PRIMITIVES_FILES
   "*.mprim"
 )
 file(COPY ${PRIMITIVES_FILES} 
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+file(GLOB WORLDS_FILES
+  "worlds/*.world"
+)
+file(COPY ${WORLDS_FILES} 
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
