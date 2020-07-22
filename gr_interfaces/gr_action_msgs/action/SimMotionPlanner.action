@@ -2,9 +2,11 @@ string object_id
 string motion_type
 bool setstart
 bool is_motion
+float64 linearspeed
 geometry_msgs/PoseStamped startpose
 geometry_msgs/PoseStamped goalPose
 ---
 bool succeeded
+float64 executing_time
 ---
 bool is_alive
