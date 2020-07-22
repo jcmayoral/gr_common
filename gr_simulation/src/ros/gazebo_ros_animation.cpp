@@ -139,8 +139,15 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
 
 
   this->Reset();
+  
+  
+  auto start = std::chrono::high_resolution_clock::now();
+  while (!is_motionfinished);
 
+  auto finish = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = finish - start;
 
+  result.executing_time = elapsed.count();
   aserver->setSucceeded(result);
 }
 
