@@ -23,6 +23,7 @@ GZ_REGISTER_MODEL_PLUGIN(GazeboROSAnimation)
 
 /////////////////////////////////////////////////
 GazeboROSAnimation::GazeboROSAnimation(): is_motionfinished(true), motion_type("stand"){
+    this->velocity = 0.1;
     if (!ros::isInitialized()){
         int argc = 0;
         char **argv = NULL;
@@ -116,16 +117,35 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
   newTarget.Y(goal->goalPose.pose.position.y);
   newTarget.Z(goal->goalPose.pose.position.z + 1.05);
   this->target = newTarget;
-  this->Reset();
+
+
+  this->velocity = goal->linearspeed;
+
   if(goal->is_motion){
     is_motionfinished = false;
   }
+
+  if (goal->linearspeed < 0.05){
+    std::cout << " Linearspeed " << goal->linearspeed << " is to low setting to stand " << std::endl;
+    motion_type = static_cast<std::string> ("stand");
+    is_motionfinished = true;
+  }
+
+
+  if (goal->linearspeed > 0.5){
+    std::cout << " Linearspeed " << goal->linearspeed << " is to high setting to run " << std::endl;
+    motion_type = static_cast<std::string> ("run");
+  }
+
+
+  this->Reset();
+
+
   aserver->setSucceeded(result);
 }
 
 /////////////////////////////////////////////////
 void GazeboROSAnimation::Reset(){
-  this->velocity = 0.8;
   this->lastUpdate = 0;
 
   /*
