@@ -1,6 +1,7 @@
 string object_id
 string motion_type
 bool setstart
+bool is_motion
 geometry_msgs/PoseStamped startpose
 geometry_msgs/PoseStamped goalPose
 ---
