@@ -21,11 +21,8 @@
 using namespace gazebo;
 GZ_REGISTER_MODEL_PLUGIN(GazeboROSAnimation)
 
-#define WALKING_ANIMATION "walking"
-
 /////////////////////////////////////////////////
-GazeboROSAnimation::GazeboROSAnimation(): start(false)
-{
+GazeboROSAnimation::GazeboROSAnimation(): is_motionfinished(true){
     if (!ros::isInitialized()){
         int argc = 0;
         char **argv = NULL;
@@ -39,7 +36,6 @@ GazeboROSAnimation::GazeboROSAnimation(): start(false)
 /////////////////////////////////////////////////
 void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-    std::cout << "LOAD "<<std::endl;
   this->model = _model;
   this->sdf = _sdf;
   this->actor = boost::dynamic_pointer_cast<physics::Actor>(_model);
@@ -85,7 +81,6 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   }
   this->model->SetWorldPose(startpose);
 
-
   ros::NodeHandle nh;// = boost::make_shared<ros::NodeHandle>("~");
   nh.setCallbackQueue(&my_callback_queue);
 
@@ -98,41 +93,45 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
           std::bind(&GazeboROSAnimation::OnUpdate, this, std::placeholders::_1)));
 
   this->Reset();
-
 }
 
 
 void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal){
-    
-    ignition::math::Pose3d pose;
-    if(goal->setstart){
-        pose.Pos().X(goal->startpose.pose.position.x);
-        pose.Pos().Y(goal->startpose.pose.position.y);
-        pose.Pos().Z(1.25);
-        this->model->SetWorldPose(pose);
-        this->actor->SetWorldPose(pose, true, true);
-        this->Reset();
-    }
+  gr_action_msgs::SimMotionPlannerFeedback feedback;
+  gr_action_msgs::SimMotionPlannerResult result;
 
+  if (std::find(std::begin(AVAILABLEMOTIONS), std::end(AVAILABLEMOTIONS), goal->motion_type) == std::end(AVAILABLEMOTIONS)){
+    ROS_ERROR("Motion request not found ");
+    aserver->setAborted(result);
+    return;
+  }
 
-    ignition::math::Vector3d newTarget;
-    newTarget.X(goal->goalPose.pose.position.x);
-    newTarget.Y(goal->goalPose.pose.position.y);
-    newTarget.Z(1.25);
-    this->target = newTarget;
+  motion_type = static_cast<std::string> (goal->motion_type);
+
+  ignition::math::Pose3d pose;
+  if(goal->setstart){
+    pose.Pos().X(goal->startpose.pose.position.x);
+    pose.Pos().Y(goal->startpose.pose.position.y);
+    pose.Pos().Z(1.25);
+    this->model->SetWorldPose(pose);
+    this->actor->SetWorldPose(pose, true, true);
     this->Reset();
+  }
 
-
-
-
-    gr_action_msgs::SimMotionPlannerFeedback feedback;
-    gr_action_msgs::SimMotionPlannerResult result;
-    aserver->setSucceeded(result);
+  ignition::math::Vector3d newTarget;
+  newTarget.X(goal->goalPose.pose.position.x);
+  newTarget.Y(goal->goalPose.pose.position.y);
+  newTarget.Z(1.25);
+  this->target = newTarget;
+  this->Reset();
+  if(goal->is_motion){
+    is_motionfinished = false;
+  }
+  aserver->setSucceeded(result);
 }
 
 /////////////////////////////////////////////////
 void GazeboROSAnimation::Reset(){
-  start = false;
   this->velocity = 0.8;
   this->lastUpdate = 0;
 
@@ -144,42 +143,23 @@ void GazeboROSAnimation::Reset(){
     */
 
   auto skelAnims = this->actor->SkeletonAnimations();
-  if (skelAnims.find(WALKING_ANIMATION) == skelAnims.end())
+  for (auto const& element : skelAnims) {
+    std::cout << "animation Available " << element.first << "\n";
+  }
+
+  if (skelAnims.find(motion_type) == skelAnims.end())
   {
-    gzerr << "Skeleton animation " << WALKING_ANIMATION << " not found.\n";
+    gzerr << "Skeleton animation " << motion_type << " not found.\n";
   }
   else
   {
     // Create custom trajectory
     this->trajectoryInfo.reset(new physics::TrajectoryInfo());
-    this->trajectoryInfo->type = WALKING_ANIMATION;
+    this->trajectoryInfo->type = motion_type;
     this->trajectoryInfo->duration = 1.0;
 
     this->actor->SetCustomTrajectory(this->trajectoryInfo);
   }
-}
-
-/////////////////////////////////////////////////
-void GazeboROSAnimation::ChooseNewTarget()
-{
-  ignition::math::Vector3d newTarget(this->target);
-  while ((newTarget - this->target).Length() < 2.0)
-  {
-    newTarget.X(ignition::math::Rand::DblUniform(-3, 3.5));
-    newTarget.Y(ignition::math::Rand::DblUniform(-10, 2));
-
-    for (unsigned int i = 0; i < this->world->ModelCount(); ++i)
-    {
-      double dist = (this->world->ModelByIndex(i)->WorldPose().Pos()
-          - newTarget).Length();
-      if (dist < 2.0)
-      {
-        newTarget = this->target;
-        break;
-      }
-    }
-  }
-  this->target = newTarget;
 }
 
 /////////////////////////////////////////////////
@@ -216,9 +196,14 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
   ignition::math::Vector3d rpy = pose.Rot().Euler();
 
   double distance = pos.Length();
-  std::cout << "DIST TO TARGET "<< distance << std::endl;
-  if (distance < 0.1){
-      return;
+  if (is_motionfinished){
+    return;
+  }
+  if (distance < 0.2){
+    is_motionfinished = true;
+    motion_type = static_cast<std::string>("stand");
+    Reset();
+    return;
   }
 
   // Choose a new target position if the actor has reached its current
@@ -230,6 +215,7 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
     pos = this->target - pose.Pos();
   }
   */
+
 
   // Normalize the direction vector, and apply the target weight
   pos = pos.Normalize() * this->targetWeight;

@@ -5,18 +5,58 @@
       <uri>model://sun</uri>
     </include>
     <actor name="actor1">
-      <pose>0 1 1.25 0 0 0</pose>
+      <startpose>0 0 0 0 0 0</startpose>
       <skin>
-        <filename>moonwalk.dae</filename>
+        <filename>stand.dae</filename>
         <scale>1.0</scale>
       </skin>
-      <animation name="walking">
+      <animation name="walk">
         <filename>walk.dae</filename>
         <scale>1.000000</scale>
         <interpolate_x>true</interpolate_x>
       </animation>
+      <animation name="moonwalk">
+        <filename>moonwalk.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <animation name="run">
+        <filename>run.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <animation name="sit_down">
+        <filename>sit_down.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <animation name="sitting">
+        <filename>sitting.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <animation name="stand_up">
+        <filename>stand_up.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <animation name="stand">
+        <filename>stand.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <animation name="talk_a">
+        <filename>talk_a.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <animation name="talk_b">
+        <filename>talk_b.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
       <plugin name="actor1_plugin" filename="libmyrosgazeboanimation.so">
-        <target>0 -5 1.2138</target>
+        <startpose>0 0 1.2138</startpose>
         <target_weight>1.15</target_weight>
         <obstacle_weight>1.8</obstacle_weight>
         <animation_factor>5.1</animation_factor>

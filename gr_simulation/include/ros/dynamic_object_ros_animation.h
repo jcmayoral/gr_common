@@ -35,6 +35,9 @@ namespace gazebo
 {
   class GZ_PLUGIN_VISIBLE GazeboROSAnimation : public ModelPlugin
   {
+    const std::list<std::string> AVAILABLEMOTIONS = std::list<std::string>({"moonwalk", "run", "sit_down", 
+                                          "sitting", "stand_up", "stand", "talk_a", "talk_b", "walk"});
+
     /// \brief Constructor
     public: GazeboROSAnimation();
 
@@ -49,9 +52,6 @@ namespace gazebo
     /// \brief Function that is called every update cycle.
     /// \param[in] _info Timing information
     private: void OnUpdate(const common::UpdateInfo &_info);
-
-    /// \brief Helper function to choose a new target location
-    private: void ChooseNewTarget();
 
     /// \brief Helper function to avoid obstacles. This implements a very
     /// simple vector-field algorithm.
@@ -100,11 +100,12 @@ namespace gazebo
     private: boost::shared_ptr<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>> aserver;
     private: ros::CallbackQueue my_callback_queue;
 
-    public: void executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal);
-    private: bool start;
+    public:  void executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal);
     private: physics::ModelPtr model;
-    private:         void QueueThread();
-    private:         std::thread rosQueueThread;
+    private: void QueueThread();
+    private: std::thread rosQueueThread;
+    private: std::string motion_type;
+    private: bool is_motionfinished;
 
 
   };
