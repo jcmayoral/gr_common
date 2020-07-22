@@ -22,7 +22,7 @@ using namespace gazebo;
 GZ_REGISTER_MODEL_PLUGIN(GazeboROSAnimation)
 
 /////////////////////////////////////////////////
-GazeboROSAnimation::GazeboROSAnimation(): is_motionfinished(true){
+GazeboROSAnimation::GazeboROSAnimation(): is_motionfinished(true), motion_type("stand"){
     if (!ros::isInitialized()){
         int argc = 0;
         char **argv = NULL;
@@ -74,13 +74,6 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       modelElem = modelElem->GetNextElement("model");
     }
   }
-  
-  ignition::math::Pose3d startpose;
-  if (_sdf && _sdf->HasElement("startpose")){
-      startpose = _sdf->Get<ignition::math::Pose3d>("startpose");
-  }
-  this->model->SetWorldPose(startpose);
-
   ros::NodeHandle nh;// = boost::make_shared<ros::NodeHandle>("~");
   nh.setCallbackQueue(&my_callback_queue);
 
@@ -112,7 +105,7 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
   if(goal->setstart){
     pose.Pos().X(goal->startpose.pose.position.x);
     pose.Pos().Y(goal->startpose.pose.position.y);
-    pose.Pos().Z(1.25);
+    pose.Pos().Z(goal->startpose.pose.position.z+1.05);
     this->model->SetWorldPose(pose);
     this->actor->SetWorldPose(pose, true, true);
     this->Reset();
@@ -121,7 +114,7 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
   ignition::math::Vector3d newTarget;
   newTarget.X(goal->goalPose.pose.position.x);
   newTarget.Y(goal->goalPose.pose.position.y);
-  newTarget.Z(1.25);
+  newTarget.Z(goal->goalPose.pose.position.z + 1.05);
   this->target = newTarget;
   this->Reset();
   if(goal->is_motion){
@@ -143,9 +136,11 @@ void GazeboROSAnimation::Reset(){
     */
 
   auto skelAnims = this->actor->SkeletonAnimations();
+  /*
   for (auto const& element : skelAnims) {
     std::cout << "animation Available " << element.first << "\n";
   }
+  */
 
   if (skelAnims.find(motion_type) == skelAnims.end())
   {
@@ -188,17 +183,18 @@ void GazeboROSAnimation::HandleObstacles(ignition::math::Vector3d &_pos)
 /////////////////////////////////////////////////
 void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
 {
-  // Time delta
-  double dt = (_info.simTime - this->lastUpdate).Double();
+  if (is_motionfinished){
+    return;
+  }
 
+    // Time delta
+  double dt = (_info.simTime - this->lastUpdate).Double();
   ignition::math::Pose3d pose = this->actor->WorldPose();
   ignition::math::Vector3d pos = this->target - pose.Pos();
   ignition::math::Vector3d rpy = pose.Rot().Euler();
 
   double distance = pos.Length();
-  if (is_motionfinished){
-    return;
-  }
+
   if (distance < 0.2){
     is_motionfinished = true;
     motion_type = static_cast<std::string>("stand");
