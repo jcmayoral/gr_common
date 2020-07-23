@@ -11,7 +11,7 @@
 namespace gazebo{
     class MotionPlanner{
         public:
-            MotionPlanner();
+            MotionPlanner(std::string primfile="my_mprim_test.mprim");
             MotionPlanner(MotionPlanner&& motionplanner){
                 std::cerr <<  "Copy constructor " << std::endl;
                 initialized_ = false;
@@ -27,6 +27,7 @@ namespace gazebo{
                 current_pose_ = motionplanner.current_pose_;
                 current_goal_ = motionplanner.current_goal_;
                 map_size_ = motionplanner.map_size_;
+                primitives_filename_ = motionplanner.primitives_filename_;
             }
             void OnMsg(ConstPosePtr &_msg);
             bool operator()(gazebo::transport::NodePtr node, std::string obstacleid, double map_size, const msgs::Vector3d* goal = NULL);
@@ -36,14 +37,26 @@ namespace gazebo{
             void stop();
             bool performMotion();
             void setupMap(std::string obstacleid, double mapsize);
+            void setPrimitivesFilename(std::string filepath){
+                primitives_filename_ = filepath;
+            }
+
+            void setResolution(double res){
+                resolution_ = res;
+            }
+
+            std::vector<EnvNAVXYTHETALAT3Dpt_t> getSBPLPath(){
+                return sbpl_path_;
+            }
 
         private:
             transport::SubscriberPtr odom_sub_;
             transport::PublisherPtr vel_pub_;
             std::string obstacleid_;
+            std::string primitives_filename_;
             SBPLPlanner* planner_;
             EnvironmentNAVXYTHETALAT* env_;
-            msgs::Vector3d current_pose_;
+            msgs::Pose current_pose_;
             msgs::Vector3d current_goal_;
             std::vector<EnvNAVXYTHETALAT3Dpt_t> sbpl_path_;
             bool initialized_;

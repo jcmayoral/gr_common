@@ -17,11 +17,11 @@ void GazeboROSDynamicObject::executeCB(const gr_action_msgs::SimMotionPlannerGoa
     gr_action_msgs::SimMotionPlannerFeedback feedback;
     gr_action_msgs::SimMotionPlannerResult result;
 
-    if (this->model->GetName().compare(goal->object_id)){
+    /*if (this->model->GetName().compare(goal->object_id)){
         std::cout<<  "WRONG ID "<<std::endl;
         aserver->setAborted();
         return;
-    }
+    }*/
 
     if (aserver->isPreemptRequested() || !ros::ok()){
         aserver->setPreempted();
@@ -34,23 +34,56 @@ void GazeboROSDynamicObject::executeCB(const gr_action_msgs::SimMotionPlannerGoa
         pose.Pos().X() = goal->startpose.pose.position.x;
         pose.Pos().Y() = goal->startpose.pose.position.y;
         pose.Pos().Z() = goal->startpose.pose.position.z;
+        pose.Rot().Euler(0,0,tf2::getYaw(goal->startpose.pose.orientation));
         this->model->SetWorldPose(pose);
     }
     // publish the feedback
-    std::cout << "DONE" << std::endl;
 
     aserver->publishFeedback(feedback);
 
     gazebo::transport::NodePtr node(new gazebo::transport::Node);
     node->Init();
-
+    
+    auto start = std::chrono::high_resolution_clock::now();
     bool res = this->motionplanner(node,this->model->GetName(), 100.0);
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+
+    path = this->motionplanner.getSBPLPath();
+    publishPath();
+
+    result.executing_time = elapsed.count();
+
     if (res){
         aserver->setSucceeded(result);
     }
     else{
         aserver->setAborted(result);
     }
+}
+
+void GazeboROSDynamicObject::publishPath(){
+    nav_msgs::Path gui_path;
+    gui_path.poses.resize(path.size());
+    gui_path.header.frame_id = "velodyne";//costmap_ros_->getGlobalFrameID();
+    gui_path.header.stamp = ros::Time::now();
+    for(unsigned int i=0; i< path.size(); i++){
+        geometry_msgs::PoseStamped pose;
+        pose.header.stamp = ros::Time::now();
+        pose.header.frame_id = "velodyne";//costmap_ros_->getGlobalFrameID();
+        pose.pose.position.x = path[i].x;// + map_metadata_->origin.position.x;
+        pose.pose.position.y = path[i].y;// + map_metadata_->origin.position.y;
+        pose.pose.position.z = 0;//start.pose.position.z;
+        tf2::Quaternion temp;
+        temp.setRPY(0,0,path[i].theta);
+        pose.pose.orientation.x = temp.getX();
+        pose.pose.orientation.y = temp.getY();
+        pose.pose.orientation.z = temp.getZ();
+        pose.pose.orientation.w = temp.getW();
+        //plan_.push_back(pose);
+        gui_path.poses[i] = pose;
+    }
+    path_pub.publish(gui_path);
 }
 
 void GazeboROSDynamicObject::SetAngVelocity(const double &_vel){
@@ -82,6 +115,23 @@ void GazeboROSDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
     if (_sdf->HasElement("lin_vely")){
         lin_vely = _sdf->Get<double>("lin_vely");
+    }
+
+    if (_sdf->HasElement("primfilepath")){
+        std::string filename = _sdf->Get<std::string>("primfilepath");
+        std::cout << filename << std::endl;
+        motionplanner.setPrimitivesFilename(filename);
+    }
+
+    if (_sdf->HasElement("resolution")){
+        double resolution = _sdf->Get<double>("resolution");
+        std::cout << "set resolution " << resolution << std::endl;
+        motionplanner.setResolution(resolution);
+    }
+
+    if (_sdf->HasElement("mapsize")){
+        auto mps = _sdf->Get<double>("mapsize");
+        mapsize = mps;
     }
 
     //CallBack for Gazebo
@@ -116,7 +166,7 @@ void GazeboROSDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
     this->rosPub = nh.advertise<std_msgs::Bool>( "/" + this->model->GetName() + "/rrrrr", 1);
     this->rosSub = nh.subscribe(so);
-
+    this -> path_pub = nh.advertise<nav_msgs::Path>( "/" + this->model->GetName() + "/path", 1);
     std::cout << "MODEL NAME " << this->model->GetName() << std::endl;
 
     // Spin up the queue helper thread.
@@ -154,7 +204,7 @@ void GazeboROSDynamicObject::goalCB(){
     //gazebo::transport::NodePtr node(new gazebo::transport::Node);
     //node->Init();
 
-    bool res = this->motionplanner(node,this->model->GetName(), 30.0);
+    bool res = this->motionplanner(node,this->model->GetName(), mapsize);
     if (res){
         aserver->setSucceeded(result);
     }
@@ -175,7 +225,6 @@ void GazeboROSDynamicObject::OnRosMsg(const geometry_msgs::TwistConstPtr &_msg){
 
  void GazeboROSDynamicObject::updatePose(const ros::TimerEvent& event){
     current_pose = this->model->WorldPose();
-    std::cout <<"X "<< current_pose.Pos().X();
     std_msgs::Bool msg;
     this->rosPub.publish(msg);
 }

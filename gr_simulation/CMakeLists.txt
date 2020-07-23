@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 add_compile_options(-std=c++17)
 
-find_package(roscpp REQUIRED COMPONENTS std_msgs geometry_msgs gr_action_msgs)
+find_package(roscpp REQUIRED COMPONENTS std_msgs geometry_msgs gr_action_msgs nav_msgs)
 find_package(gr_action_msgs REQUIRED)
 find_package(actionlib REQUIRED)
 
 find_package(gazebo REQUIRED)
+find_package(tf2_ros REQUIRED COMPONENTS tf2_geometry_msgs)
+
 
 
 find_package(PkgConfig REQUIRED)
@@ -48,7 +50,7 @@ target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIE
 
 #ROS
 add_library(dynobjectros SHARED src/ros/dynamic_object_ros_interface.cpp)
-target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} motionplanner)
+target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} ${tf2_ros_LIBRARIES} motionplanner)
 #add_dependencies(dynobjectros   ${gr_action_msgs_EXPORTED_TARGETS})
 add_library(myrosgazeboanimation SHARED src/ros/gazebo_ros_animation.cpp)
 target_link_libraries(myrosgazeboanimation ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} motionplanner)

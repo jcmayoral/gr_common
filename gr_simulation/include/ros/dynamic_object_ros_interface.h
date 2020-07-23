@@ -17,6 +17,13 @@
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Bool.h>
 #include <gazebo/motion_planner.h>
+
+//#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+//#include <tf2_ros/transform_listener.h>
+#include <tf2/utils.h>
+
+#include <nav_msgs/Path.h>
+
 namespace gazebo
 {
   /// \brief A plugin to control a GR Dynamic Obstacle sensor.
@@ -55,6 +62,8 @@ namespace gazebo
 
         void OnMsg(ConstVector3dPtr &_msg);
         void OnUpdate();
+        void publishPath();
+
 
     private: 
         void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg);
@@ -67,6 +76,7 @@ namespace gazebo
         double ang_velocity = 0;
         double lin_velx = 0;
         double lin_vely = 0;
+        double mapsize = 30.0;
 
         //For ROS
         /// \brief A node use for ROS transpor
@@ -90,6 +100,8 @@ namespace gazebo
         transport::PublisherPtr pub;
         event::ConnectionPtr updateConnection;
 
+        std::vector<EnvNAVXYTHETALAT3Dpt_t> path;
+        ros::Publisher path_pub;
 
   };
 

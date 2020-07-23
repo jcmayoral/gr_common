@@ -2,14 +2,16 @@
 
 using namespace gazebo;
 
-MotionPlanner::MotionPlanner(): obstacleid_("defaults"), initialized_(false),ncells_(100), mtx_(){
+MotionPlanner::MotionPlanner(std::string primfile): primitives_filename_(primfile),obstacleid_("defaults"), initialized_(false),ncells_(100), mtx_(), resolution_(0.1){
   std::cout << "constructor";
 }
 
 bool MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize, const msgs::Vector3d* goal){
   std::cout << "OPERATOR "<<std::endl;
   if (goal == NULL){
-    current_goal_.set_x(10.0);
+    current_goal_.set_x(1.0);
+    current_goal_.set_y(1.0);
+    current_goal_.set_z(3.1415);
   }
 
   else{
@@ -31,7 +33,7 @@ void MotionPlanner::setupMap(std::string obstacleid, double mapsize){
   planner_ = new ARAPlanner(env_, false); //forward_search
   //TODO PARAMETRIZE
 
-  resolution_ = 0.1;
+  //resolution_ = 0.1;
   double nominalvel_mpersecs = 0.1;
   double timetoturn45degsinplace_secs = 0.1;
   int obst_cost_thresh= 2.0;
@@ -65,8 +67,8 @@ void MotionPlanner::setupMap(std::string obstacleid, double mapsize){
   perimeterptsV.push_back(pt_m);
 
   bool ret;
-  std::string primitive_filename_;
-  primitive_filename_ = "my_mprim_test.mprim";
+  //std::string primitive_filename_;
+  //primitive_filename_ = "my_mprim_test.mprim";
 
   ncells_ = int(map_size/resolution_ + 1);
 
@@ -79,7 +81,7 @@ void MotionPlanner::setupMap(std::string obstacleid, double mapsize){
                               0, 0, 0, //goal tolerance
                               perimeterptsV, resolution_, nominalvel_mpersecs,
                               timetoturn45degsinplace_secs, obst_cost_thresh,
-                              primitive_filename_.c_str());
+                              primitives_filename_.c_str());
   }
   catch(SBPL_Exception e){
     std::cerr << e.what() << std::endl;
@@ -120,7 +122,7 @@ bool MotionPlanner::performMotion(){
   while(sbpl_path_.size()>1 && dist2Goal> 0.25){
     ExecuteCommand();
     std::this_thread::sleep_for(std::chrono::milliseconds(80));
-    dist2Goal = sqrt(pow(current_goal_.x() - current_pose_.x() ,2) + pow(current_goal_.y() - current_pose_.y() ,2)); 
+    dist2Goal = sqrt(pow(current_goal_.x() - current_pose_.position().x() ,2) + pow(current_goal_.y() - current_pose_.position().y() ,2)); 
     std::cout << dist2Goal << " : " << obstacleid_ << "and " << sbpl_path_.size() << std::endl;
   }
   stop();
@@ -138,16 +140,18 @@ void MotionPlanner::ExecuteCommand(){
     auto expected_pose = sbpl_path_.back();
     sbpl_path_.pop_back();
     //std::cout << " x " << (expected_pose.x - offset_) << " , " << current_pose_.x() << std::endl;
-    auto velx = (expected_pose.x - offset_) - current_pose_.x();
-    auto vely = (expected_pose.y - offset_) - current_pose_.y();
+    auto velx = (expected_pose.x - offset_) - current_pose_.position().x();
+    auto vely = (expected_pose.y - offset_) - current_pose_.position().y();
     //pos error
     error_ += sqrt(pow(velx,2) + pow(vely,2));
     //std::cout << "vel x " << velx <<  " vel y " << vely << std::endl;
     msgs::Vector3d msg;
     //assert(velx < 2.0);
-    //assert(vely < 2.0);
-    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx,vely,0.0));
-    //std::cout << "velx " << velx << " vely " << vely << std::endl;
+    //assert(vely < 2.0)
+    auto currentyaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
+    auto angacc = (expected_pose.theta - currentyaw)*0.1;
+    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx,vely,angacc));
+    std::cout << "velx " << velx << " vely " << vely << " ang acc " << angacc << "YAW " << currentyaw << std::endl;
     // Send the message
     vel_pub_->Publish(msg);
     //mtx_.unlock();
@@ -165,24 +169,20 @@ void MotionPlanner::OnMsg(ConstPosePtr &_msg){
     //boost::mutex::scoped_lock lck(mtx_);
     initialized_ = true;
     //std::lock_guard<std::mutex> guard(mtx_);
-    current_pose_ = _msg->position();
+    current_pose_ = *_msg;//->position();
 }
 
 bool MotionPlanner::planPath(){
     while(!initialized_){
-      std::cout << "wait for initialization" << std::endl;
     }
     sbpl_path_.clear();
-
-    double theta_start = 0.0;//2 * atan2(start.pose.orientation.z, start.pose.orientation.w);
     offset_ = ncells_/2 * resolution_;
-
-    std::cout << "START " << current_pose_.x()+offset_ << " , " << current_pose_.y()+offset_<< std::endl;
 
   try{
     //Check conversion offset of map start with frame -> gr_map_utils
     //Substract offset
-    int ret = env_->SetStart(current_pose_.x()+offset_, current_pose_.y()+offset_, theta_start);
+    auto startyaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
+    int ret = env_->SetStart(current_pose_.position().x()+offset_, current_pose_.position().y()+offset_, startyaw);
 
     if(ret < 0 || planner_->set_start(ret) == 0){
       std::cerr<<"ERROR: failed to set start state\n"<<std::endl;
@@ -199,8 +199,7 @@ bool MotionPlanner::planPath(){
     //Substract offset
     //current_goal_.set_x(goalx);
     //current_goal_.set_y(goaly);
-    float goalyaw = 0.0;
-    int ret = env_->SetGoal(current_goal_.x()+offset_, current_goal_.y()+offset_, goalyaw);
+    int ret = env_->SetGoal(current_goal_.x()+offset_, current_goal_.y()+offset_, current_goal_.z());
 
     if(ret < 0 || planner_->set_goal(ret) == 0){
       std::cerr<<"ERROR: failed to set goal state\n" << std::endl;
@@ -260,8 +259,8 @@ bool MotionPlanner::planPath(){
   if( sbpl_path_.size() == 0 ) {
     //Substract offset
     EnvNAVXYTHETALAT3Dpt_t s(
-        current_pose_.x(),
-        current_pose_.y(),
+        current_pose_.position().x(),
+        current_pose_.position().y(),
         0);
     sbpl_path_.push_back(s);
   }
