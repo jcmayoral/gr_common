@@ -50,7 +50,7 @@ void GazeboROSDynamicObject::executeCB(const gr_action_msgs::SimMotionPlannerGoa
     std::chrono::duration<double> elapsed = finish - start;
 
     path = this->motionplanner.getSBPLPath();
-    publishPath();
+    publishPath(motionplanner.getOffset());
 
     result.executing_time = elapsed.count();
 
@@ -62,17 +62,18 @@ void GazeboROSDynamicObject::executeCB(const gr_action_msgs::SimMotionPlannerGoa
     }
 }
 
-void GazeboROSDynamicObject::publishPath(){
+void GazeboROSDynamicObject::publishPath(const double offset){
     nav_msgs::Path gui_path;
     gui_path.poses.resize(path.size());
     gui_path.header.frame_id = "velodyne";//costmap_ros_->getGlobalFrameID();
     gui_path.header.stamp = ros::Time::now();
+    std::cout << "SIZE OF PAth" << gui_path.poses.size() << std::endl;
     for(unsigned int i=0; i< path.size(); i++){
         geometry_msgs::PoseStamped pose;
         pose.header.stamp = ros::Time::now();
         pose.header.frame_id = "velodyne";//costmap_ros_->getGlobalFrameID();
-        pose.pose.position.x = path[i].x;// + map_metadata_->origin.position.x;
-        pose.pose.position.y = path[i].y;// + map_metadata_->origin.position.y;
+        pose.pose.position.x = path[i].x - offset;//offset.x;// + map_metadata_->origin.position.x;
+        pose.pose.position.y = path[i].y - offset;// offset.y;// + map_metadata_->origin.position.y;
         pose.pose.position.z = 0;//start.pose.position.z;
         tf2::Quaternion temp;
         temp.setRPY(0,0,path[i].theta);

@@ -121,9 +121,9 @@ bool MotionPlanner::performMotion(){
 
   while(sbpl_path_.size()>1 && dist2Goal> 0.25){
     ExecuteCommand();
-    std::this_thread::sleep_for(std::chrono::milliseconds(80));
-    dist2Goal = sqrt(pow(current_goal_.x() - current_pose_.position().x() ,2) + pow(current_goal_.y() - current_pose_.position().y() ,2)); 
-    std::cout << dist2Goal << " : " << obstacleid_ << "and " << sbpl_path_.size() << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    dist2Goal = sqrt(pow(current_goal_.x() - current_pose_.position().x() ,2) + pow(current_goal_.y() - current_pose_.position().y() ,2));
+    std::cout << dist2Goal << " : " << obstacleid_ << "and " << sbpl_path_.size() << ": " << copy_sbpl_path_.size() << std::endl;
   }
   stop();
 
@@ -139,19 +139,25 @@ void MotionPlanner::ExecuteCommand(){
     boost::mutex::scoped_lock lock(mtx_);
     auto expected_pose = sbpl_path_.back();
     sbpl_path_.pop_back();
-    //std::cout << " x " << (expected_pose.x - offset_) << " , " << current_pose_.x() << std::endl;
-    auto velx = (expected_pose.x - offset_) - current_pose_.position().x();
-    auto vely = (expected_pose.y - offset_) - current_pose_.position().y();
-    //pos error
-    error_ += sqrt(pow(velx,2) + pow(vely,2));
-    //std::cout << "vel x " << velx <<  " vel y " << vely << std::endl;
-    msgs::Vector3d msg;
+    
     //assert(velx < 2.0);
     //assert(vely < 2.0)
     auto currentyaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
-    auto angacc = (expected_pose.theta - currentyaw)*0.1;
-    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx,vely,angacc));
-    std::cout << "velx " << velx << " vely " << vely << " ang acc " << angacc << "YAW " << currentyaw << std::endl;
+    auto angacc = (expected_pose.theta - currentyaw);
+
+    std::cout << "expected pose " << (expected_pose.x - offset_)  << " : " << (expected_pose.y - offset_) << " :" << expected_pose.theta << std::endl; 
+    std::cout << "current pose " << (current_pose_.position().x())  << " : " << (current_pose_.position().y()) << " : " << currentyaw << std::endl;
+    auto auxx = (expected_pose.x - offset_) - (current_pose_.position().x());
+    auto auxy = (expected_pose.y - offset_) - (current_pose_.position().y());
+
+    auto velx = auxx*cos(currentyaw) - auxy*sin(currentyaw);
+    auto vely = auxx*sin(currentyaw) + auxy*cos(currentyaw);
+
+    error_ += sqrt(pow(velx,2) + pow(vely,2));
+
+    msgs::Vector3d msg;    
+    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx*0.1,vely*0.1,angacc*0.1));
+    //std::cout << "velx " << velx << " vely " << vely << " ang acc " << angacc << "YAW " << currentyaw << "offset " << offset_ << std::endl;
     // Send the message
     vel_pub_->Publish(msg);
     //mtx_.unlock();
@@ -182,6 +188,7 @@ bool MotionPlanner::planPath(){
     //Check conversion offset of map start with frame -> gr_map_utils
     //Substract offset
     auto startyaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
+    startpose_ = current_pose_;
     int ret = env_->SetStart(current_pose_.position().x()+offset_, current_pose_.position().y()+offset_, startyaw);
 
     if(ret < 0 || planner_->set_start(ret) == 0){
@@ -267,6 +274,7 @@ bool MotionPlanner::planPath(){
 
   std::reverse(sbpl_path_.begin(), sbpl_path_.end());
 
+  copy_sbpl_path_ = sbpl_path_;
   //sbpl_path[i].y;
   //sbpl_path[i].theta);
   return true;

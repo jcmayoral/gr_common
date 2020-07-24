@@ -62,7 +62,7 @@ namespace gazebo
 
         void OnMsg(ConstVector3dPtr &_msg);
         void OnUpdate();
-        void publishPath();
+        void publishPath(const double offset);
 
 
     private: 

@@ -25,6 +25,7 @@ namespace gazebo{
                 planner_ = motionplanner.planner_;
                 env_ = motionplanner.env_;
                 current_pose_ = motionplanner.current_pose_;
+                startpose_ = motionplanner.startpose_;
                 current_goal_ = motionplanner.current_goal_;
                 map_size_ = motionplanner.map_size_;
                 primitives_filename_ = motionplanner.primitives_filename_;
@@ -46,7 +47,11 @@ namespace gazebo{
             }
 
             std::vector<EnvNAVXYTHETALAT3Dpt_t> getSBPLPath(){
-                return sbpl_path_;
+                return copy_sbpl_path_;
+            }
+
+            double getOffset(){
+                return offset_;
             }
 
         private:
@@ -57,8 +62,10 @@ namespace gazebo{
             SBPLPlanner* planner_;
             EnvironmentNAVXYTHETALAT* env_;
             msgs::Pose current_pose_;
+            msgs::Pose startpose_;
             msgs::Vector3d current_goal_;
             std::vector<EnvNAVXYTHETALAT3Dpt_t> sbpl_path_;
+            std::vector<EnvNAVXYTHETALAT3Dpt_t> copy_sbpl_path_;
             bool initialized_;
             double resolution_;
             int ncells_;
