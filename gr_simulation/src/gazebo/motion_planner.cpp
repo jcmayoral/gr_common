@@ -145,18 +145,18 @@ void MotionPlanner::ExecuteCommand(){
     auto currentyaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
     auto angacc = (expected_pose.theta - currentyaw);
 
-    std::cout << "expected pose " << (expected_pose.x - offset_)  << " : " << (expected_pose.y - offset_) << " :" << expected_pose.theta << std::endl; 
+    std::cout << "expected pose " << (expected_pose.x - offset_)  << " : " << (expected_pose.y - offset_) << " : " << expected_pose.theta << std::endl; 
     std::cout << "current pose " << (current_pose_.position().x())  << " : " << (current_pose_.position().y()) << " : " << currentyaw << std::endl;
     auto auxx = (expected_pose.x - offset_) - (current_pose_.position().x());
     auto auxy = (expected_pose.y - offset_) - (current_pose_.position().y());
 
-    auto velx = auxx*cos(currentyaw) - auxy*sin(currentyaw);
-    auto vely = auxx*sin(currentyaw) + auxy*cos(currentyaw);
+    auto velx = auxx*cos(angacc) - auxy*sin(angacc);
+    auto vely = auxx*sin(angacc) + auxy*cos(angacc);
 
     error_ += sqrt(pow(velx,2) + pow(vely,2));
 
     msgs::Vector3d msg;    
-    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx*0.1,vely*0.1,angacc*0.1));
+    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx*0.1,vely*0.1,0));//angacc*0.1));
     //std::cout << "velx " << velx << " vely " << vely << " ang acc " << angacc << "YAW " << currentyaw << "offset " << offset_ << std::endl;
     // Send the message
     vel_pub_->Publish(msg);
