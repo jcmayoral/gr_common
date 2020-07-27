@@ -84,8 +84,8 @@ void GazeboROSDynamicObject::publishPath(const double offset){
         geometry_msgs::PoseStamped pose;
         pose.header.stamp = ros::Time::now();
         pose.header.frame_id = "velodyne";//costmap_ros_->getGlobalFrameID();
-        pose.pose.position.x = path[i].x;// - offset;//offset.x;// + map_metadata_->origin.position.x;
-        pose.pose.position.y = path[i].y;// - offset;// offset.y;// + map_metadata_->origin.position.y;
+        pose.pose.position.x = path[i].x - offset;//offset.x;// + map_metadata_->origin.position.x;
+        pose.pose.position.y = path[i].y - offset;// offset.y;// + map_metadata_->origin.position.y;
         pose.pose.position.z = 0;//start.pose.position.z;
         tf2::Quaternion temp;
         temp.setRPY(0,0,path[i].theta);
@@ -204,7 +204,7 @@ void GazeboROSDynamicObject::OnMsg(ConstVector3dPtr &_msg){
 }
 
 void GazeboROSDynamicObject::OnUpdate(){
-    current_pose = this->model->WorldPose();
+    current_pose = this->link->WorldPose();//this->model->WorldPose();
     this->pub->Publish(gazebo::msgs::Convert(current_pose));
 }
 

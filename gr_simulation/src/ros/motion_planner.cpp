@@ -123,9 +123,9 @@ bool ROSMotionPlanner::performMotion(){
     return false;
   }
 
-  while(sbpl_path_.size()>1 && dist2Goal> 0.25){
+  while(sbpl_path_.size()>1 && dist2Goal> 0.05){
     ExecuteCommand();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(80));
     dist2Goal = sqrt(pow(current_goal_.x() - current_pose_.position().x() ,2) + pow(current_goal_.y() - current_pose_.position().y() ,2));
     std::cout << dist2Goal << " : " << obstacleid_ << "and " << sbpl_path_.size() << ": " << copy_sbpl_path_.size() << std::endl;
   }
@@ -147,20 +147,30 @@ void ROSMotionPlanner::ExecuteCommand(){
     //assert(velx < 2.0);
     //assert(vely < 2.0)
     auto currentyaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
-    auto angacc = (expected_pose.theta - currentyaw);
+    auto angacc = ((expected_pose.theta/(2*M_PI) - currentyaw));// + M_PI) % (2*M_PI) - M_PI;
+    //auto angacc = std::min(std::fabs(expected_pose.theta/(2*M_PI) - currentyaw), std::fabs(currentyaw - expected_pose.theta/(2*M_PI)));
+
+
+    std::cout << "DIFF " << expected_pose.theta << " , " << currentyaw << std::endl;
+
+    /*
+    if (angacc > M_PI){
+      angacc =
+    }
+    */
 
     std::cout << "expected pose " << (expected_pose.x )  << " : " << (expected_pose.y) << " : " << expected_pose.theta << std::endl;
     std::cout << "current pose " << (current_pose_.position().x() + offset_)  << " : " << (current_pose_.position().y() + offset_) << " : " << currentyaw << std::endl;
     auto auxx = (expected_pose.x) - (current_pose_.position().x() + offset_);
     auto auxy = (expected_pose.y) - (current_pose_.position().y() + offset_);
-    std::cout << "VX " << auxx << " VY " << auxy << std::endl;
+    std::cout << "VX " << auxx << " VY " << auxy <<  " angacc "<< angacc <<   std::endl;
 
     auto velx = auxx*cos(angacc) - auxy*sin(currentyaw);
     auto vely = auxx*sin(angacc) + auxy*cos(currentyaw);
     error_ += sqrt(pow(velx,2) + pow(vely,2));
 
     msgs::Vector3d msg;
-    gazebo::msgs::Set(&msg, ignition::math::Vector3d(auxx*0.1,auxy*0.1,angacc*0.1));
+    gazebo::msgs::Set(&msg, ignition::math::Vector3d(auxx,auxy,angacc));
     //std::cout << "velx " << velx << " vely " << vely << " ang acc " << angacc << "YAW " << currentyaw << "offset " << offset_ << std::endl;
     // Send the message
     vel_pub_->Publish(msg);
@@ -175,8 +185,8 @@ void ROSMotionPlanner::ExecuteCommand(){
     marker.action = visualization_msgs::Marker::DELETE;
     rpub_.publish(marker);
     marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = current_pose_.position().x() - offset_;
-    marker.pose.position.y = current_pose_.position().y() - offset_;
+    marker.pose.position.x = current_pose_.position().x();
+    marker.pose.position.y = current_pose_.position().y();
     marker.pose.position.z = 1;
     marker.pose.orientation.x = 0.0;
     marker.pose.orientation.y = 0.0;
@@ -303,7 +313,7 @@ bool ROSMotionPlanner::planPath(){
     sbpl_path_.push_back(s);
   }
 
-  //std::reverse(sbpl_path_.begin(), sbpl_path_.end());
+  std::reverse(sbpl_path_.begin(), sbpl_path_.end());
 
   copy_sbpl_path_ = sbpl_path_;
   //sbpl_path[i].y;
