@@ -42,7 +42,7 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   this->actor = boost::dynamic_pointer_cast<physics::Actor>(_model);
   this->world = this->actor->GetWorld();
 
-  
+
   // Read in the target weight
   if (_sdf->HasElement("target_weight"))
     this->targetWeight = _sdf->Get<double>("target_weight");
@@ -61,6 +61,8 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   else
     this->animationFactor = 4.5;
 
+  this->actor->SetLaserRetro(1.0);
+
   // Add our own name to models we should ignore when avoiding obstacles.
   this->ignoreModels.push_back(this->actor->GetName());
 
@@ -78,7 +80,7 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   ros::NodeHandle nh;// = boost::make_shared<ros::NodeHandle>("~");
   nh.setCallbackQueue(&my_callback_queue);
 
-  aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, std::string("SimMotionPlanner")+"/" + this->model->GetName(), 
+  aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, std::string("SimMotionPlanner")+"/" + this->model->GetName(),
                                                                 boost::bind(&GazeboROSAnimation::executeCB, this, _1), false);
   this->rosQueueThread = std::thread(std::bind(&GazeboROSAnimation::QueueThread, this));
   aserver->start();
@@ -139,8 +141,8 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
 
 
   this->Reset();
-  
-  
+
+
   auto start = std::chrono::high_resolution_clock::now();
   while (!is_motionfinished);
 

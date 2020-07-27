@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 add_compile_options(-std=c++17)
 
-find_package(roscpp REQUIRED COMPONENTS std_msgs geometry_msgs gr_action_msgs nav_msgs)
+find_package(roscpp REQUIRED COMPONENTS std_msgs geometry_msgs gr_action_msgs nav_msgs visualization_msgs)
 find_package(gr_action_msgs REQUIRED)
 find_package(actionlib REQUIRED)
 
@@ -45,12 +45,15 @@ target_link_libraries(visualgrassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_
 add_library(motionplanner SHARED src/gazebo/motion_planner.cpp)
 target_link_libraries(motionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY})
 
+add_library(rosmotionplanner SHARED src/ros/motion_planner.cpp)
+target_link_libraries(rosmotionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY})
+
 add_library(obstaclescoordinator SHARED src/gazebo/obstacles_coordinator.cpp)
 target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} motionplanner)
 
 #ROS
 add_library(dynobjectros SHARED src/ros/dynamic_object_ros_interface.cpp)
-target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} ${tf2_ros_LIBRARIES} motionplanner)
+target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} ${tf2_ros_LIBRARIES} rosmotionplanner)
 #add_dependencies(dynobjectros   ${gr_action_msgs_EXPORTED_TARGETS})
 add_library(myrosgazeboanimation SHARED src/ros/gazebo_ros_animation.cpp)
 target_link_libraries(myrosgazeboanimation ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} motionplanner)
@@ -60,7 +63,7 @@ add_executable(grass_cutter src/grassrobot/grass_event_caller.cpp)
 add_executable(run_obstacle_coordinator src/gazebo/obstacles_coordinator_node.cpp)
 #include(FindBoost)
 #  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)
-#  target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
+#  target_link_libraries(personvel_pub ${GAZEBO_IBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES})
 target_link_libraries(grass_cutter ${GAZEBO_LIBRARIES} gr_simulation_msgs)
 target_link_libraries(run_obstacle_coordinator ${GAZEBO_LIBRARIES} obstaclescoordinator)

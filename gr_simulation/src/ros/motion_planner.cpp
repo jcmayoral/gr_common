@@ -1,12 +1,13 @@
-#include <gazebo/motion_planner.h>
+#include <ros/motion_planner.h>
 
 using namespace gazebo;
 
-MotionPlanner::MotionPlanner(std::string primfile): primitives_filename_(primfile),obstacleid_("defaults"), initialized_(false),ncells_(100), mtx_(), resolution_(0.1){
+ROSMotionPlanner::ROSMotionPlanner(std::string primfile): primitives_filename_(primfile),obstacleid_("defaults"), initialized_(false),
+                                                          nh("~"), ncells_(100), mtx_(), resolution_(0.1){
   std::cout << "constructor";
 }
 
-bool MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize, const msgs::Vector3d* goal){
+bool ROSMotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize, const msgs::Vector3d* goal){
   std::cout << "OPERATOR "<<std::endl;
   if (goal == NULL){
     current_goal_.set_x(1.0);
@@ -19,11 +20,11 @@ bool MotionPlanner::operator()(gazebo::transport::NodePtr node, std::string obst
     current_goal_ = *goal;
     std::cout << "H1" << std::endl;
   }
-  
+
   return run(node, obstacleid, mapsize);
 }
 
-void MotionPlanner::setupMap(std::string obstacleid, double mapsize){
+void ROSMotionPlanner::setupMap(std::string obstacleid, double mapsize){
   obstacleid_ = obstacleid;
   double map_size = mapsize; //meters
   std::cout << "Creating Motion model for  " << obstacleid << std::endl;
@@ -92,15 +93,16 @@ void MotionPlanner::setupMap(std::string obstacleid, double mapsize){
   }
 }
 
-bool MotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize){
+bool ROSMotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize){
   setupMap(obstacleid, mapsize);
   vel_pub_ = node->Advertise<gazebo::msgs::Vector3d>("/" + obstacleid + "/vel_cmd");
   vel_pub_->WaitForConnection();
-  odom_sub_ = node->Subscribe("/" + obstacleid + "/odom",&MotionPlanner::OnMsg, this);
+  odom_sub_ = node->Subscribe("/" + obstacleid + "/odom",&ROSMotionPlanner::OnMsg, this);
+  this->rpub_ = nh.advertise<visualization_msgs::Marker>( "/" + obstacleid + "/position", 1);
   return performMotion();
 }
 
-bool MotionPlanner::performMotion(){
+bool ROSMotionPlanner::performMotion(){
   std::cout << "performing motion "<< std::endl;
 
   double motionx;
@@ -136,36 +138,62 @@ bool MotionPlanner::performMotion(){
   //going backwards
 }
 
-void MotionPlanner::ExecuteCommand(){
+void ROSMotionPlanner::ExecuteCommand(){
     //mtx_.lock();
     boost::mutex::scoped_lock lock(mtx_);
     auto expected_pose = sbpl_path_.back();
     sbpl_path_.pop_back();
-    
+
     //assert(velx < 2.0);
     //assert(vely < 2.0)
     auto currentyaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
     auto angacc = (expected_pose.theta - currentyaw);
 
-    std::cout << "expected pose " << (expected_pose.x - offset_)  << " : " << (expected_pose.y - offset_) << " : " << expected_pose.theta << std::endl; 
-    std::cout << "current pose " << (current_pose_.position().x())  << " : " << (current_pose_.position().y()) << " : " << currentyaw << std::endl;
-    auto auxx = (expected_pose.x - offset_) - (current_pose_.position().x());
-    auto auxy = (expected_pose.y - offset_) - (current_pose_.position().y());
+    std::cout << "expected pose " << (expected_pose.x )  << " : " << (expected_pose.y) << " : " << expected_pose.theta << std::endl;
+    std::cout << "current pose " << (current_pose_.position().x() + offset_)  << " : " << (current_pose_.position().y() + offset_) << " : " << currentyaw << std::endl;
+    auto auxx = (expected_pose.x) - (current_pose_.position().x() + offset_);
+    auto auxy = (expected_pose.y) - (current_pose_.position().y() + offset_);
+    std::cout << "VX " << auxx << " VY " << auxy << std::endl;
 
-    auto velx = auxx*cos(angacc) - auxy*sin(angacc);
-    auto vely = auxx*sin(angacc) + auxy*cos(angacc);
-
+    auto velx = auxx*cos(angacc) - auxy*sin(currentyaw);
+    auto vely = auxx*sin(angacc) + auxy*cos(currentyaw);
     error_ += sqrt(pow(velx,2) + pow(vely,2));
 
-    msgs::Vector3d msg;    
-    gazebo::msgs::Set(&msg, ignition::math::Vector3d(velx*0.1,vely*0.1,0));//angacc*0.1));
+    msgs::Vector3d msg;
+    gazebo::msgs::Set(&msg, ignition::math::Vector3d(auxx*0.1,auxy*0.1,angacc*0.1));
     //std::cout << "velx " << velx << " vely " << vely << " ang acc " << angacc << "YAW " << currentyaw << "offset " << offset_ << std::endl;
     // Send the message
     vel_pub_->Publish(msg);
+
+
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = "velodyne";
+    marker.header.stamp = ros::Time();
+    marker.ns = "my_namespace";
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::SPHERE;
+    marker.action = visualization_msgs::Marker::DELETE;
+    rpub_.publish(marker);
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.x = current_pose_.position().x() - offset_;
+    marker.pose.position.y = current_pose_.position().y() - offset_;
+    marker.pose.position.z = 1;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = 1.0;
+    marker.scale.y = 1.0;
+    marker.scale.z = 0.5;
+    marker.color.a = 1.0; // Don't forget to set the alpha!
+    marker.color.r = 1.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+    rpub_.publish( marker );
     //mtx_.unlock();
 }
 
-void MotionPlanner::stop(){
+void ROSMotionPlanner::stop(){
   msgs::Vector3d msg;
     gazebo::msgs::Set(&msg, ignition::math::Vector3d(0,0,0.0));
     // Send the message
@@ -173,18 +201,19 @@ void MotionPlanner::stop(){
 }
 
 
-void MotionPlanner::OnMsg(ConstPosePtr &_msg){
+void ROSMotionPlanner::OnMsg(ConstPosePtr &_msg){
     //boost::mutex::scoped_lock lck(mtx_);
     initialized_ = true;
     //std::lock_guard<std::mutex> guard(mtx_);
     current_pose_ = *_msg;//->position();
 }
 
-bool MotionPlanner::planPath(){
+bool ROSMotionPlanner::planPath(){
     while(!initialized_){
     }
     sbpl_path_.clear();
     offset_ = ncells_/2 * resolution_;
+    std::cout << " OFFSET " << offset_ << std::endl;
 
   try{
     //Check conversion offset of map start with frame -> gr_map_utils
@@ -274,7 +303,7 @@ bool MotionPlanner::planPath(){
     sbpl_path_.push_back(s);
   }
 
-  std::reverse(sbpl_path_.begin(), sbpl_path_.end());
+  //std::reverse(sbpl_path_.begin(), sbpl_path_.end());
 
   copy_sbpl_path_ = sbpl_path_;
   //sbpl_path[i].y;

@@ -16,7 +16,7 @@
 #include <ros/subscribe_options.h>
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Bool.h>
-#include <gazebo/motion_planner.h>
+#include <ros/motion_planner.h>
 
 //#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 //#include <tf2_ros/transform_listener.h>
@@ -30,7 +30,7 @@ namespace gazebo
   class GazeboROSDynamicObject : public ModelPlugin
   {
     /// \brief Constructor
-    public: 
+    public:
         GazeboROSDynamicObject();
         virtual ~GazeboROSDynamicObject(){
           aserver->shutdown();
@@ -65,13 +65,14 @@ namespace gazebo
         void publishPath(const double offset);
 
 
-    private: 
+    private:
         void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg);
+        void OnRosMsg2(const visualization_msgs::MarkerConstPtr _msg);
         void QueueThread();
         /// \brief Pointer to the model.
         physics::ModelPtr model;
         physics::LinkPtr link;
-        
+
         ignition::math::Pose3<double> current_pose;
         double ang_velocity = 0;
         double lin_velx = 0;
@@ -89,10 +90,10 @@ namespace gazebo
         /// \brief A thread the keeps running the rosQueue
         std::thread rosQueueThread;
         ros::CallbackQueue my_callback_queue;
-        
+
         bool is_ok;
         boost::shared_ptr<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>> aserver;
-        MotionPlanner motionplanner;
+        ROSMotionPlanner motionplanner;
         //actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>* aserver;
 
         transport::NodePtr node;
@@ -109,4 +110,3 @@ namespace gazebo
   GZ_REGISTER_MODEL_PLUGIN(GazeboROSDynamicObject)
 }
 #endif
-

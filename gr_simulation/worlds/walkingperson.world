@@ -25,9 +25,9 @@
       </model>
       <pose>0 0 0 0 0 0</pose>
       <box>
-        <size>20 20 0.01</size>
+        <size>10 10 0.01</size>
       </box>
-      <model_count>2</model_count>
+      <model_count>1</model_count>
       <distribution>
         <type>random</type>
       </distribution>
