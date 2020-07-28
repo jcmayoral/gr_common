@@ -94,7 +94,7 @@ if __name__ == '__main__':
     outcome = sm.execute()
     """
 
-    pattern = Rectangle2D(id="rectangle", height=4, width=4, center=(4,4,0), outcomes = ['succeeded', 'aborted'], output_keys=['start', 'end'])
+    pattern = Rectangle2D(id="rectangle", height=10, width=10, center=(10,0,0), outcomes = ['succeeded', 'aborted'], output_keys=['start', 'end'])
 
     sm = smach.StateMachine(outcomes = ['succeeded','aborted','preempted'])
     sm.userdata.nums = range(25, 30, 3)
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     with sm:
         sm_it = smach.Iterator(outcomes = ['succeeded','preempted','aborted'],
                                input_keys = ['nums', 'even_nums', 'odd_nums'],
-                               it = range(100),#lambda: range(0, len(sm.userdata.nums)),
+                               it = range(6),#lambda: range(0, len(sm.userdata.nums)),
                                output_keys = ['even_nums', 'odd_nums'],
                                it_label = 'index',
                                exhausted_outcome = 'succeeded')

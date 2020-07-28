@@ -179,8 +179,15 @@ void ROSMotionPlanner::ExecuteCommand(){
     auto currentyaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
 
     tf2::Quaternion temp;
-    temp.setRPY(0,0,expected_pose.theta+M_PI/2);
+    //temp.setRPY(0,0,expected_pose.theta+M_PI/2);
+    if (expected_pose.theta >= M_PI*2){
+      temp.setRPY(0,0,-(expected_pose.theta-M_PI*2));
+    }
+    else{
+      temp.setRPY(0,0,expected_pose.theta);
+    }
     auto angacc = (temp.getAngleShortestPath() - currentyaw);// + M_PI) % (2*M_PI) - M_PI;
+    //auto angacc = (temp.getAngle() - currentyaw);// + M_PI) % (2*M_PI) - M_PI;
     //auto angacc = std::min(std::fabs(expected_pose.theta/(2*M_PI) - currentyaw), std::fabs(currentyaw - expected_pose.theta/(2*M_PI)));
 
 
@@ -214,24 +221,26 @@ void ROSMotionPlanner::ExecuteCommand(){
     marker.header.stamp = ros::Time();
     marker.ns = "my_namespace";
     marker.id = 0;
-    marker.type = visualization_msgs::Marker::SPHERE;
+    marker.type = visualization_msgs::Marker::ARROW;
     marker.action = visualization_msgs::Marker::DELETE;
     rpub_.publish(marker);
     marker.action = visualization_msgs::Marker::ADD;
     marker.pose.position.x = current_pose_.position().x();
     marker.pose.position.y = current_pose_.position().y();
     marker.pose.position.z = 1;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
+
+    auto yaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
+    tf2::Quaternion t;
+    //temp.setRPY(0,0,expected_pose.theta+M_PI/2);
+    t.setRPY(0,0,yaw);
+    marker.pose.orientation = tf2::toMsg(t);
     marker.scale.x = 1.0;
-    marker.scale.y = 1.0;
+    marker.scale.y = 0.1;
     marker.scale.z = 0.5;
     marker.color.a = 1.0; // Don't forget to set the alpha!
     marker.color.r = 1.0;
-    marker.color.g = 1.0;
-    marker.color.b = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 1.0;
     rpub_.publish( marker );
     //mtx_.unlock();
 }
