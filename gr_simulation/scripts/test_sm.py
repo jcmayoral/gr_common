@@ -23,7 +23,7 @@ def motion_goalcb(userdata, goal):
         return goal
 
     goal.setstart = True
-    goal.is_motion = False
+    goal.is_motion = True
 
     goal.startpose.pose.position.x = start[0]
     goal.startpose.pose.position.x = start[1]
@@ -33,6 +33,16 @@ def motion_goalcb(userdata, goal):
     goal.startpose.pose.orientation.y = quaternion[1]
     goal.startpose.pose.orientation.z = quaternion[2]
     goal.startpose.pose.orientation.w = quaternion[3]
+
+
+    goal.goalPose.pose.position.x = end[0]
+    goal.goalPose.pose.position.x = end[1]
+    quaternion2 = tf.transformations.quaternion_from_euler(0, 0, end[2])
+    #type(pose) = geometry_msgs.msg.Pose
+    goal.goalPose.pose.orientation.x = quaternion2[0]
+    goal.goalPose.pose.orientation.y = quaternion2[1]
+    goal.goalPose.pose.orientation.z = quaternion2[2]
+    goal.goalPose.pose.orientation.w = quaternion2[3]
     print(goal)
 
     return goal
@@ -58,7 +68,7 @@ if __name__ == '__main__':
     outcome = sm.execute()
     """
 
-    pattern = Rectangle2D(id="rectangle", height=10, width=10, center=(-10,0,0), outcomes = ['succeeded', 'aborted'], output_keys=['start', 'end'])
+    pattern = Rectangle2D(id="rectangle", height=5, width=5, center=(-10,-10,0), outcomes = ['succeeded', 'aborted'], output_keys=['start', 'end'])
 
     sm = smach.StateMachine(outcomes = ['succeeded','aborted','preempted'])
     sm.userdata.nums = range(25, 88, 3)
