@@ -177,11 +177,14 @@ void ROSMotionPlanner::ExecuteCommand(){
     //assert(velx < 2.0);
     //assert(vely < 2.0)
     auto currentyaw = msgs::ConvertIgn(current_pose_.orientation()).Yaw();
-    auto angacc = ((expected_pose.theta/(2*M_PI) - currentyaw));// + M_PI) % (2*M_PI) - M_PI;
+
+    tf2::Quaternion temp;
+    temp.setRPY(0,0,expected_pose.theta+M_PI/2);
+    auto angacc = (temp.getAngleShortestPath() - currentyaw);// + M_PI) % (2*M_PI) - M_PI;
     //auto angacc = std::min(std::fabs(expected_pose.theta/(2*M_PI) - currentyaw), std::fabs(currentyaw - expected_pose.theta/(2*M_PI)));
 
 
-    std::cout << "DIFF " << expected_pose.theta << " , " << currentyaw << std::endl;
+    std::cout << "DIFF " << temp.getAngleShortestPath() << " , " << currentyaw << std::endl;
 
     /*
     if (angacc > M_PI){
