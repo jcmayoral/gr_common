@@ -99,7 +99,34 @@ bool ROSMotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacle
   vel_pub_->WaitForConnection();
   odom_sub_ = node->Subscribe("/" + obstacleid + "/odom",&ROSMotionPlanner::OnMsg, this);
   this->rpub_ = nh.advertise<visualization_msgs::Marker>( "/" + obstacleid + "/position", 1);
+  this->rpub2_ = nh.advertise<nav_msgs::Path>( "/" + obstacleid + "/path", 1);
+
   return performMotion();
+}
+
+void ROSMotionPlanner::publishPath(){
+    nav_msgs::Path gui_path;
+    gui_path.poses.resize(copy_sbpl_path_.size());
+    gui_path.header.frame_id = "velodyne";//costmap_ros_->getGlobalFrameID();
+    gui_path.header.stamp = ros::Time::now();
+    std::cout << "SIZE OF PAth" << gui_path.poses.size() << std::endl;
+    for(unsigned int i=0; i< copy_sbpl_path_.size(); i++){
+        geometry_msgs::PoseStamped pose;
+        pose.header.stamp = ros::Time::now();
+        pose.header.frame_id = "velodyne";//costmap_ros_->getGlobalFrameID();
+        pose.pose.position.x = copy_sbpl_path_[i].x - offset_;//offset.x;// + map_metadata_->origin.position.x;
+        pose.pose.position.y = copy_sbpl_path_[i].y - offset_;// offset.y;// + map_metadata_->origin.position.y;
+        pose.pose.position.z = 0;//start.pose.position.z;
+        tf2::Quaternion temp;
+        temp.setRPY(0,0,copy_sbpl_path_[i].theta);
+        pose.pose.orientation.x = temp.getX();
+        pose.pose.orientation.y = temp.getY();
+        pose.pose.orientation.z = temp.getZ();
+        pose.pose.orientation.w = temp.getW();
+        //plan_.push_back(pose);
+        gui_path.poses[i] = pose;
+    }
+    this->rpub2_.publish(gui_path);
 }
 
 bool ROSMotionPlanner::performMotion(){
@@ -318,5 +345,6 @@ bool ROSMotionPlanner::planPath(){
   copy_sbpl_path_ = sbpl_path_;
   //sbpl_path[i].y;
   //sbpl_path[i].theta);
+  this->publishPath();
   return true;
 }

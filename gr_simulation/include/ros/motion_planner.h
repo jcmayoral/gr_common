@@ -9,6 +9,8 @@
 #include <thread>
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
+#include <nav_msgs/Path.h>
+#include <tf2/utils.h>
 
 namespace gazebo{
     class ROSMotionPlanner{
@@ -56,6 +58,8 @@ namespace gazebo{
                 return offset_;
             }
 
+            void publishPath();
+
         private:
             transport::SubscriberPtr odom_sub_;
             transport::PublisherPtr vel_pub_;
@@ -76,8 +80,9 @@ namespace gazebo{
             double map_size_;
             boost::mutex mtx_;
             ros::Publisher rpub_;
+            ros::Publisher rpub2_;
             ros::NodeHandle nh;
     };
 }
 
-#endif 
+#endif

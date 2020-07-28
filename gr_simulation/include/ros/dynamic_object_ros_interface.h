@@ -62,8 +62,6 @@ namespace gazebo
 
         void OnMsg(ConstVector3dPtr &_msg);
         void OnUpdate();
-        void publishPath(const double offset);
-
 
     private:
         void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg);
@@ -102,7 +100,6 @@ namespace gazebo
         event::ConnectionPtr updateConnection;
 
         std::vector<EnvNAVXYTHETALAT3Dpt_t> path;
-        ros::Publisher path_pub;
 
   };
 

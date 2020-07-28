@@ -5,6 +5,8 @@ add_compile_options(-std=c++17)
 find_package(roscpp REQUIRED COMPONENTS std_msgs geometry_msgs gr_action_msgs nav_msgs visualization_msgs)
 find_package(gr_action_msgs REQUIRED)
 find_package(actionlib REQUIRED)
+find_package(tf2 REQUIRED)
+
 
 find_package(gazebo REQUIRED)
 find_package(tf2_ros REQUIRED COMPONENTS tf2_geometry_msgs)
@@ -24,7 +26,7 @@ include_directories(include
                     ${SBPL_INCLUDE_DIRS})
 
 link_directories(${Boost_INCLUDE_DIRS}
-                 ${GAZEBO_LIBRARY_DIRS} 
+                 ${GAZEBO_LIBRARY_DIRS}
                  ${CMAKE_CURRENT_BINARY_DIR}/msgs
                  ${SBPL_LIBRARY_DIRS})
 add_subdirectory(msgs)
@@ -46,14 +48,14 @@ add_library(motionplanner SHARED src/gazebo/motion_planner.cpp)
 target_link_libraries(motionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY})
 
 add_library(rosmotionplanner SHARED src/ros/motion_planner.cpp)
-target_link_libraries(rosmotionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY})
+target_link_libraries(rosmotionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY} ${tf2_ros_LIBRARIES})
 
 add_library(obstaclescoordinator SHARED src/gazebo/obstacles_coordinator.cpp)
 target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} motionplanner)
 
 #ROS
 add_library(dynobjectros SHARED src/ros/dynamic_object_ros_interface.cpp)
-target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} ${tf2_ros_LIBRARIES} rosmotionplanner)
+target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} rosmotionplanner)
 #add_dependencies(dynobjectros   ${gr_action_msgs_EXPORTED_TARGETS})
 add_library(myrosgazeboanimation SHARED src/ros/gazebo_ros_animation.cpp)
 target_link_libraries(myrosgazeboanimation ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} motionplanner)
@@ -71,11 +73,11 @@ target_link_libraries(run_obstacle_coordinator ${GAZEBO_LIBRARIES} obstaclescoor
 file(GLOB PRIMITIVES_FILES
   "*.mprim"
 )
-file(COPY ${PRIMITIVES_FILES} 
+file(COPY ${PRIMITIVES_FILES}
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(GLOB WORLDS_FILES
   "worlds/*.world"
 )
-file(COPY ${WORLDS_FILES} 
+file(COPY ${WORLDS_FILES}
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
