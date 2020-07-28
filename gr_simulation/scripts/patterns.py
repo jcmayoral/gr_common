@@ -1,4 +1,5 @@
 import math
+import smach
 
 class Pattern2D:
     def __init__(self, **kwargs):
@@ -16,9 +17,10 @@ class Pattern2D:
     def __call__(self):
         pass
 
-class Rectangle2D(Pattern2D):
+class Rectangle2D(Pattern2D, smach.State):
     def __init__(self, **kwargs):
         Pattern2D.__init__(self,**kwargs)
+        smach.State.__init__(self, outcomes=kwargs["outcomes"], output_keys = kwargs["output_keys"])
         print ("vertex", self.vortexs)
 
     def __call__(self):
@@ -27,6 +29,17 @@ class Rectangle2D(Pattern2D):
         except:
             s,e = None, None
         return s,e
+
+    def execute(self,userdata):
+        s,e = self.__call__()
+
+        if s is None:
+            self.vortexs = self.generate_votexs()
+            print ("restart")
+            s,e = self.__call__()
+        userdata.start = s
+        userdata.end = e
+        return 'succeeded'
 
 
 
