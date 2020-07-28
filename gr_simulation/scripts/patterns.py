@@ -49,15 +49,15 @@ class Rectangle2D(Pattern2D, smach.State):
         e = list()
         #FIRST COORDINATES
         s.append(self.center)
-        e.append([self.center[0]+self.height, self.center[1], self.center[2]])
+        e.append([self.center[0], self.center[1]+self.width, self.center[2]])
 
-        s.append([self.center[0]+self.height, self.center[1], self.center[2]+math.pi/2])
+        s.append([self.center[0], self.center[1]+self.width, self.center[2]+math.pi/2])
         e.append([self.center[0]+self.height, self.center[1]+ self.width, self.center[2]+math.pi/2])
 
         s.append([self.center[0]+self.height, self.center[1]+ self.width, self.center[2]+math.pi])
-        e.append([self.center[0], self.center[1]+self.width, self.center[2]+math.pi + math.pi])
+        e.append([self.center[0]+self.height, self.center[1], self.center[2]+math.pi + math.pi])
 
-        s.append([self.center[0], self.center[1]+self.width, self.center[2]+math.pi + math.pi/2])
-        e.append([self.center[0], self.center[1]+self.width, self.center[2]+math.pi + math.pi/2])
+        s.append([self.center[0]+self.height, self.center[1], self.center[2]+math.pi + math.pi/2])
+        e.append([self.center[0], self.center[1], self.center[2]+math.pi + math.pi/2])
 
         return iter(zip(s,e))

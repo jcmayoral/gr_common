@@ -3,7 +3,7 @@
 using namespace gazebo;
 
 ROSMotionPlanner::ROSMotionPlanner(std::string primfile): primitives_filename_(primfile),obstacleid_("defaults"), initialized_(false),
-                                                          nh("~"), ncells_(100), mtx_(), resolution_(0.1){
+                                                          nh("~"), ncells_(100), mtx_(), resolution_(0.1), map_set(false){
   std::cout << "constructor";
 }
 
@@ -91,16 +91,19 @@ void ROSMotionPlanner::setupMap(std::string obstacleid, double mapsize){
     std::cerr << "SBPL encountered a fatal exception!"<< std::endl;
     ret = false;
   }
+
+  map_set = true;
 }
 
 bool ROSMotionPlanner::run(gazebo::transport::NodePtr node, std::string obstacleid, double mapsize){
-  setupMap(obstacleid, mapsize);
-  vel_pub_ = node->Advertise<gazebo::msgs::Vector3d>("/" + obstacleid + "/vel_cmd");
-  vel_pub_->WaitForConnection();
-  odom_sub_ = node->Subscribe("/" + obstacleid + "/odom",&ROSMotionPlanner::OnMsg, this);
-  this->rpub_ = nh.advertise<visualization_msgs::Marker>( "/" + obstacleid + "/position", 1);
-  this->rpub2_ = nh.advertise<nav_msgs::Path>( "/" + obstacleid + "/path", 1);
-
+  if (!map_set){
+    setupMap(obstacleid, mapsize);
+    vel_pub_ = node->Advertise<gazebo::msgs::Vector3d>("/" + obstacleid + "/vel_cmd");
+    vel_pub_->WaitForConnection();
+    odom_sub_ = node->Subscribe("/" + obstacleid + "/odom",&ROSMotionPlanner::OnMsg, this);
+    this->rpub_ = nh.advertise<visualization_msgs::Marker>( "/" + obstacleid + "/position", 1);
+    this->rpub2_ = nh.advertise<nav_msgs::Path>( "/" + obstacleid + "/path", 1);
+  }
   return performMotion();
 }
 

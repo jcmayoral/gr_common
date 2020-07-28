@@ -26,7 +26,7 @@ def motion_goalcb(userdata, goal):
     goal.is_motion = True
 
     goal.startpose.pose.position.x = start[0]
-    goal.startpose.pose.position.x = start[1]
+    goal.startpose.pose.position.y = start[1]
     quaternion = tf.transformations.quaternion_from_euler(0, 0, start[2])
     #type(pose) = geometry_msgs.msg.Pose
     goal.startpose.pose.orientation.x = quaternion[0]
@@ -36,7 +36,7 @@ def motion_goalcb(userdata, goal):
 
 
     goal.goalPose.pose.position.x = end[0]
-    goal.goalPose.pose.position.x = end[1]
+    goal.goalPose.pose.position.y = end[1]
     quaternion2 = tf.transformations.quaternion_from_euler(0, 0, end[2])
     #type(pose) = geometry_msgs.msg.Pose
     goal.goalPose.pose.orientation.x = quaternion2[0]
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     outcome = sm.execute()
     """
 
-    pattern = Rectangle2D(id="rectangle", height=5, width=5, center=(-10,-10,0), outcomes = ['succeeded', 'aborted'], output_keys=['start', 'end'])
+    pattern = Rectangle2D(id="rectangle", height=-1, width=-1, center=(4,4,0), outcomes = ['succeeded', 'aborted'], output_keys=['start', 'end'])
 
     sm = smach.StateMachine(outcomes = ['succeeded','aborted','preempted'])
     sm.userdata.nums = range(25, 88, 3)
@@ -102,8 +102,8 @@ if __name__ == '__main__':
                      {'succeeded':'succeeded',
                       'aborted':'aborted'})
 
-    #sis = IntrospectionServer('experiment_sm_viewer', sm, '/ROOT')
-    #sis.start()
+    sis = IntrospectionServer('experiment_sm_viewer', sm, '/ROOT')
+    sis.start()
     outcome = sm.execute()
     rospy.spin()
-    #sis.stop()
+    sis.stop()

@@ -82,6 +82,7 @@ namespace gazebo{
             ros::Publisher rpub_;
             ros::Publisher rpub2_;
             ros::NodeHandle nh;
+            bool map_set;
     };
 }
 
