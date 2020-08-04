@@ -12,6 +12,7 @@
 #include <tf2/utils.h>
 
 #include <gr_safety_gridmap/main_gridmap.hpp>
+#include <angles/angles.h>
 
 //Based originally from the rosbag c++ implementation
 //https://github.com/ros/ros_comm/tree/noetic-devel/tools/rosbag/src
@@ -97,7 +98,6 @@ namespace gr_safety_gridmap{
                 auto aux = currentpose;
                 //float ospeed = sqrt(pow(o.speed.x,2) + pow(o.speed.y,2));
                 int searchdepth = tracking_time_;//int(tracking_distance_/(nprimitives_*ospeed));
-                std::cout << "D" << searchdepth << std::endl;
                 //recursivity
                 search_depth_ = searchdepth;
                 generateCycle(aux,searchdepth, o.object_id, o.speed);
@@ -121,7 +121,7 @@ namespace gr_safety_gridmap{
                 }
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
-                    gridmap.gridmap.at(o.object_id, *iterator) = 0.5;
+                    gridmap.gridmap.at(o.object_id, *iterator) = 0.01;
                 }
             }
 
@@ -178,57 +178,59 @@ namespace gr_safety_gridmap{
 
                 //double dt = (current_time - last_time).toSec();
                 auto dt = 1;
-                auto vth = ov.z;
-
                 float vx =0.0;
                 float vy =0.0;
 
-
-                //x += delta_x;
-                //y += delta_y;
                 auto th = tf2::getYaw(in.orientation);
-                double delta_th = vth * dt;
+                double delta_th = ov.z*0.1;// * dt;
 
                 switch(motion_type){
                     case 0:
                         //th += delta_th;
-                        vx = ov.x;
+                        vx = fabs(ov.x);
+                        //vx = std::max(resolution_,2.0);
                         break;
                     case 1:
-                        vx = ov.x;
+                        vx = fabs(ov.x);
+                        //vx = std::max(resolution_,2.0);
                         th += delta_th;
                         break;
                     case 2:
-                        vx = ov.x;
+                        vx = fabs(ov.x);
+                        //vx = std::max(resolution_,2.0);
                         th -= delta_th;
                         break;
                     case 3:
-                        vx = ov.x;
+                        vx = fabs(ov.x);
+                        //vx = std::max(resolution_,2.0);
                         th -= M_PI+delta_th;
                         break;
                     case 4:
-                        vx = ov.x;
+                        vx = fabs(ov.x);
+                        //vx = std::max(resolution_,2.0);
                         th += M_PI+delta_th;
                         break;
                     case 5:
-                        //out = in;
-                        break;
-                    case 6:
-                        vx = -ov.x;
+                        vx = -fabs(ov.x);
+                        //vx = -std::max(resolution_,2.0);
                         //vy = 1;
                         //th -= delta_th;
                         break;
-                    case 7:
+                    case 6:
                         //out.position.x = in.position.x-resolution_;
                         //out.position.y = in.position.y+resolution
                         th += delta_th;
                         break;
-                    case 8:
+                    case 7:
                         //out.position.x = in.position.x+resolution_;
                         //out.position.y = in.position.y-resolution_;
                         th -= delta_th;
                         break;
+                    case 8:                     //out = in;
+                        break;
                 }
+
+                th = angles::normalize_angle(th);
 
                 tf2::Quaternion quat_tf;
                 double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
@@ -236,6 +238,7 @@ namespace gr_safety_gridmap{
                 out.position.x = in.position.x+delta_x;
                 out.position.y = in.position.y+delta_y;
                 quat_tf.setEuler(0,0,th);
+
                 //std::cout << th << " normalize?" << std::endl;
                 //tf2::fromMsg(in.orientation, quat_tf);
                 out.orientation = tf2::toMsg(quat_tf.normalize());
