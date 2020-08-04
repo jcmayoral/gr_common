@@ -171,6 +171,7 @@ namespace gr_safety_gridmap{
                 */
                 grid_map::Position center;
                 grid_map::Index index;
+
                 center(0) = p.position.x;
                 center(1) = p.position.y;
                 
@@ -183,7 +184,7 @@ namespace gr_safety_gridmap{
                 */
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_);!iterator.isPastEnd(); ++iterator) {
-                    gridmap.gridmap.at(layer_id, *iterator) =  std::max(static_cast<double>(gridmap.gridmap.at(layer_id, *iterator)),val);;
+                    gridmap.gridmap.at(layer_id, *iterator) =  std::max(static_cast<double>(gridmap.gridmap.at(layer_id, *iterator)),val);
                 }
 
                 return true;
