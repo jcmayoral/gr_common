@@ -9,4 +9,4 @@ grid_map_visualizations:
     params:
      layer: conv
      data_min: 0.0
-     data_max: 50.00
+     data_max: 0.50

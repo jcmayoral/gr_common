@@ -9,4 +9,4 @@ grid_map_visualizations:
     params:
      layer: normal_z
      data_min: 0.0
-     data_max: 40.0
+     data_max: 1.0

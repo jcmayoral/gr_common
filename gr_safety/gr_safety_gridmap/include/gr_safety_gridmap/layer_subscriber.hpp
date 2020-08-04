@@ -154,6 +154,7 @@ namespace gr_safety_gridmap{
 
 
             bool updateGridLayer(const std::string layer_id, geometry_msgs::Pose p, double val){
+                /*
                 grid_map::Position position;
                 grid_map::Index index;
 
@@ -166,6 +167,24 @@ namespace gr_safety_gridmap{
                 }
                 //gridmap.gridmap.at(layer_id, index) += val;
                 gridmap.gridmap.at(layer_id, index) = std::max(static_cast<double>(gridmap.gridmap.at(layer_id, index)),val);
+
+                */
+                grid_map::Position center;
+                grid_map::Index index;
+                center(0) = p.position.x;
+                center(1) = p.position.y;
+                
+
+                /*
+                bool validindex = gridmap.gridmap.getIndex(center, index);
+                if (!validindex){
+                    return;
+                }
+                */
+
+                for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_);!iterator.isPastEnd(); ++iterator) {
+                    gridmap.gridmap.at(layer_id, *iterator) =  std::max(static_cast<double>(gridmap.gridmap.at(layer_id, *iterator)),val);;
+                }
 
                 return true;
             }
