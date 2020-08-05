@@ -72,6 +72,12 @@ namespace gr_safety_gridmap{
                 to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);{
+                
+                for (int i = 0; i <int(tracking_time_); i++){
+                    //gridmap.gridmap.clear("Time_"+std::to_string(i));
+                    gridmap.gridmap["Time_"+std::to_string(i)].setZero();
+                }
+
                 fb_msgs_.header.frame_id = map_frame_;
                 fb_msgs_.poses.clear();
 
@@ -104,7 +110,7 @@ namespace gr_safety_gridmap{
                     
                 //Update current position
                 convert(currentpose);
-                updateGridLayer(o.object_id, currentpose,  exp(0));
+                updateGridLayer(o.object_id, currentpose,  exp(0), 0);
             }
 
             void updateStatic(safety_msgs::Object o){
@@ -122,6 +128,12 @@ namespace gr_safety_gridmap{
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
                     gridmap.gridmap.at(o.object_id, *iterator) = 0.01;
+                }
+
+                for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
+                    for (int i = 0; i <int(tracking_time_); i++){
+                        gridmap.gridmap.at("Time_"+std::to_string(i), *iterator) = 0.01;
+                    }
                 }
             }
 
@@ -144,7 +156,7 @@ namespace gr_safety_gridmap{
                     auto val = 2*exp(-0.3*(search_depth_-depth))*prob[i];
                     //val /=norm;
 
-                    if (updateGridLayer(layer, aux2, val )){
+                    if (updateGridLayer(layer, aux2, val, search_depth_-depth)){
                         fb_msgs_.poses.push_back(aux2);
                     }
                     generateCycle(aux2,depth-1,layer, v);
@@ -153,7 +165,7 @@ namespace gr_safety_gridmap{
             }
 
 
-            bool updateGridLayer(const std::string layer_id, geometry_msgs::Pose p, double val){
+            bool updateGridLayer(const std::string layer_id, geometry_msgs::Pose p, double val, const int timeindex){
                 /*
                 grid_map::Position position;
                 grid_map::Index index;
@@ -183,8 +195,12 @@ namespace gr_safety_gridmap{
                 }
                 */
 
+                std::string layname{"Time_"+std::to_string(timeindex)};
+                std::cout << "update " << layname << std::endl;
+
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_);!iterator.isPastEnd(); ++iterator) {
                     gridmap.gridmap.at(layer_id, *iterator) =  std::max(static_cast<double>(gridmap.gridmap.at(layer_id, *iterator)),val);
+                    gridmap.gridmap.at(layname, *iterator) =  std::max(static_cast<double>(gridmap.gridmap.at(layname, *iterator)),val);
                 }
 
                 return true;
@@ -251,6 +267,8 @@ namespace gr_safety_gridmap{
                 }
 
                 th = angles::normalize_angle(th);
+
+                vx = vx * resolution_;
 
                 tf2::Quaternion quat_tf;
                 double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
@@ -321,7 +339,6 @@ namespace gr_safety_gridmap{
                                                                                                             search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
                                                                                                             proxemic_distance_(proxemic_distance){
-
                 rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
@@ -332,6 +349,12 @@ namespace gr_safety_gridmap{
                         const ros::MessageEvent<topic_tools::ShapeShifter const> &> >(
                                 boost::bind(&LayerSubscriber::layerCB, this, _1));
                 rsub_ = nh_.subscribe(ops);
+
+                std::cout << "AAAAAAAAAA"<<std::endl;
+                for (auto i=0; i<int(tracking_time_); i++){
+                    std::cout << "T "<<  i << std::endl;
+                    addLayerTuple("Time_" + std::to_string(i));
+                }
             }
 
         private:

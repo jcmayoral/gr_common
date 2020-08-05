@@ -1,8 +1,8 @@
-resolution: 0.25
+resolution: 0.5
 mapsize: 20
 timeout: 0.5
-trackingtime: 8
-nprimitives: 1
+trackingtime: 5
+nprimitives: 2
 proxemicradius: 0.50
 detection_topics:
     #- /detected_objects
