@@ -127,12 +127,12 @@ namespace gr_safety_gridmap{
                 }
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
-                    gridmap.gridmap.at(o.object_id, *iterator) = 0.01;
+                    gridmap.gridmap.at(o.object_id, *iterator) += 0.01;
                 }
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
                     for (int i = 0; i <int(tracking_time_); i++){
-                        gridmap.gridmap.at("Time_"+std::to_string(i), *iterator) = 0.1*(tracking_time_-i);
+                        gridmap.gridmap.at("Time_"+std::to_string(i), *iterator) += 0.1*(tracking_time_-i);
                     }
                 }
             }
@@ -199,8 +199,8 @@ namespace gr_safety_gridmap{
                 std::cout << "update " << layname << std::endl;
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_);!iterator.isPastEnd(); ++iterator) {
-                    gridmap.gridmap.at(layer_id, *iterator) =  std::max(static_cast<double>(gridmap.gridmap.at(layer_id, *iterator)),val);
-                    gridmap.gridmap.at(layname, *iterator) =  std::max(static_cast<double>(gridmap.gridmap.at(layname, *iterator)),val);
+                    gridmap.gridmap.at(layer_id, *iterator) += val;//std::max(static_cast<double>(gridmap.gridmap.at(layer_id, *iterator)),val);
+                    gridmap.gridmap.at(layname, *iterator) +=  val;//std::max(static_cast<double>(gridmap.gridmap.at(layname, *iterator)),val);
                 }
 
                 return true;
