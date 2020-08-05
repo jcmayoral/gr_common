@@ -132,7 +132,7 @@ namespace gr_safety_gridmap{
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
                     for (int i = 0; i <int(tracking_time_); i++){
-                        gridmap.gridmap.at("Time_"+std::to_string(i), *iterator) = 0.01;
+                        gridmap.gridmap.at("Time_"+std::to_string(i), *iterator) = 0.1*(tracking_time_-i);
                     }
                 }
             }
@@ -268,7 +268,7 @@ namespace gr_safety_gridmap{
 
                 th = angles::normalize_angle(th);
 
-                vx = vx * resolution_;
+                vx = vx + resolution_;
 
                 tf2::Quaternion quat_tf;
                 double delta_x = (vx * cos(th) - vy * sin(th)) * dt;

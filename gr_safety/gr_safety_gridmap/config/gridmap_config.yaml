@@ -1,9 +1,9 @@
 resolution: 0.5
-mapsize: 20
+mapsize: 25
 timeout: 0.5
-trackingtime: 5
-nprimitives: 2
-proxemicradius: 0.50
+trackingtime: 10
+nprimitives: 1
+proxemicradius: 2.50
 detection_topics:
     #- /detected_objects
     #- /pointcloud_processing_node/detected_objects
