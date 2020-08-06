@@ -42,6 +42,7 @@ void SafetyGridMap::timer_callback(const ros::TimerEvent& event){
         ROS_ERROR_STREAM("Erase "<< object_id);
        
         if(gridmap.gridmap.exists(object_id)){
+            gridmap.gridmap.clear(object_id);
             gridmap.gridmap.erase(object_id);
         }
 
