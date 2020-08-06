@@ -196,7 +196,7 @@ namespace gr_safety_gridmap{
                 */
 
                 std::string layname{"Time_"+std::to_string(timeindex)};
-                std::cout << "update " << layname << std::endl;
+                //std::cout << "update " << layname << std::endl;
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_);!iterator.isPastEnd(); ++iterator) {
                     gridmap.gridmap.at(layer_id, *iterator) += val;//std::max(static_cast<double>(gridmap.gridmap.at(layer_id, *iterator)),val);
@@ -288,8 +288,6 @@ namespace gr_safety_gridmap{
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 grid_map::Position position;
                 grid_map::Index index;
-                //std::cout << "updateLayer" << id_ << std::endl;
-                //std::cout << gridmap.id << "PATH OK "<< std::endl;
                 addLayerTuple(std::to_string(0));
                 //gridmap.lock();
                 if (behaviour==1){
