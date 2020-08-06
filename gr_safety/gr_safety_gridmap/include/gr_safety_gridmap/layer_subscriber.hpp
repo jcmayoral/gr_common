@@ -73,8 +73,9 @@ namespace gr_safety_gridmap{
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);{
                 
-                for (int i = 0; i <int(tracking_time_); i++){
+                for (int i = 0; i <=tracking_time_; i++){
                     //gridmap.gridmap.clear("Time_"+std::to_string(i));
+                    std::cout << "LAYER  " << i << std::endl;
                     gridmap.gridmap["Time_"+std::to_string(i)].setZero();
                 }
 
@@ -131,7 +132,7 @@ namespace gr_safety_gridmap{
                 }
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
-                    for (int i = 0; i <int(tracking_time_); i++){
+                    for (int i = 0; i < tracking_time_; i++){
                         gridmap.gridmap.at("Time_"+std::to_string(i), *iterator) += 0.1*(tracking_time_-i);
                     }
                 }
@@ -147,16 +148,17 @@ namespace gr_safety_gridmap{
                 aux = in;
                 //MotionModel class TODO
                 double prob[9] ={1.0,1.0,1.0,1.0,1.0,0.5,0.5,0.05,0.05};
-                //auto norm = nprimitives*exp(-0.3*(search_depth_-depth));
+                //auto norm = nprimitives_*exp(-0.3*(search_depth_-depth));
 
                 for (int i=0; i <nprimitives_; i++){
                     aux2 = generateMotion(in,i, v);
                     //to mapframe
                     convert(aux2);
-                    auto val = 2*exp(-0.3*(search_depth_-depth))*prob[i];
+                    auto val = 1*exp(-0.3*(search_depth_-depth))*prob[i];
                     //val /=norm;
+                    std::cout << 1+search_depth_-depth << std::endl;
 
-                    if (updateGridLayer(layer, aux2, val, search_depth_-depth)){
+                    if (updateGridLayer(layer, aux2, val, 1+search_depth_-depth)){
                         fb_msgs_.poses.push_back(aux2);
                     }
                     generateCycle(aux2,depth-1,layer, v);
@@ -196,7 +198,7 @@ namespace gr_safety_gridmap{
                 */
 
                 std::string layname{"Time_"+std::to_string(timeindex)};
-                //std::cout << "update " << layname << std::endl;
+                std::cout << "update " << layname << std::endl;
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_);!iterator.isPastEnd(); ++iterator) {
                     gridmap.gridmap.at(layer_id, *iterator) += val;//std::max(static_cast<double>(gridmap.gridmap.at(layer_id, *iterator)),val);
@@ -268,7 +270,7 @@ namespace gr_safety_gridmap{
 
                 th = angles::normalize_angle(th);
 
-                vx = vx + resolution_;
+                vx = vx + 3*resolution_;
 
                 tf2::Quaternion quat_tf;
                 double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
@@ -333,7 +335,7 @@ namespace gr_safety_gridmap{
             }
             
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local, int tracking_time=2.0, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), 
+            LayerSubscriber(std::string input, double resolution, bool local, int tracking_time=2, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), 
                                                                                                             search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
                                                                                                             proxemic_distance_(proxemic_distance){
@@ -349,7 +351,7 @@ namespace gr_safety_gridmap{
                 rsub_ = nh_.subscribe(ops);
 
                 std::cout << "AAAAAAAAAA"<<std::endl;
-                for (auto i=0; i<int(tracking_time_); i++){
+                for (auto i=0; i<=tracking_time_; i++){
                     std::cout << "T "<<  i << std::endl;
                     addLayerTuple("Time_" + std::to_string(i));
                 }

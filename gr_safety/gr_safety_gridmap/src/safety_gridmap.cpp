@@ -169,7 +169,7 @@ void SafetyGridMap::loadRegions(std::string iid){
         }
         //assign values in the gridmap
         for (grid_map::PolygonIterator iterator(gridmap.gridmap, polygon); !iterator.isPastEnd(); ++iterator) {
-            gridmap.gridmap.at(iid, *iterator) = risk_level;
+            gridmap.gridmap.at(iid, *iterator) = exp(0.3*risk_level);
         }
     }
 }
@@ -203,7 +203,7 @@ void SafetyGridMap::updateGrid(){
                 continue;
             }
             auto layer = gridmap.gridmap.get(object_id).array().matrix();
-            float object_risk_index = layer.cwiseProduct(safety_layer).sum();
+            float object_risk_index = layer.cwiseProduct(safety_layer).maxCoeff();
             gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + layer;
             nobjects++;
 
@@ -222,11 +222,12 @@ void SafetyGridMap::updateGrid(){
         while (gridmap.gridmap.exists(timeid)){
             tobj.object_id = timeid;
             auto tlayer = gridmap.gridmap.get(timeid).array().matrix();
-            tobj.risk_index = tlayer.cwiseProduct(safety_layer).sum();
+            tobj.risk_index = tlayer.cwiseProduct(safety_layer).maxCoeff();
             indexes.objects.push_back(tobj);
+            std::cout << timeid << " : " << tobj.risk_index << std::endl;
+
             timecount++;
             timeid = "Time_" + std::to_string(timecount);
-            std::cout << timeid << std::endl;
         }
 
         std_msgs::Float32 score;
