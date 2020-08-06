@@ -3,7 +3,7 @@ mapsize: 20
 timeout: 2.0
 trackingtime: 5
 nprimitives: 1
-proxemicradius: 1.50
+proxemicradius: 1.0
 detection_topics:
     #- /detected_objects
     #- /pointcloud_processing_node/detected_objects

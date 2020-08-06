@@ -177,6 +177,7 @@ void SafetyGridMap::loadRegions(std::string iid){
 void SafetyGridMap::updateGrid(){
     boost::mutex::scoped_lock lltk(smtx);
     boost::mutex::scoped_lock ltk(gridmap.mtx);
+
         gridmap.gridmap.add("conv", 0);
         auto safety_layer = gridmap.gridmap.get("safetyregions");
         auto layers =  gridmap.gridmap.getLayers();
@@ -202,7 +203,7 @@ void SafetyGridMap::updateGrid(){
                 continue;
             }
             auto layer = gridmap.gridmap.get(object_id).array().matrix();
-            float object_risk_index = layer.cwiseProduct(gridmap.gridmap.get("safetyregions")).sum();
+            float object_risk_index = layer.cwiseProduct(safety_layer).sum();
             gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + layer;
             nobjects++;
 
@@ -211,8 +212,25 @@ void SafetyGridMap::updateGrid(){
             robj.risk_index =object_risk_index;
             indexes.objects.push_back(robj);
         }
+
+        //Time predicionts
+        int timecount = 0;
+        std::string timeid{"Time_" + std::to_string(timecount)};
+
+        safety_msgs::RiskObject tobj;
+
+        while (gridmap.gridmap.exists(timeid)){
+            tobj.object_id = timeid;
+            auto tlayer = gridmap.gridmap.get(timeid).array().matrix();
+            tobj.risk_index = tlayer.cwiseProduct(safety_layer).sum();
+            indexes.objects.push_back(tobj);
+            timecount++;
+            timeid = "Time_" + std::to_string(timecount);
+            std::cout << timeid << std::endl;
+        }
+
         std_msgs::Float32 score;
-        gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(gridmap.gridmap.get("safetyregions"));// * safety_layer;
+        gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(safety_layer);
         //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
         score.data = gridmap.gridmap.get("conv").sum();
 
