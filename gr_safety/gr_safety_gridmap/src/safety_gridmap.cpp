@@ -203,8 +203,10 @@ void SafetyGridMap::updateGrid(){
                 continue;
             }
             auto layer = gridmap.gridmap.get(object_id).array().matrix();
+            auto normlayer = layer/layer.maxCoeff();
+
             float object_risk_index = layer.cwiseProduct(safety_layer).maxCoeff();
-            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + layer;
+            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + normlayer;
             nobjects++;
 
             safety_msgs::RiskObject robj;

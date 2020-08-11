@@ -75,7 +75,7 @@ namespace gr_safety_gridmap{
                 
                 for (int i = 0; i <=tracking_time_; i++){
                     //gridmap.gridmap.clear("Time_"+std::to_string(i));
-                    std::cout << "LAYER  " << i << std::endl;
+                    //std::cout << "LAYER  " << i << std::endl;
                     gridmap.gridmap["Time_"+std::to_string(i)].setZero();
                 }
 
