@@ -3,7 +3,7 @@
 using namespace gazebo;
 
 ROSMotionPlanner::ROSMotionPlanner(std::string primfile): primitives_filename_(primfile),obstacleid_("defaults"), initialized_(false),
-                                                          nh("~"), ncells_(100), mtx_(), resolution_(0.1), map_set(false){
+                                                          nh("~"), ncells_(100), mtx_(), resolution_(0.1), map_set(false),odom_sub_(NULL){
   std::cout << "constructor";
 }
 

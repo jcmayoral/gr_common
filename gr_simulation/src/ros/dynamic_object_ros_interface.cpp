@@ -162,7 +162,8 @@ void GazeboROSDynamicObject::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
     std::cout << "MODEL NAME " << this->model->GetName() << std::endl;
 
     // Spin up the queue helper thread.
-    this->rosQueueThread = std::thread(std::bind(&GazeboROSDynamicObject::QueueThread, this));
+    futureObj = exitSignal.get_future();
+    this->rosQueueThread = std::thread(std::bind(&GazeboROSDynamicObject::QueueThread, this), std::move(futureObj));
     aserver->start();
     //ros::spinOnce();
 
@@ -238,9 +239,11 @@ void GazeboROSDynamicObject::OnRosMsg2(const visualization_msgs::MarkerConstPtr 
 void GazeboROSDynamicObject::QueueThread(){
     static const double timeout = 0.01;
     while (is_ok){
-        //ros::getGlobalCallbackQueue()->callAvailable(ros::WallDuration(0));
-        my_callback_queue.callAvailable(ros::WallDuration());
-       this->rosQueue.callAvailable(ros::WallDuration(timeout));
-       ros::Duration(0.5).sleep();
-      }
+      //ros::getGlobalCallbackQueue()->callAvailable(ros::WallDuration(0));
+      my_callback_queue.callAvailable(ros::WallDuration());
+      this->rosQueue.callAvailable(ros::WallDuration(timeout));
+      //ros::Duration(0.5).sleep();
+      std::this_thread::sleep_for (std::chrono::milliseconds(500));
+    }
+    std::cout << "Dying" <<std::endl;
 }

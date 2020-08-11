@@ -24,6 +24,9 @@
 
 #include <nav_msgs/Path.h>
 
+
+#include <future>
+
 namespace gazebo
 {
   /// \brief A plugin to control a GR Dynamic Obstacle sensor.
@@ -33,14 +36,26 @@ namespace gazebo
     public:
         GazeboROSDynamicObject();
         virtual ~GazeboROSDynamicObject(){
+          is_ok = false;
+          exitSignal.set_value();
+          rosQueueThread.join();
+
+          rosQueue.clear();
+          rosQueue.disable();
+          my_callback_queue.clear();
+          my_callback_queue.disable();
           aserver->shutdown();
           //delete aserver;
+          aserver = NULL;
           aserver.reset();
           rosSub.shutdown();
           rosPub.shutdown();
-          std::cout << "destroyed0"<< std::endl;
-          is_ok = false;
-          //rosQueueThread.join();
+          poseTimer.stop();
+          updateConnection.reset();
+          std::cout << "destroyeda"<< std::endl;
+
+
+          sub->Unsubscribe();
           std::cout << "destroyed"<< std::endl;
         }
 
@@ -89,7 +104,7 @@ namespace gazebo
         std::thread rosQueueThread;
         ros::CallbackQueue my_callback_queue;
 
-        bool is_ok;
+        std::atomic_bool is_ok;
         boost::shared_ptr<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>> aserver;
         ROSMotionPlanner motionplanner;
         //actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>* aserver;
@@ -100,6 +115,9 @@ namespace gazebo
         event::ConnectionPtr updateConnection;
 
         std::vector<EnvNAVXYTHETALAT3Dpt_t> path;
+
+        std::promise<void> exitSignal;
+        std::future<void> futureObj;
 
   };
 

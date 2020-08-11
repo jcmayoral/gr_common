@@ -60,6 +60,19 @@ namespace gazebo{
 
             void publishPath();
 
+            ~ROSMotionPlanner(){
+              std::cout << "AMOT"<< std::endl;
+              //delete planner_;
+              //delete env_;
+              if (odom_sub_!=NULL){
+                  odom_sub_->Unsubscribe();
+              }
+              rpub_.shutdown();
+              rpub2_.shutdown();
+              nh.shutdown();
+              std::cout << "BMOT"<< std::endl;
+            }
+
         private:
             transport::SubscriberPtr odom_sub_;
             transport::PublisherPtr vel_pub_;

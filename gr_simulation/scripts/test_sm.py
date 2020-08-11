@@ -94,7 +94,7 @@ if __name__ == '__main__':
     outcome = sm.execute()
     """
 
-    pattern = Rectangle2D(id="rectangle", height=10, width=10, center=(10,0,0), outcomes = ['succeeded', 'aborted'], output_keys=['start', 'end'])
+    pattern = Rectangle2D(id="rectangle", height=10, width=10, center=(-5,-5,0), outcomes = ['succeeded', 'aborted'], output_keys=['start', 'end'])
 
     sm = smach.StateMachine(outcomes = ['succeeded','aborted','preempted'])
     sm.userdata.nums = range(25, 30, 3)
