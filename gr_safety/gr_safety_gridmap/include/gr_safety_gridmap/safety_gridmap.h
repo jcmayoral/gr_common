@@ -24,7 +24,7 @@ namespace gr_safety_gridmap{
             ros::Publisher objects_risk_pub_;
             std::vector<LayerSubscriber> layer_subscribers;
             ros::Timer clear_timer_;
-            float safety_threshold_;
+            double safety_threshold_;
             boost::mutex smtx;
     };
 

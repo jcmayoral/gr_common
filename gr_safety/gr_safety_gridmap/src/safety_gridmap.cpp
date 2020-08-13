@@ -78,7 +78,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     float proxemicdistance = config_yaml["proxemicradius"].as<float>();
     ROS_ERROR_STREAM("Proxemic Distance: "<< proxemicdistance);
 
-    safety_threshold_= config_yaml["safety_threshold"].as<float>();
+    safety_threshold_= config_yaml["safety_threshold"].as<double>();
     ROS_ERROR_STREAM("Threshold: "<< safety_threshold_);
 
     std::string map_frame;
