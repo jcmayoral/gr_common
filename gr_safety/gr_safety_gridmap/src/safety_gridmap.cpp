@@ -78,6 +78,9 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     float proxemicdistance = config_yaml["proxemicradius"].as<float>();
     ROS_ERROR_STREAM("Proxemic Distance: "<< proxemicdistance);
 
+    safety_threshold_= config_yaml["safety_threshold"].as<float>();
+    ROS_ERROR_STREAM("Threshold: "<< safety_threshold_);
+
     std::string map_frame;
     int factor;
 
@@ -111,6 +114,7 @@ void SafetyGridMap::initializeGridMap(bool localgridmap){
     rpub_ = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
     safety_grader_ = nh.advertise<std_msgs::Float32>("safety_score", 1, true);
     objects_risk_pub_ = nh.advertise<safety_msgs::RiskIndexes>("safety_indexes", 1, true);
+    request_stop_ = nh.advertise<std_msgs::Bool>("/lock_all", 1, true);
 
     // Transformin the entire path of location can be computaitonal expensive
     if(!localgridmap){
@@ -239,6 +243,13 @@ void SafetyGridMap::updateGrid(){
 
         ROS_ERROR_STREAM_THROTTLE(5,"risk sum " << score.data << " MEAN SAFETY " << score.data/nobjects << "MAX COEFF "<<gridmap.gridmap.get("conv").maxCoeff());
 
+
+        std_msgs::Bool stop_request;
+        if (score.data > safety_threshold_){
+            stop_request.data = true;
+        }
+
+        request_stop_.publish(stop_request);
         //Publish Score
         safety_grader_.publish(score);
         objects_risk_pub_.publish(indexes);
