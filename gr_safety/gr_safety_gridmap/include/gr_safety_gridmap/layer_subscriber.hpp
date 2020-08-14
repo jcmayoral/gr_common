@@ -95,7 +95,7 @@ namespace gr_safety_gridmap{
                     }
                 }
                 rpub_.publish(fb_msgs_);
-                //gridmap.setDataFlag(true);
+                gridmap.setDataFlag(true);
                 };
             }
 
@@ -124,7 +124,7 @@ namespace gr_safety_gridmap{
                 
                 bool validindex = gridmap.gridmap.getIndex(center, index);
                 if (!validindex){
-                    return;
+                   return;
                 }
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
@@ -314,7 +314,7 @@ namespace gr_safety_gridmap{
 
                     c++;
                 }
-                //gridmap.setDataFlag(true);  
+                gridmap.setDataFlag(true);  
                 //gridmap.unlock();
             }
             

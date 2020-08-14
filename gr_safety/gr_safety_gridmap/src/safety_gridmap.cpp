@@ -181,6 +181,10 @@ void SafetyGridMap::loadRegions(std::string iid){
 void SafetyGridMap::updateGrid(){
     boost::mutex::scoped_lock lltk(smtx);
     boost::mutex::scoped_lock ltk(gridmap.mtx);
+    if (!gridmap.isNewDataAvailable()){
+	    ROS_ERROR("NO UPDATES");
+    return;	    
+    }
 
         gridmap.gridmap.add("conv", 0);
         auto safety_layer = gridmap.gridmap.get("safetyregions");
@@ -254,4 +258,5 @@ void SafetyGridMap::updateGrid(){
         safety_grader_.publish(score);
         objects_risk_pub_.publish(indexes);
         publishGrid();
+	gridmap.setDataFlag(false);
 }
