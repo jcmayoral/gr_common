@@ -223,7 +223,7 @@ namespace gr_safety_gridmap{
                 float vy =0.0;
 
                 auto th = tf2::getYaw(in.orientation);
-                double delta_th = ov.z*0.1;// * dt;
+                double delta_th = 0.05*dt;//ov.z*0.1;// * dt;
 
                 switch(motion_type){
                     case 0:
@@ -274,7 +274,7 @@ namespace gr_safety_gridmap{
 
                 th = angles::normalize_angle(th);
 
-                vx = vx + 3*resolution_;
+                vx = vx;// + 3*resolution_;
 
                 tf2::Quaternion quat_tf;
                 double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
@@ -337,7 +337,7 @@ namespace gr_safety_gridmap{
                                 boost::bind(&LayerSubscriber::layerCB, this, _1));
                 rsub_ = nh_.subscribe(ops);
             }
-            
+
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
             LayerSubscriber(std::string input, double resolution, bool local, int tracking_time=2, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), 
                                                                                                             search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
@@ -354,9 +354,7 @@ namespace gr_safety_gridmap{
                                 boost::bind(&LayerSubscriber::layerCB, this, _1));
                 rsub_ = nh_.subscribe(ops);
 
-                std::cout << "AAAAAAAAAA"<<std::endl;
                 for (auto i=0; i<=tracking_time_; i++){
-                    //std::cout << "T "<<  i << std::endl;
                     addLayerTuple("Time_" + std::to_string(i));
                 }
             }
