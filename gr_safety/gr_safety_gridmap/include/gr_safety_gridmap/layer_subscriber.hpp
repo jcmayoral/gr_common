@@ -60,7 +60,11 @@ namespace gr_safety_gridmap{
                 gridmap.gridmap.add(person_id, 0.0);
             }
 
-            void convert(geometry_msgs::Pose& in){
+            void convert(geometry_msgs::PoseStamped& in){
+                if (in.header.frame_id.compare(map_frame_)==0){
+                    //std::cout << "AAA : " << in.header.frame_id << " >>> " << map_frame_ << std::endl;
+                    return;
+                }
                 tf2::doTransform(in, in, to_global_transform);
             }
 
@@ -89,10 +93,10 @@ namespace gr_safety_gridmap{
                     gridmap.update_times_[o.object_id] = ros::Time::now();                        
 
                     if (o.is_dynamic){
-                        updateDynamic(o);
+                        updateDynamic(o, poses.header.frame_id);
                     }
                     else{
-                        updateStatic(o);
+                        updateStatic(o, poses.header.frame_id);
                     }
                 }
                 rpub_.publish(fb_msgs_);
@@ -101,8 +105,10 @@ namespace gr_safety_gridmap{
             }
 
 
-            void updateDynamic(safety_msgs::Object o){
-                auto currentpose = o.pose;
+            void updateDynamic(safety_msgs::Object o, const std::string frameid){
+                geometry_msgs::PoseStamped currentpose;
+                currentpose.header.frame_id = frameid;
+                currentpose.pose = o.pose;
                 auto aux = currentpose;
                 //float ospeed = sqrt(pow(o.speed.x,2) + pow(o.speed.y,2));
                 int searchdepth = tracking_time_;//int(tracking_distance_/(nprimitives_*ospeed));
@@ -115,13 +121,15 @@ namespace gr_safety_gridmap{
                 updateGridLayer(o.object_id, currentpose,  exp(0), 0);
             }
 
-            void updateStatic(safety_msgs::Object o){
+            void updateStatic(safety_msgs::Object o, const std::string frameid){
                 grid_map::Position center;
                 grid_map::Index index;
-                auto currentpose = o.pose;
+                geometry_msgs::PoseStamped currentpose;
+                currentpose.header.frame_id = frameid;
+                currentpose.pose = o.pose;
                 convert(currentpose);
-                center(0) = currentpose.position.x;
-                center(1) = currentpose.position.y;
+                center(0) = currentpose.pose.position.x;
+                center(1) = currentpose.pose.position.y;
                 
                 bool validindex = gridmap.gridmap.getIndex(center, index);
                 if (!validindex){
@@ -139,22 +147,27 @@ namespace gr_safety_gridmap{
                 }
             }
 
-            void generateCycle(geometry_msgs::Pose in, int depth, std::string layer, const geometry_msgs::Vector3 v){
+            void generateCycle(geometry_msgs::PoseStamped in, int depth, std::string layer, const geometry_msgs::Vector3 v){
                 if (depth == 0){
                     return;
                 }
                 //generateCycle(in,depth);
-                geometry_msgs::Pose aux, aux2;
+                geometry_msgs::PoseStamped aux, aux2;
                 float radius = 1.0;
                 aux = in;
                 //MotionModel class TODO
                 double prob[9] ={1.0,1.0,1.0,1.0,1.0,0.5,0.5,0.05,0.05};
                 //auto norm = nprimitives_*exp(-0.3*(search_depth_-depth));
+                geometry_msgs::Pose p;
 
                 for (int i=0; i <nprimitives_; i++){
-                    aux2 = generateMotion(in,i, v);
                     //to mapframe
-                    convert(aux2);
+                    aux2 = generateMotion(in,i, v);
+
+                    if (aux2.pose.position.z > 1.1){
+                        std::cout << "GENCY " << depth << layer << std::endl;
+                    }
+
                     auto val = 1*exp(-0.3*(search_depth_-depth))*prob[i];
                     //val /=norm;
                     if (val > 1.0){
@@ -162,7 +175,8 @@ namespace gr_safety_gridmap{
                     }
 
                     if (updateGridLayer(layer, aux2, val, 1+search_depth_-depth)){
-                        fb_msgs_.poses.push_back(aux2);
+                        p = aux2.pose;
+                        fb_msgs_.poses.push_back(p);
                     }
                     generateCycle(aux2,depth-1,layer, v);
 
@@ -170,7 +184,7 @@ namespace gr_safety_gridmap{
             }
 
 
-            bool updateGridLayer(const std::string layer_id, geometry_msgs::Pose p, double val, const int timeindex){
+            bool updateGridLayer(const std::string layer_id, geometry_msgs::PoseStamped p, double val, const int timeindex){
                 /*
                 grid_map::Position position;
                 grid_map::Index index;
@@ -189,8 +203,8 @@ namespace gr_safety_gridmap{
                 grid_map::Position center;
                 grid_map::Index index;
 
-                center(0) = p.position.x;
-                center(1) = p.position.y;
+                center(0) = p.pose.position.x;
+                center(1) = p.pose.position.y;
                 
 
                 /*
@@ -212,17 +226,20 @@ namespace gr_safety_gridmap{
             }
 
             //TODO create MotionModelClass
-            geometry_msgs::Pose generateMotion(const geometry_msgs::Pose in, int motion_type, const geometry_msgs::Vector3 ov){
+            geometry_msgs::PoseStamped generateMotion(const geometry_msgs::PoseStamped in, int motion_type, const geometry_msgs::Vector3 ov){
                 //this motion is a hack... motion on the sensor frame not the relative path
-                geometry_msgs::Pose out;
+
+                geometry_msgs::PoseStamped out;
                 out = in;
+
+                convert(out);
 
                 //double dt = (current_time - last_time).toSec();
                 auto dt = 1;
                 float vx =0.0;
                 float vy =0.0;
 
-                auto th = tf2::getYaw(in.orientation);
+                auto th = tf2::getYaw(in.pose.orientation);
                 double delta_th = 0.05*dt;//ov.z*0.1;// * dt;
 
                 switch(motion_type){
@@ -279,13 +296,14 @@ namespace gr_safety_gridmap{
                 tf2::Quaternion quat_tf;
                 double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
                 double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
-                out.position.x = in.position.x+delta_x;
-                out.position.y = in.position.y+delta_y;
+                out.pose.position.x = in.pose.position.x+delta_x;
+                out.pose.position.y = in.pose.position.y+delta_y;
                 quat_tf.setEuler(0,0,th);
 
                 //std::cout << th << " normalize?" << std::endl;
                 //tf2::fromMsg(in.orientation, quat_tf);
-                out.orientation = tf2::toMsg(quat_tf.normalize());
+                out.pose.orientation = tf2::toMsg(quat_tf.normalize());
+
                 return out;
             }
 
@@ -304,7 +322,7 @@ namespace gr_safety_gridmap{
                 int c = 0;
                 for (auto p : path.poses){
                     if (behaviour==1){
-                        convert(p.pose);
+                        convert(p);
                     }
                     position(0) = p.pose.position.x;
                     position(1) = p.pose.position.y;
