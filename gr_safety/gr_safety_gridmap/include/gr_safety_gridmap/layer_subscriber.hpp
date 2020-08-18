@@ -40,9 +40,10 @@ namespace gr_safety_gridmap{
                     return;
                 }
                 catch(...){
+
                 }
 
-                try{
+               try{
                     safety_msgs::FoundObjectsArray parr;
                     parr = *ssmsg->instantiate<safety_msgs::FoundObjectsArray>();
                     updateLayer(parr, 1);
@@ -50,6 +51,7 @@ namespace gr_safety_gridmap{
                 }
 
                 catch(...){
+                    ROS_ERROR_STREAM("Not processed"<< msgtype);
                 }
                 
             }
@@ -72,7 +74,6 @@ namespace gr_safety_gridmap{
                 to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);{
-                
                 for (int i = 0; i <=tracking_time_; i++){
                     //gridmap.gridmap.clear("Time_"+std::to_string(i));
                     //std::cout << "LAYER  " << i << std::endl;
@@ -128,12 +129,12 @@ namespace gr_safety_gridmap{
                 }
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
-                    gridmap.gridmap.at(o.object_id, *iterator) += 0.01;
+                    gridmap.gridmap.at(o.object_id, *iterator) = 1.0;
                 }
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
                     for (int i = 0; i < tracking_time_; i++){
-                        gridmap.gridmap.at("Time_"+std::to_string(i), *iterator) += 0.1*(tracking_time_-i);
+                        gridmap.gridmap.at("Time_"+std::to_string(i), *iterator) = 1.0;//0.1*(tracking_time_-i);
                     }
                 }
             }
@@ -156,7 +157,9 @@ namespace gr_safety_gridmap{
                     convert(aux2);
                     auto val = 1*exp(-0.3*(search_depth_-depth))*prob[i];
                     //val /=norm;
-                    std::cout << 1+search_depth_-depth << std::endl;
+                    if (val > 1.0){
+                        val = 1.0;
+                    }
 
                     if (updateGridLayer(layer, aux2, val, 1+search_depth_-depth)){
                         fb_msgs_.poses.push_back(aux2);
@@ -198,11 +201,11 @@ namespace gr_safety_gridmap{
                 */
 
                 std::string layname{"Time_"+std::to_string(timeindex)};
-                std::cout << "update " << layname << std::endl;
+                //std::cout << "update " << layname << std::endl;
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_);!iterator.isPastEnd(); ++iterator) {
-                    gridmap.gridmap.at(layer_id, *iterator) += val;//std::max(static_cast<double>(gridmap.gridmap.at(layer_id, *iterator)),val);
-                    gridmap.gridmap.at(layname, *iterator) +=  val;//std::max(static_cast<double>(gridmap.gridmap.at(layname, *iterator)),val);
+                    gridmap.gridmap.at(layer_id, *iterator) = std::min( 1.0 ,val);
+                    gridmap.gridmap.at(layname, *iterator) =  std::min( 1.0 ,val);
                 }
 
                 return true;
@@ -247,6 +250,7 @@ namespace gr_safety_gridmap{
                         vx = fabs(ov.x);
                         //vx = std::max(resolution_,2.0);
                         th += M_PI+delta_th;
+                        
                         break;
                     case 5:
                         vx = -fabs(ov.x);
@@ -352,7 +356,7 @@ namespace gr_safety_gridmap{
 
                 std::cout << "AAAAAAAAAA"<<std::endl;
                 for (auto i=0; i<=tracking_time_; i++){
-                    std::cout << "T "<<  i << std::endl;
+                    //std::cout << "T "<<  i << std::endl;
                     addLayerTuple("Time_" + std::to_string(i));
                 }
             }

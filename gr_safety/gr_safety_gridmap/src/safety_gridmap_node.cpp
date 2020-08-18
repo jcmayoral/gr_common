@@ -15,7 +15,7 @@ int main(int argc, char** argv){
 
     safety_gridmap = new SafetyGridMap(localgr);
 
-    ros::Rate r(20);
+    ros::Rate r(10);
 
     while(ros::ok()){
         //TODO replace by rate

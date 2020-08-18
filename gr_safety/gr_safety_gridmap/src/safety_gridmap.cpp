@@ -173,7 +173,7 @@ void SafetyGridMap::loadRegions(std::string iid){
         }
         //assign values in the gridmap
         for (grid_map::PolygonIterator iterator(gridmap.gridmap, polygon); !iterator.isPastEnd(); ++iterator) {
-            gridmap.gridmap.at(iid, *iterator) = exp(0.3*risk_level);
+            gridmap.gridmap.at(iid, *iterator) = risk_level;
         }
     }
 }
@@ -210,11 +210,11 @@ void SafetyGridMap::updateGrid(){
                 std::cout << "avoid "<<std::endl;
                 continue;
             }
-            auto layer = gridmap.gridmap.get(object_id).array().matrix();
-            auto normlayer = layer/layer.maxCoeff();
-
+            auto layer = gridmap.gridmap.get(object_id);
+            //std::cout << "MAX OBJECT LAYER g" << layer.maxCoeff()<<std::endl;
+            // auto normlayer = layer/layer.maxCoeff();
             float object_risk_index = layer.cwiseProduct(safety_layer).maxCoeff();
-            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + normlayer;
+            gridmap.gridmap["conv"] = gridmap.gridmap.get("conv") + layer;
             nobjects++;
 
             safety_msgs::RiskObject robj;
@@ -231,11 +231,9 @@ void SafetyGridMap::updateGrid(){
 
         while (gridmap.gridmap.exists(timeid)){
             tobj.object_id = timeid;
-            auto tlayer = gridmap.gridmap.get(timeid).array().matrix();
+            auto tlayer = gridmap.gridmap.get(timeid);//.matrix();
             tobj.risk_index = tlayer.cwiseProduct(safety_layer).maxCoeff();
             indexes.objects.push_back(tobj);
-            std::cout << timeid << " : " << tobj.risk_index << std::endl;
-
             timecount++;
             timeid = "Time_" + std::to_string(timecount);
         }
@@ -245,7 +243,7 @@ void SafetyGridMap::updateGrid(){
         //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
         score.data = gridmap.gridmap.get("conv").sum();
 
-        ROS_ERROR_STREAM_THROTTLE(5,"risk sum " << score.data << " MEAN SAFETY " << score.data/nobjects << "MAX COEFF "<<gridmap.gridmap.get("conv").maxCoeff());
+        //ROS_ERROR_STREAM_THROTTLE(1,"risk sum " << score.data << " MEAN SAFETY " << score.data/nobjects << "MAX COEFF "<<gridmap.gridmap.get("conv").maxCoeff());
 
 
         std_msgs::Bool stop_request;
