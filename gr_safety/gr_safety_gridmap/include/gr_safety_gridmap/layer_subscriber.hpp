@@ -100,6 +100,7 @@ namespace gr_safety_gridmap{
                     }
                 }
                 rpub_.publish(fb_msgs_);
+                last_reading_ = ros::Time::now();
                 gridmap.setDataFlag(true);
                 };
             }
@@ -234,13 +235,13 @@ namespace gr_safety_gridmap{
 
                 convert(out);
 
-                //double dt = (current_time - last_time).toSec();
-                auto dt = 1;
+                double dt = (ros::Time::now() - last_reading_).toSec();
+                //auto dt = 10;
                 float vx =0.0;
                 float vy =0.0;
 
                 auto th = tf2::getYaw(in.pose.orientation);
-                double delta_th = 0.05*dt;//ov.z*0.1;// * dt;
+                double delta_th = dt;//ov.z*0.1;// * dt;
 
                 switch(motion_type){
                     case 0:
@@ -291,7 +292,7 @@ namespace gr_safety_gridmap{
 
                 th = angles::normalize_angle(th);
 
-                vx = vx;// + 3*resolution_;
+                //vx = vx;// + 3*resolution_;
 
                 tf2::Quaternion quat_tf;
                 double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
@@ -346,6 +347,7 @@ namespace gr_safety_gridmap{
                                                             tracking_time_(other.tracking_time_), nprimitives_(other.nprimitives_),
                                                             proxemic_distance_(other.proxemic_distance_){
                 topic_ = other.topic_;
+                last_reading_ = other.last_reading_;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
                 ops.queue_size = 1;
                 ops.md5sum = ros::message_traits::md5sum<topic_tools::ShapeShifter>();
@@ -361,6 +363,7 @@ namespace gr_safety_gridmap{
                                                                                                             search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
                                                                                                             proxemic_distance_(proxemic_distance){
+                last_reading_ = ros::Time::now();
                 rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
@@ -397,6 +400,7 @@ namespace gr_safety_gridmap{
             float tracking_time_;
             double resolution_;
             float proxemic_distance_;
+            ros::Time last_reading_;
 
     };
 };

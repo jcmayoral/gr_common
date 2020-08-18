@@ -1,9 +1,9 @@
 safety_threshold: 0.8
-resolution: 0.25
+resolution: 0.2
 mapsize: 20
 timeout: 1.00
-trackingtime: 5
-nprimitives: 3
+trackingtime: 3
+nprimitives: 1
 proxemicradius: 0.25
 detection_topics:
     #- /detected_objects
