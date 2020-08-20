@@ -1,0 +1,12 @@
+grid_map_topic: /gr_safe_gridmap/grid_map
+grid_map_visualizations:
+  - name: other_points
+    type: point_cloud
+    params:
+     layer: normal_x
+  - name: normal_grid
+    type: occupancy_grid
+    params:
+     layer: normal_z
+     data_min: 0.0
+     data_max: 1.0

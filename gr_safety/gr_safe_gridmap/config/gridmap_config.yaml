@@ -1,0 +1,15 @@
+safety_threshold: 0.8
+resolution: 0.3
+mapsize: 10
+timeout: 1.00
+trackingtime: 6
+nprimitives: 3
+proxemicradius: 0.6
+detection_topics:
+    - /detected_objects
+    #- /pointcloud_processing_node/detected_objects
+    - /pointcloud_lidar_processing/found_object 
+    #- /pointcloud_lidar_processing/detected_objects
+    #- /pointcloud_nodelet/found_object
+    #- /fusion_manager/detected_objects
+pathtopic: move_base/NavfnROS/plan
