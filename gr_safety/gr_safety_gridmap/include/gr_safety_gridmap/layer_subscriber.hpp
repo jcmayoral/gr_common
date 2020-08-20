@@ -236,13 +236,13 @@ namespace gr_safety_gridmap{
                 convert(out);
 
                 //every step should be a second
-                double dt = 1;//(ros::Time::now() - last_reading_).toSec();
+                double dt = 0.5;//(ros::Time::now() - last_reading_).toSec();
                 //auto dt = 10;
                 float vx =0.0;
                 float vy =0.0;
 
                 auto th = tf2::getYaw(in.pose.orientation);
-                double delta_th = dt;//ov.z*0.1;// * dt;
+                double delta_th = ov.z*dt;//ov.z*0.1;// * dt;
 
                 switch(motion_type){
                     case 0:
