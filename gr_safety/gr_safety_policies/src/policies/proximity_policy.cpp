@@ -122,8 +122,10 @@ namespace gr_safety_policies
   void ProximityPolicy::dyn_reconfigureCB(gr_safety_policies::ProximityPolicyConfig &config, uint32_t level){
     region_radius_ = config.region_radius;
     enabling_after_timeout_ = config.sensor_timeout;
-    visualization_msgs::Marker marker;
+  }
 
+  void ProximityPolicy::createAllRings(){
+    visualization_msgs::Marker marker;
     marker_array_.markers.clear();
     for (auto i =1 ; i<=regions_number_; i++){
       createRingMarker(marker, i);
@@ -143,9 +145,17 @@ namespace gr_safety_policies
     marker.scale.x = 0.1;//region_radius_ * level;
     //marker.scale.y = region_radius_ * level;
     //marker.scale.z = 0.05;
-    marker.color.r = 1.0f /level;
-    marker.color.g = 1.0f /level;
-    marker.color.b = 0.0f;
+    switch(fault_region_id_){
+      case 0: 
+        marker.color.r = 1.0f;// /level;
+        break;
+      case 1:
+        marker.color.b = 1.0f;// /level;
+        break;
+      case 2:
+        marker.color.g = 1.0f;// /level;
+        break;
+    }
     marker.color.a = 1.0;
 
     geometry_msgs::Point circumference;
@@ -202,12 +212,12 @@ namespace gr_safety_policies
       //action_executer_ = NULL;
       policy_.action_ = -1;
       policy_.state_ = PolicyDescription::SAFE;
+      createAllRings();
     }
     return is_obstacle_detected_;
   }
 
   void ProximityPolicy::suggestAction(){
-
     //action_executer_ = new PublisherSafeAction();
     //ROS_INFO_STREAM_THROTTLE(5, "Obstacle detected on region with ID "<< fault_region_id_ );
     switch (fault_region_id_){
@@ -248,6 +258,7 @@ namespace gr_safety_policies
         ROS_ERROR("Error detecting obstacles");
         break;
     }
+    createAllRings();
     policy_.state_ = PolicyDescription::UNSAFE;
     policy_.action_ = action_executer_->getSafetyID();
   }

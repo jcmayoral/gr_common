@@ -235,7 +235,8 @@ namespace gr_safety_gridmap{
 
                 convert(out);
 
-                double dt = (ros::Time::now() - last_reading_).toSec();
+                //every step should be a second
+                double dt = 1;//(ros::Time::now() - last_reading_).toSec();
                 //auto dt = 10;
                 float vx =0.0;
                 float vy =0.0;

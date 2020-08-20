@@ -45,6 +45,7 @@ namespace gr_safety_policies
       void suggestAction();
       void publishTopics();
 
+      void createAllRings();
       void createRingMarker(visualization_msgs::Marker& marker, int level);
       void poses_CB(const geometry_msgs::PoseArray::ConstPtr& poses);
       int getRing(float x, float y);
