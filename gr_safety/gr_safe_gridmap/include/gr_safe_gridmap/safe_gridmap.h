@@ -6,6 +6,9 @@
 #include <yaml-cpp/yaml.h>
 #include <safety_msgs/RiskIndexes.h>
 
+#include <gr_safe_gridmap/SafeGridMapConfig.h>
+#include <dynamic_reconfigure/server.h>
+
 namespace gr_safe_gridmap{
     class SafeGridMap{
         public:
@@ -17,7 +20,11 @@ namespace gr_safe_gridmap{
            void addStaticLayer(std::string iid);
            void loadRegions(std::string iid);
            void timer_callback(const ros::TimerEvent& event);
+           void dyn_reconfigureCB(gr_safe_gridmap::SafeGridMapConfig &config, uint32_t level);
         private:
+            dynamic_reconfigure::Server<gr_safe_gridmap::SafeGridMapConfig> dyn_server_;
+            dynamic_reconfigure::Server<gr_safe_gridmap::SafeGridMapConfig>::CallbackType dyn_server_cb_;
+
             ros::Publisher rpub_;
             ros::Publisher safety_grader_;
             ros::Publisher request_stop_;

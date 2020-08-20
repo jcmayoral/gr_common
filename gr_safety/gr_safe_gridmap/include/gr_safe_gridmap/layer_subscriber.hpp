@@ -14,9 +14,6 @@
 #include <gr_safe_gridmap/main_gridmap.hpp>
 #include <angles/angles.h>
 
-#include <gr_safe_gridmap/SafeGridMapConfig.h>
-#include <dynamic_reconfigure/server.h>
-
 //Based originally from the rosbag c++ implementation
 //https://github.com/ros/ros_comm/tree/noetic-devel/tools/rosbag/src
 //used as tutorial to get into the definition of a message.
@@ -343,35 +340,30 @@ namespace gr_safe_gridmap{
                 //gridmap.unlock();
             }
             
-            LayerSubscriber(const LayerSubscriber& other): tf2_listener_(tf_buffer_), nh_("~"), local_frame_(other.local_frame_), 
+            LayerSubscriber(const LayerSubscriber& other): local_frame_(other.local_frame_), tf_buffer_(),
                                                             map_frame_(other.local_frame_), search_depth_(other.search_depth_),
-                                                            is_local_(other.is_local_), resolution_(other.resolution_),
+                                                            is_local_(other.is_local_), resolution_(other.resolution_), 
                                                             tracking_time_(other.tracking_time_), nprimitives_(other.nprimitives_),
-                                                            proxemic_distance_(other.proxemic_distance_){
-                dyn_server_cb_ = boost::bind(&LayerSubscriber::dyn_reconfigureCB, this, _1, _2);
-                dyn_server_.setCallback(dyn_server_cb_);
+                                                            proxemic_distance_(other.proxemic_distance_), ops(other.ops),tf2_listener_(tf_buffer_),nh_(other.nh_){
                 topic_ = other.topic_;
                 last_reading_ = other.last_reading_;
-                ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
-                ops.queue_size = 1;
-                ops.md5sum = ros::message_traits::md5sum<topic_tools::ShapeShifter>();
-                ops.datatype = ros::message_traits::datatype<topic_tools::ShapeShifter>();
-                ops.helper = boost::make_shared<ros::SubscriptionCallbackHelperT<
-                        const ros::MessageEvent<topic_tools::ShapeShifter const> &> >(
-                                boost::bind(&LayerSubscriber::layerCB, this, _1));
+                config();
+            }
+
+
+            void config(){
+                rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);
                 rsub_ = nh_.subscribe(ops);
             }
 
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string input, double resolution, bool local, int tracking_time=2, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="odom"): tf2_listener_(tf_buffer_), nh_(), 
+            LayerSubscriber(std::string id_nh, std::string input, double resolution, bool local, int tracking_time=2, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="odom"): 
+                                                                                                            tf_buffer_(),tf2_listener_(tf_buffer_), nh_(id_nh),
                                                                                                             search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
                                                                                                             proxemic_distance_(proxemic_distance){
-                
-                dyn_server_cb_ = boost::bind(&LayerSubscriber::dyn_reconfigureCB, this, _1, _2);
-                dyn_server_.setCallback(dyn_server_cb_);
+                std::cout << "constructor" << std::endl;
                 last_reading_ = ros::Time::now();
-                rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
                 ops.queue_size = 1;
@@ -380,23 +372,14 @@ namespace gr_safe_gridmap{
                 ops.helper = boost::make_shared<ros::SubscriptionCallbackHelperT<
                         const ros::MessageEvent<topic_tools::ShapeShifter const> &> >(
                                 boost::bind(&LayerSubscriber::layerCB, this, _1));
-                rsub_ = nh_.subscribe(ops);
 
                 for (auto i=0; i<=tracking_time_; i++){
                     addLayerTuple("Time_" + std::to_string(i));
                 }
-
-                
+                config();
             }
-
-            void dyn_reconfigureCB(gr_safe_gridmap::SafeGridMapConfig &config, uint32_t level){
-                std::cout << "DYN " << std::endl;
-            }
-
 
         private:
-            dynamic_reconfigure::Server<gr_safe_gridmap::SafeGridMapConfig> dyn_server_;
-            dynamic_reconfigure::Server<gr_safe_gridmap::SafeGridMapConfig>::CallbackType dyn_server_cb_;
             std::string topic_;
             boost::shared_ptr<ros::Subscriber> sub_;
             ros::NodeHandle nh_;  
