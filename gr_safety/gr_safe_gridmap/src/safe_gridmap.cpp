@@ -56,10 +56,9 @@ void SafeGridMap::timer_callback(const ros::TimerEvent& event){
 void SafeGridMap::dyn_reconfigureCB(gr_safe_gridmap::SafeGridMapConfig &config, uint32_t level){
     std::cout << "DYN " <<  level << std::endl;
     config.sensors_ids = sensors_ids_;    
-    /*for (auto it= layer_subscribers.begin(); it != layer_subscribers.end(); it++){
+    for (auto it= layer_subscribers.begin(); it != layer_subscribers.end(); it++){
         it->reconfigure(config);
     }
-    */
 }
 
 
@@ -147,13 +146,6 @@ void SafeGridMap::initializeGridMap(bool localgridmap){
         ROS_INFO_STREAM("Subscribing to " << topic << nh_id);
         sensors_ids_ += nh_id.c_str();//+ " , ";
         layer_subscribers.emplace_back(nh_id.c_str(),topic.c_str(), resolution, localgridmap, tracking_time, nprimitives, proxemicdistance, map_frame);
-        ROS_WARN("0");
-        //layer_subscribers[index].dyn_server_cb = boost::bind(&LayerSubscriber::reconfigure, this->layer_subscribers.at(index), _1, _2);
-        layer_subscribers[index].dyn_server_cb = boost::bind(&LayerSubscriber::reconfigure, this, _1, _2);
-        ROS_WARN("1");
-        layer_subscribers[index].dyn_server.setCallback(layer_subscribers[index].dyn_server_cb);
-        ROS_WARN_STREAM("2"<< "INDEX "<< index);
-        
     }
 
     /*
@@ -164,8 +156,8 @@ void SafeGridMap::initializeGridMap(bool localgridmap){
     ddr.publishServicesTopics();
     */
 
-    //dyn_server_cb_ = boost::bind(&SafeGridMap::dyn_reconfigureCB, this, _1, _2);
-    //dyn_server_.setCallback(dyn_server_cb_);
+    dyn_server_cb_ = boost::bind(&SafeGridMap::dyn_reconfigureCB, this, _1, _2);
+    dyn_server_.setCallback(dyn_server_cb_);
 
 
     clear_timer_ = nh.createTimer(ros::Duration(clearing_timeout), &SafeGridMap::timer_callback, this);

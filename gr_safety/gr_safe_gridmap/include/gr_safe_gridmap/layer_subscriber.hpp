@@ -16,8 +16,6 @@
 
 
 #include <gr_safe_gridmap/SafeGridMapConfig.h>
-#include <gr_safe_gridmap/SafeGridMapConfig.h>
-#include <dynamic_reconfigure/server.h>
 
 //Based originally from the rosbag c++ implementation
 //https://github.com/ros/ros_comm/tree/noetic-devel/tools/rosbag/src
@@ -239,13 +237,13 @@ namespace gr_safe_gridmap{
                 convert(out);
 
                 //every step should be a second
-                double dt = 0.5;//(ros::Time::now() - last_reading_).toSec();
+                //double dt = 0.5;//(ros::Time::now() - last_reading_).toSec();
                 //auto dt = 10;
                 float vx =0.0;
                 float vy =0.0;
 
                 auto th = tf2::getYaw(in.pose.orientation);
-                double delta_th = ov.z*dt;//ov.z*0.1;// * dt;
+                double delta_th = ov.z*dt_;//ov.z*0.1;// * dt;
 
                 switch(motion_type){
                     case 0:
@@ -299,8 +297,8 @@ namespace gr_safe_gridmap{
                 //vx = vx;// + 3*resolution_;
 
                 tf2::Quaternion quat_tf;
-                double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
-                double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
+                double delta_x = (vx * cos(th) - vy * sin(th)) * dt_;
+                double delta_y = (vx * sin(th) + vy * cos(th)) * dt_;
                 out.pose.position.x = in.pose.position.x+delta_x;
                 out.pose.position.y = in.pose.position.y+delta_y;
                 quat_tf.setEuler(0,0,th);
@@ -312,8 +310,23 @@ namespace gr_safe_gridmap{
                 return out;
             }
 
-            void reconfigure(SafeGridMapConfig& config, uint32_t level){
+            void reconfigure(SafeGridMapConfig& config){
+                boost::mutex::scoped_lock lck(layermtx);
                 std::cout << "DYN " << subscriber_id_ << std::endl;
+                if (config.selection.compare(subscriber_id_)!=0){
+                    return;
+                }
+                switch (config.mode){
+                    case 0: 
+                        ROS_WARN_STREAM("reconfig" << subscriber_id_);
+                        setnPrimitive(config.nprimitives);
+                        setTimeStep(config.timestep);
+                        setSearchDepth(config.depth);
+                        break;
+                    case 1:
+                        ROS_WARN_STREAM("this must be implemented on safe gridmap" << subscriber_id_);
+                        break;
+                }
             }
 
 
@@ -352,7 +365,7 @@ namespace gr_safe_gridmap{
             
             LayerSubscriber(const LayerSubscriber& other): local_frame_(other.local_frame_), tf_buffer_(), subscriber_id_(other.subscriber_id_),
                                                             map_frame_(other.local_frame_), search_depth_(other.search_depth_),
-                                                            is_local_(other.is_local_), resolution_(other.resolution_), 
+                                                            is_local_(other.is_local_), resolution_(other.resolution_), dt_(other.dt_),
                                                             tracking_time_(other.tracking_time_), nprimitives_(other.nprimitives_),
                                                             proxemic_distance_(other.proxemic_distance_), ops(other.ops),tf2_listener_(tf_buffer_),nh_(other.nh_){
                 topic_ = other.topic_;
@@ -371,7 +384,7 @@ namespace gr_safe_gridmap{
                                                                                                             tf_buffer_(),tf2_listener_(tf_buffer_), nh_(id_nh),
                                                                                                             search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
-                                                                                                            proxemic_distance_(proxemic_distance){
+                                                                                                            proxemic_distance_(proxemic_distance), dt_(0.5){
                 std::cout << "constructor" << std::endl;
                 subscriber_id_ = id_nh;
                 last_reading_ = ros::Time::now();
@@ -390,11 +403,20 @@ namespace gr_safe_gridmap{
                 config();
             }
 
-            dynamic_reconfigure::Server<gr_safe_gridmap::SafeGridMapConfig> dyn_server;
-            dynamic_reconfigure::Server<gr_safe_gridmap::SafeGridMapConfig>::CallbackType dyn_server_cb;
+            void setSearchDepth(int depth){
+                search_depth_ = depth;
+            }
+
+            void setTimeStep(double step){
+                dt_ =step;
+            }
+
+            void setnPrimitive(int prims){
+                nprimitives_ = prims;
+            }
 
         private:
-
+            boost::mutex layermtx;
             std::string topic_;
             boost::shared_ptr<ros::Subscriber> sub_;
             ros::NodeHandle nh_;  
@@ -415,6 +437,7 @@ namespace gr_safe_gridmap{
             float tracking_time_;
             double resolution_;
             float proxemic_distance_;
+            double dt_;
             ros::Time last_reading_;
 
     };
