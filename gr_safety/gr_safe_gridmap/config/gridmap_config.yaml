@@ -1,6 +1,6 @@
 safety_threshold: 0.8
 resolution: 0.3
-mapsize: 10
+mapsize: 15
 timeout: 1.00
 trackingtime: 6
 nprimitives: 3

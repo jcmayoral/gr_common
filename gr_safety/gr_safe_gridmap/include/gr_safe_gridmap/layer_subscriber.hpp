@@ -14,6 +14,11 @@
 #include <gr_safe_gridmap/main_gridmap.hpp>
 #include <angles/angles.h>
 
+
+#include <gr_safe_gridmap/SafeGridMapConfig.h>
+#include <gr_safe_gridmap/SafeGridMapConfig.h>
+#include <dynamic_reconfigure/server.h>
+
 //Based originally from the rosbag c++ implementation
 //https://github.com/ros/ros_comm/tree/noetic-devel/tools/rosbag/src
 //used as tutorial to get into the definition of a message.
@@ -307,6 +312,11 @@ namespace gr_safe_gridmap{
                 return out;
             }
 
+            void reconfigure(SafeGridMapConfig& config, uint32_t level){
+                std::cout << "DYN " << subscriber_id_ << std::endl;
+            }
+
+
             void updateLayer(const nav_msgs::Path& path, int behaviour){
                 //boost::shared_ptr<grid_map::GridMap> pmap;
                 boost::mutex::scoped_lock lck(gridmap.mtx);
@@ -340,7 +350,7 @@ namespace gr_safe_gridmap{
                 //gridmap.unlock();
             }
             
-            LayerSubscriber(const LayerSubscriber& other): local_frame_(other.local_frame_), tf_buffer_(),
+            LayerSubscriber(const LayerSubscriber& other): local_frame_(other.local_frame_), tf_buffer_(), subscriber_id_(other.subscriber_id_),
                                                             map_frame_(other.local_frame_), search_depth_(other.search_depth_),
                                                             is_local_(other.is_local_), resolution_(other.resolution_), 
                                                             tracking_time_(other.tracking_time_), nprimitives_(other.nprimitives_),
@@ -363,6 +373,7 @@ namespace gr_safe_gridmap{
                                                                                                             resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
                                                                                                             proxemic_distance_(proxemic_distance){
                 std::cout << "constructor" << std::endl;
+                subscriber_id_ = id_nh;
                 last_reading_ = ros::Time::now();
                 topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
@@ -379,7 +390,11 @@ namespace gr_safe_gridmap{
                 config();
             }
 
+            dynamic_reconfigure::Server<gr_safe_gridmap::SafeGridMapConfig> dyn_server;
+            dynamic_reconfigure::Server<gr_safe_gridmap::SafeGridMapConfig>::CallbackType dyn_server_cb;
+
         private:
+
             std::string topic_;
             boost::shared_ptr<ros::Subscriber> sub_;
             ros::NodeHandle nh_;  
@@ -393,6 +408,7 @@ namespace gr_safe_gridmap{
             ros::SubscribeOptions ops;
             int search_depth_;
             int nprimitives_;
+            std::string subscriber_id_;
             std::string local_frame_;
             std::string map_frame_;
             bool is_local_;

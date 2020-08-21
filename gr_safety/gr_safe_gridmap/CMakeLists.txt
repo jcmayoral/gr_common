@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   grid_map_rviz_plugin
   grid_map_visualization
   dynamic_reconfigure
+  #ddynamic_reconfigure
   geometry_msgs
   sensor_msgs
   nav_msgs
@@ -42,7 +43,7 @@ catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-  DEPENDS system_lib safety_msgs dynamic_reconfigure
+  DEPENDS system_lib safety_msgs 
 )
 
 ###########

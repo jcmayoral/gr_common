@@ -2,7 +2,7 @@
 
 using namespace gr_safe_gridmap;
 
-SafeGridMap::SafeGridMap(){
+SafeGridMap::SafeGridMap(): sensors_ids_{}{
     ROS_INFO_STREAM("Default local gridmap");
     bool localgridmap = true;
     initializeGridMap(localgridmap);
@@ -52,17 +52,19 @@ void SafeGridMap::timer_callback(const ros::TimerEvent& event){
     }
 }
 
+
 void SafeGridMap::dyn_reconfigureCB(gr_safe_gridmap::SafeGridMapConfig &config, uint32_t level){
-    std::cout << "DYN " << std::endl;
+    std::cout << "DYN " <<  level << std::endl;
+    config.sensors_ids = sensors_ids_;    
+    /*for (auto it= layer_subscribers.begin(); it != layer_subscribers.end(); it++){
+        it->reconfigure(config);
+    }
+    */
 }
 
 
 void SafeGridMap::initializeGridMap(bool localgridmap){
     ros::NodeHandle nh;
-
-    dyn_server_cb_ = boost::bind(&SafeGridMap::dyn_reconfigureCB, this, _1, _2);
-    dyn_server_.setCallback(dyn_server_cb_);
-
     //LOAD FROM gridmap_config.yaml
     std::string path = ros::package::getPath("gr_safe_gridmap");
     std::string config_path;
@@ -134,15 +136,37 @@ void SafeGridMap::initializeGridMap(bool localgridmap){
     std::cout << "Number of Obstacle Topics to Subscribe " << detection_topics.size() << std::endl;
     std::string nh_id;
 
+
+    int index;
+
+        
     for (YAML::const_iterator it= detection_topics.begin(); it != detection_topics.end(); it++){
-      std::string topic = it->as<std::string>();
-      nh_id = nh.getNamespace() + std::to_string(std::distance(detection_topics.begin(), it));
-      ROS_INFO_STREAM("Subscribing to " << topic << nh_id);
-
-      layer_subscribers.emplace_back(nh_id.c_str(),topic.c_str(), resolution, localgridmap, tracking_time, nprimitives, proxemicdistance, map_frame);
-            ROS_INFO_STREAM("after topic");
-
+        std::string topic = it->as<std::string>();
+        index = std::distance(detection_topics.begin(), it);
+        nh_id = nh.getNamespace() + std::to_string(index);
+        ROS_INFO_STREAM("Subscribing to " << topic << nh_id);
+        sensors_ids_ += nh_id.c_str();//+ " , ";
+        layer_subscribers.emplace_back(nh_id.c_str(),topic.c_str(), resolution, localgridmap, tracking_time, nprimitives, proxemicdistance, map_frame);
+        ROS_WARN("0");
+        //layer_subscribers[index].dyn_server_cb = boost::bind(&LayerSubscriber::reconfigure, this->layer_subscribers.at(index), _1, _2);
+        layer_subscribers[index].dyn_server_cb = boost::bind(&LayerSubscriber::reconfigure, this, _1, _2);
+        ROS_WARN("1");
+        layer_subscribers[index].dyn_server.setCallback(layer_subscribers[index].dyn_server_cb);
+        ROS_WARN_STREAM("2"<< "INDEX "<< index);
+        
     }
+
+    /*
+    std::map<std::string, std::string> enum_map = {{"Key 1", "Value 1"}, {"Key 2", "Value 2"}};
+    std::string enum_value = enum_map["Key 1"];
+    ddr.registerVariable<int>("int_param", &int_param, "param description");
+    ddr.registerEnumVariable<std::string>("string_enum", &enum_value,"param description", enum_map);
+    ddr.publishServicesTopics();
+    */
+
+    //dyn_server_cb_ = boost::bind(&SafeGridMap::dyn_reconfigureCB, this, _1, _2);
+    //dyn_server_.setCallback(dyn_server_cb_);
+
 
     clear_timer_ = nh.createTimer(ros::Duration(clearing_timeout), &SafeGridMap::timer_callback, this);
     //ros::spin();
