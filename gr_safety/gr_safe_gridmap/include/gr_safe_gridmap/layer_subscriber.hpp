@@ -321,7 +321,7 @@ namespace gr_safe_gridmap{
                         ROS_WARN_STREAM("reconfig" << subscriber_id_);
                         setnPrimitive(config.nprimitives);
                         setTimeStep(config.timestep);
-                        setSearchDepth(config.depth);
+                        setTrackingSamples(config.tracking);
                         break;
                     case 1:
                         ROS_WARN_STREAM("this must be implemented on safe gridmap" << subscriber_id_);
@@ -403,8 +403,8 @@ namespace gr_safe_gridmap{
                 config();
             }
 
-            void setSearchDepth(int depth){
-                search_depth_ = depth;
+            void setTrackingSamples(int depth){
+                tracking_time_ = depth;
             }
 
             void setTimeStep(double step){
