@@ -159,7 +159,7 @@ namespace gr_safe_gridmap{
                 float radius = 1.0;
                 aux = in;
                 //MotionModel class TODO
-                double prob[9] ={1.0,1.0,1.0,1.0,1.0,0.5,0.5,0.05,0.05};
+                double prob[9] ={0.5,0.25,0.25,0.05,0.05,0.05,0.05,0.05,0.05};
                 //auto norm = nprimitives_*exp(-0.3*(search_depth_-depth));
                 geometry_msgs::Pose p;
 
@@ -171,9 +171,10 @@ namespace gr_safe_gridmap{
                         std::cout << "GENCY " << depth << layer << std::endl;
                     }
 
-                    auto val = 1*exp(-0.3*(search_depth_-depth))*prob[i];
+                    float val = 1*exp(-0.5*(search_depth_-depth))*prob[i];
                     //val /=norm;
                     if (val > 1.0){
+                        std::cout << "WTF WHYYYY "<<std::endl;
                         val = 1.0;
                     }
 
@@ -186,7 +187,7 @@ namespace gr_safe_gridmap{
                 }
             }
 
-            bool updateGridLayer(const std::string layer_id, geometry_msgs::PoseStamped p, double val, const int timeindex){
+            bool updateGridLayer(const std::string layer_id, geometry_msgs::PoseStamped p, float val, const int timeindex){
                 /*
                 grid_map::Position position;
                 grid_map::Index index;
@@ -220,8 +221,8 @@ namespace gr_safe_gridmap{
                 //std::cout << "update " << layname << std::endl;
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_);!iterator.isPastEnd(); ++iterator) {
-                    gridmap.gridmap.at(layer_id, *iterator) = std::min( 1.0 ,val);
-                    gridmap.gridmap.at(layname, *iterator) =  std::min( 1.0 ,val);
+                    gridmap.gridmap.at(layer_id, *iterator) = std::max( gridmap.gridmap.at(layer_id, *iterator) ,val);
+                    gridmap.gridmap.at(layname, *iterator) =  std::max( gridmap.gridmap.at(layname, *iterator) ,val);
                 }
 
                 return true;

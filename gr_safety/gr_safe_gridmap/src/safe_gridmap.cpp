@@ -269,7 +269,7 @@ void SafeGridMap::updateGrid(){
 
         std_msgs::Float32 score;
         gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(safety_layer);
-        //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
+        ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
         score.data = gridmap.gridmap.get("conv").maxCoeff();//sum();
 
         //ROS_ERROR_STREAM_THROTTLE(1,"risk sum " << score.data << " MEAN SAFETY " << score.data/nobjects << "MAX COEFF "<<gridmap.gridmap.get("conv").maxCoeff());
