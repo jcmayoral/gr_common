@@ -150,7 +150,8 @@ namespace gr_safety_policies
         marker.color.r = 1.0f;// /level;
         break;
       case 1:
-        marker.color.b = 1.0f;// /level;
+        marker.color.r = 1.0f;// /level;
+        marker.color.g = 1.0f;// /level;
         break;
       case 2:
         marker.color.g = 1.0f;// /level;
