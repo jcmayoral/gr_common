@@ -7,8 +7,9 @@ from numpy import cov
 import message_filters
 
 class RiskExtractor:
-    def __init__(self):
+    def __init__(self, file_name):
         rospy.init_node("gr_experiment_tool")
+        self.file_name = file_name
         self.obstacles = []#dict()
         self.safety_scores = []
         self.run = True
@@ -24,12 +25,11 @@ class RiskExtractor:
         while not rospy.is_shutdown() and self.run:
             pass
 
-        print "OBSTACLES"
-        self.execute(self.obstacles)
-        print "SAFETY SCORES ", self.safety_scores
-        self.execute(self.safety_scores)
+        #print "OBSTACLES"
+        self.execute(self.obstacles, "OBSTACLES")
+        #print "SAFETY SCORES ", self.safety_scores
+        self.execute(self.safety_scores, "SCORE")
 
-        print "COVARIANCE ", cov(self.obstacles, self.safety_scores)
 
     def timed_cb(self, persons, score):
         print "timed cb", len(self.obstacles), len(self.safety_scores)
@@ -43,7 +43,7 @@ class RiskExtractor:
         print "out"
         self.run = False
         #self.subscriber.unregister()
-        self.subscriber3.unregister()
+        #self.subscriber3.unregister()
 
     def cb2(self, score):
         self.safety_scores.append(score.data)
@@ -51,11 +51,18 @@ class RiskExtractor:
     def cb(self, persons):
         #Note distance on velodyne fixed
         #TODO MODIFY to generalisze
-        for p in persons.objects:
-            self.obstacles.append(distance.euclidean((p.pose.position.x, p.pose.position.y, p.pose.position.z), (0,0,0)))
+        #for p in persons.objects:
+        #    self.obstacles.append(distance.euclidean((p.pose.position.x, p.pose.position.y, p.pose.position.z), (0,0,0)))
+        p = persons.objects[0]
+        self.obstacles.append(distance.euclidean((p.pose.position.x, p.pose.position.y, p.pose.position.z), (0,0,0)))
 
-    def execute(self, data):
-        print "Number of detections " , len(data)
-        print "SM1 Metric: " , SM1(data)
-        print "SM2 Metric: " , SM2(data)
-        print "SM3 Metric: " , SM3(data)
+    def execute(self, data, id):
+        f = open(self.file_name, "w")
+        f.write(id)
+        f.write("Number of detections " + str(len(data))+"\n")
+        if len(data)> 0:
+            f.write("SM1 Metric: " + str(SM1(data))+"\n")
+            f.write("SM2 Metric: " + str(SM2(data))+"\n")
+            f.write("SM3 Metric: " + str(SM3(data))+"\n")
+            f.write("COVARIANCE " + str(cov(self.obstacles, self.safety_scores))+"\n")
+        f.close()
