@@ -11,8 +11,7 @@ find_package(catkin REQUIRED
 
 add_action_files(
   DIRECTORY action
-  FILES GRNavigation.action SimMotionPlanner.action
-  SingleRowExecution.action
+  FILES GRNavigation.action SimMotionPlanner.action SingleRowExecution.action
 )
 
 generate_messages(

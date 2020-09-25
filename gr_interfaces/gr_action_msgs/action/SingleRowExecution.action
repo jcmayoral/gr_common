@@ -1,8 +1,9 @@
-string command 
+std_msgs/String command 
+std_msgs/String row_id 
 float32 cmd_distance
 ---
 bool finished
 int8 sequence
 ---
-string message
+std_msgs/String message
 float32[] metrics
