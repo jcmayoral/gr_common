@@ -6,6 +6,7 @@ find_package(catkin REQUIRED
             std_msgs
             geometry_msgs
             actionlib_msgs
+	    message_generation
 )
 
 
@@ -14,9 +15,15 @@ add_action_files(
   FILES GRNavigation.action SimMotionPlanner.action SingleRowExecution.action
 )
 
+add_service_files(
+  FILES
+  GetMetrics.srv
+)
+
 generate_messages(
   DEPENDENCIES actionlib_msgs std_msgs geometry_msgs
 )
+
 
 catkin_package(
     CATKIN_DEPENDS
