@@ -1,13 +1,21 @@
 #!/usr/bin/python
 import yaml
 import rospy
+import sys
 from dynamic_reconfigure.client import Client
+from std_msgs.srv import Empty, EmptyResponse, EmptyRequest
 
 class DynReconfigurator:
     def __init__(self):
         rospy.init_node("dynamic_reconfigure_experimnetal")
         self.configuration = dict()
         self.client = Client("gr_safe_gridmap_node", timeout=30, config_callback=self.callback)
+        self.service = rospy.Service("set_configuration", Empty, self.set_configuration)
+
+    def set_configuration(self, req):
+        #TODO create a list of  config
+        self.load('dynrec_sample.yaml')
+
 
     def callback(self, config):
         print "updated", config
@@ -48,7 +56,9 @@ class DynReconfigurator:
 
 if __name__ == '__main__':
     print rospy.myargv()
+    print "DEPRECATED use navigation_experiment"
+    sys.exit()
     dyn = DynReconfigurator()
     #dyn.save()
-    dyn.load('dynrec_sample.yaml')
-    dyn.update()
+    #dyn.load('dynrec_sample.yaml')
+    #dyn.update()
