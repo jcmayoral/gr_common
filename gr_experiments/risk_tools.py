@@ -5,13 +5,14 @@ from scipy.spatial import distance
 import rospy
 from numpy import cov
 import message_filters
+#import actionlib
+from gr_action_msgs.srv import GetMetrics, GetMetricsResponse
 
 class RiskExtractor:
-    def __init__(self, file_name):
+    def __init__(self, file_name, service_required = False):
         rospy.init_node("gr_experiment_tool")
         self.file_name = file_name
-        self.obstacles = []#dict()
-        self.safety_scores = []
+        self.reset()
         self.run = True
         #self.subscriber = rospy.Subscriber("/pointcloud_lidar_processing/found_object", FoundObjectsArray, self.cb)
         self.subscriber2 = rospy.Subscriber("/test_finished", Empty, self.test_cb)
@@ -22,14 +23,40 @@ class RiskExtractor:
         self.ts = message_filters.ApproximateTimeSynchronizer([sub1, sub2], queue_size=10, slop=0.5, allow_headerless=True)
         self.ts.registerCallback(self.timed_cb)
 
-        while not rospy.is_shutdown() and self.run:
-            pass
 
-        #print "OBSTACLES"
+        if not service_required:
+            while not rospy.is_shutdown() and self.run:
+                pass
+            #print "OBSTACLES"
+            self.execute(self.obstacles, "OBSTACLES")
+            #print "SAFETY SCORES ", self.safety_scores
+            self.execute(self.safety_scores, "SCORE")
+        else:
+            #TODO SERVICE?
+            #self._as = actionlib.SimpleActionServer("SingleRowExecutionAction", SingleRowExecutionAction, execute_cb=self.execute_cb, auto_start = False)
+            #self._as.start()
+            service = rospy.Service("get_metrics", GetMetrics, self.get_metrics)
+            rospy.spin()
+
+    def get_metrics(self, req):
+        self.file_name = req.file_name + ".txt"
+        r = GetMetricsResponse()
+        m1 = self.generate_metric(self.obstacles)
+        m2 = self.generate_metric(self.safety_scores)
+        r.metrics.extend(m1)
+        r.metrics.extend(m2)
+        print r.metrics
+
+        self.reset()
+        #savefiles
         self.execute(self.obstacles, "OBSTACLES")
-        #print "SAFETY SCORES ", self.safety_scores
         self.execute(self.safety_scores, "SCORE")
+        return r
 
+    #def execute_cb(self,goal):
+    def reset(self):
+        self.obstacles = []#dict()
+        self.safety_scores = []
 
     def timed_cb(self, persons, score):
         print "timed cb", len(self.obstacles), len(self.safety_scores)
@@ -57,8 +84,8 @@ class RiskExtractor:
         self.obstacles.append(distance.euclidean((p.pose.position.x, p.pose.position.y, p.pose.position.z), (0,0,0)))
 
     def execute(self, data, id):
-        f = open(self.file_name, "w")
-        f.write(id)
+        f = open(self.file_name, "a")
+        f.write(id+"\n")
         f.write("Number of detections " + str(len(data))+"\n")
         if len(data)> 0:
             f.write("SM1 Metric: " + str(SM1(data))+"\n")
@@ -66,3 +93,12 @@ class RiskExtractor:
             f.write("SM3 Metric: " + str(SM3(data))+"\n")
             f.write("COVARIANCE " + str(cov(self.obstacles, self.safety_scores))+"\n")
         f.close()
+
+    def generate_metric(self, data):
+        data = []
+        if len(data)> 0:
+            data = [float(len(data)),float(SM1(data)),float(SM2(data)),float(SM3(data))]
+        else:
+            data = [0.0,0.0,0.0,0.0]
+        print data
+        return data
