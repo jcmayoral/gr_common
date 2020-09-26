@@ -39,6 +39,7 @@ class RiskExtractor:
             rospy.spin()
 
     def get_metrics(self, req):
+        print "SERVICE REQUIRED"
         self.file_name = req.file_name + ".txt"
         r = GetMetricsResponse()
         m1 = self.generate_metric(self.obstacles)
@@ -47,10 +48,11 @@ class RiskExtractor:
         r.metrics.extend(m2)
         print r.metrics
 
-        self.reset()
         #savefiles
         self.execute(self.obstacles, "OBSTACLES")
         self.execute(self.safety_scores, "SCORE")
+        self.reset()
+
         return r
 
     #def execute_cb(self,goal):
@@ -59,9 +61,9 @@ class RiskExtractor:
         self.safety_scores = []
 
     def timed_cb(self, persons, score):
-        print "timed cb", len(self.obstacles), len(self.safety_scores)
+        rospy.loginfo_throttle(10, "timed cb " + str(len(self.obstacles)) + str(len(self.safety_scores)))
         #print "error ", len(persons.objects) <1
-        if len(persons.objects) <1:
+        if len(persons.objects) == 0:
             return
         self.cb(persons)
         self.cb2(score)
@@ -95,7 +97,7 @@ class RiskExtractor:
         f.close()
 
     def generate_metric(self, data):
-        data = []
+        print "DATA", data, len(data)
         if len(data)> 0:
             data = [float(len(data)),float(SM1(data)),float(SM2(data)),float(SM3(data))]
         else:
