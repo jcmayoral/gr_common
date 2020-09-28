@@ -16,9 +16,7 @@ bool ROSMotionPlanner::operator()(gazebo::transport::NodePtr node, std::string o
   }
 
   else{
-    std::cout << "H1" << std::endl;
     current_goal_ = *goal;
-    std::cout << "H1" << std::endl;
   }
 
   return run(node, obstacleid, mapsize);

@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+project(gr_simulation)
 
 add_compile_options(-std=c++17)
 
@@ -11,11 +12,16 @@ find_package(tf2 REQUIRED)
 find_package(gazebo REQUIRED)
 find_package(tf2_ros REQUIRED COMPONENTS tf2_geometry_msgs)
 
+find_package(dynamic_reconfigure REQUIRED)
 
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SBPL REQUIRED sbpl)
 find_library(SBPL_LIBRARY NAMES sbpl PATHS ${SBPL_LIBRARY_DIRS} NO_DEFAULT_PATH)
+
+generate_dynamic_reconfigure_options(
+  cfg/PersonMotion.cfg
+)
 
 include_directories(include
                     ${roscpp_INCLUDE_DIRS}
@@ -59,6 +65,12 @@ target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${act
 #add_dependencies(dynobjectros   ${gr_action_msgs_EXPORTED_TARGETS})
 add_library(myrosgazeboanimation SHARED src/ros/gazebo_ros_animation.cpp)
 target_link_libraries(myrosgazeboanimation ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} motionplanner)
+
+
+add_library(simplerosinterface SHARED src/ros/simple_ros_interface.cpp)
+target_link_libraries(simplerosinterface ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES})
+add_dependencies(simplerosinterface ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_EXPORTED_TARGETS})
+
 
 add_executable(personvel_pub src/gazebo/grdyn_pub.cpp)
 add_executable(grass_cutter src/grassrobot/grass_event_caller.cpp)
