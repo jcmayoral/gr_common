@@ -87,7 +87,7 @@ add_executable(ros_interface_node src/ros/ros_interface_node.cpp)
 target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES})
 target_link_libraries(grass_cutter ${GAZEBO_LIBRARIES} gr_simulation_msgs)
 target_link_libraries(run_obstacle_coordinator ${GAZEBO_LIBRARIES} obstaclescoordinator)
-target_link_libraries(ros_interface_node ${GAZEBO_LIBRARIES} rosinterface)
+target_link_libraries(ros_interface_node ${GAZEBO_LIBRARIES} rosinterface ${tf2_ros_LIBRARIES})
 
 file(GLOB PRIMITIVES_FILES
   "*.mprim"

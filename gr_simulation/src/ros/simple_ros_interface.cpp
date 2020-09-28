@@ -22,8 +22,9 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
     std::cout << "OK execute cb " << this->model->GetName() << std::endl;
     gr_action_msgs::SimMotionPlannerFeedback feedback;
     gr_action_msgs::SimMotionPlannerResult result;
+    ignition::math::Vector3 curAngularVel = this->link->WorldAngularVel();
 
-
+    std::cout << curAngularVel << "ANGULAR VEL" << std::endl;
 
     /*if (this->model->GetName().compare(goal->object_id)){
         std::cout<<  "WRONG ID "<<std::endl;
@@ -35,7 +36,7 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
         aserver->setPreempted();
         return;
     }
-    aserver->acceptNewGoal();
+    //aserver->acceptNewGoal();
     //Set Start Pose
     ignition::math::Pose3d pose;
     if(goal->setstart){
@@ -46,12 +47,18 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
 
         this->link->SetWorldPose(pose, true, true);
     }
+    
+    this->SetLinearVelocityX(goal->linearspeed);
+    this->SetLinearVelocityY(goal->linearspeedy);
+
     // publish the feedback
-    if (!goal->is_motion){
-      aserver->publishFeedback(feedback);
-      aserver->setSucceeded(result);
-      return;
+    /*
+    if (goal->is_motion){
+        aserver->publishFeedback(feedback);
+        aserver->setSucceeded(result);
+        return;
     }
+    */
 
     msgs::Vector3d* newTarget = new msgs::Vector3d();
 
@@ -81,51 +88,6 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
     //}
 }
 
-/*
-    std::cout << "OK execute cb " << this->model->GetName() << std::endl;
-
-    //Set Start Pose
-    ignition::math::Pose3d pose;
-    if(goal->setstart){
-        pose.Pos().X() = goal->startpose.pose.position.x;
-        pose.Pos().Y() = goal->startpose.pose.position.y;
-        pose.Pos().Z() = goal->startpose.pose.position.z;
-        pose.Rot().Euler(0,0,tf2::getYaw(goal->startpose.pose.orientation));
-
-        this->link->SetWorldPose(pose, true, true);
-    }
-    // publish the feedback
-    if (!goal->is_motion){
-      aserver->publishFeedback(feedback);
-      aserver->setSucceeded(result);
-      return;
-    }
-
-    msgs::Vector3d* newTarget = new msgs::Vector3d();
-
-    newTarget->set_x(goal->goalPose.pose.position.x);
-    newTarget->set_y(goal->goalPose.pose.position.y);
-    newTarget->set_z(tf2::getYaw(goal->goalPose.pose.orientation));
-    gazebo::transport::NodePtr node(new gazebo::transport::Node);
-    node->Init();
-
-    auto start = std::chrono::high_resolution_clock::now();
-    bool res = this->motionplanner(node,this->model->GetName(), 100.0, newTarget);
-    auto finish = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed = finish - start;
-
-    //path = this->motionplanner.getSBPLPath();
-
-    result.executing_time = elapsed.count();
-
-    if (res){
-        aserver->setSucceeded(result);
-    }
-    else{
-        aserver->setAborted(result);
-    }
-}
-*/
 
 void SimpleROSInterface::SetAngVelocity(const double &_vel){
     ang_velocity = _vel;
@@ -134,6 +96,7 @@ void SimpleROSInterface::SetAngVelocity(const double &_vel){
 
 void SimpleROSInterface::SetLinearVelocityX(const double &_vel){
     lin_velx = _vel;
+    std::cout << "VELX "<< _vel <<std::endl;
     this->link->SetLinearVel(ignition::math::Vector3<double>(lin_velx,lin_vely,0.0));
 }
 void SimpleROSInterface::SetLinearVelocityY(const double &_vel){
@@ -175,7 +138,6 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     this->link = _model->GetLinks()[0];
     this->link->SetLinearVel(ignition::math::Vector3<double>(lin_velx,lin_vely,0.0));
     this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,ang_velocity));
-
     //CallBack for Gazebo used by Motion Planner
     this->node = transport::NodePtr(new transport::Node());
     this->node->Init(this->model->GetWorld()->Name());
@@ -207,7 +169,7 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     //Callback for ROS
     ros::NodeHandle nh;// = boost::make_shared<ros::NodeHandle>("~");
     nh.setCallbackQueue(&my_callback_queue);
-     aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, "SimMotionPlanner/" + this->model->GetName(),
+    aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, "SimMotionPlanner/" + this->model->GetName(),
                                                                 boost::bind(&SimpleROSInterface::executeCB, this, _1), false);
 
     // Create a named topic, and subscribe to it.
@@ -306,9 +268,9 @@ void SimpleROSInterface::OnRosMsg2(const visualization_msgs::MarkerConstPtr _msg
 void SimpleROSInterface::QueueThread(){
     static const double timeout = 0.01;
     while (is_ok){
-      //ros::getGlobalCallbackQueue()->callAvailable(ros::WallDuration(0));
-      //my_callback_queue.callAvailable(ros::WallDuration());
-      //this->rosQueue.callAvailable(ros::WallDuration(timeout));
+      ros::getGlobalCallbackQueue()->callAvailable(ros::WallDuration(0));
+      my_callback_queue.callAvailable(ros::WallDuration());
+      this->rosQueue.callAvailable(ros::WallDuration(timeout));
       //ros::Duration(0.5).sleep();
       std::this_thread::sleep_for (std::chrono::milliseconds(500));
     }
