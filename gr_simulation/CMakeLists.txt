@@ -68,19 +68,26 @@ target_link_libraries(myrosgazeboanimation ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIE
 
 
 add_library(simplerosinterface SHARED src/ros/simple_ros_interface.cpp)
-target_link_libraries(simplerosinterface ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES})
-add_dependencies(simplerosinterface ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_EXPORTED_TARGETS})
+target_link_libraries(simplerosinterface ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${dynamic_reconfigure_LIBRARIES} ${actionlib_LIBRARIES})
+#add_dependencies(simplerosinterface ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_EXPORTED_TARGETS})
+
+add_library(rosinterface SHARED src/ros/ros_interface.cpp)
+target_link_libraries(rosinterface ${roscpp_LIBRARIES} ${dynamic_reconfigure_LIBRARIES} ${actionlib_LIBRARIES})
+add_dependencies(rosinterface ${PROJECT_NAME}_gencfg)
 
 
 add_executable(personvel_pub src/gazebo/grdyn_pub.cpp)
 add_executable(grass_cutter src/grassrobot/grass_event_caller.cpp)
 add_executable(run_obstacle_coordinator src/gazebo/obstacles_coordinator_node.cpp)
+add_executable(ros_interface_node src/ros/ros_interface_node.cpp)
+
 #include(FindBoost)
 #  find_package(Boost ${MIN_BOOST_VERSION} REQUIRED system filesystem regex)
 #  target_link_libraries(personvel_pub ${GAZEBO_IBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(personvel_pub ${GAZEBO_LIBRARIES})
 target_link_libraries(grass_cutter ${GAZEBO_LIBRARIES} gr_simulation_msgs)
 target_link_libraries(run_obstacle_coordinator ${GAZEBO_LIBRARIES} obstaclescoordinator)
+target_link_libraries(ros_interface_node ${GAZEBO_LIBRARIES} rosinterface)
 
 file(GLOB PRIMITIVES_FILES
   "*.mprim"

@@ -6,17 +6,17 @@
 #include <ignition/math/Vector3.hh>
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
-#include <gr_simulation/PersonMotionConfig.h>
 
-#include <actionlib/server/simple_action_server.h>
-
+//#include <gr_simulation/PersonMotionConfig.h>
 #include <thread>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <ros/subscribe_options.h>
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Bool.h>
-#include <dynamic_reconfigure/server.h>
+//#include <dynamic_reconfigure/server.h>
+#include <actionlib/server/simple_action_server.h>
+#include <gr_action_msgs/SimMotionPlannerAction.h>
 
 //#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 //#include <tf2_ros/transform_listener.h>
@@ -63,8 +63,10 @@ namespace gazebo
 
         virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
         void updatePose(const ros::TimerEvent& event);
-        void dyn_reconfigureCB(gr_simulation::PersonMotionConfig &config, uint32_t level);
-  
+        //void dyn_reconfigureCB(gr_simulation::PersonMotionConfig &config, uint32_t level);
+
+        void executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal);
+
         void OnMsg(ConstVector3dPtr &_msg);
         void OnUpdate();
 
@@ -96,8 +98,8 @@ namespace gazebo
 
         std::atomic_bool is_ok;
 
-        dynamic_reconfigure::Server<gr_simulation::PersonMotionConfig> dyn_server_;
-        dynamic_reconfigure::Server<gr_simulation::PersonMotionConfig>::CallbackType dyn_server_cb_;
+        //dynamic_reconfigure::Server<gr_simulation::PersonMotionConfig> dyn_server_;
+        //dynamic_reconfigure::Server<gr_simulation::PersonMotionConfig>::CallbackType dyn_server_cb_;
 
         transport::NodePtr node;
         transport::SubscriberPtr sub;
@@ -106,6 +108,7 @@ namespace gazebo
 
         std::promise<void> exitSignal;
         std::future<void> futureObj;
+        boost::shared_ptr<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>> aserver;
 
   };
 
