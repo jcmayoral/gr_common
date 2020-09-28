@@ -3,6 +3,7 @@ string motion_type
 bool setstart
 bool is_motion
 float64 linearspeed
+float64 linearspeedy
 geometry_msgs/PoseStamped startpose
 geometry_msgs/PoseStamped goalPose
 ---
