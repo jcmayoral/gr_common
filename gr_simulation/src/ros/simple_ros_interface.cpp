@@ -50,10 +50,10 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
 
         this->link->SetWorldPose(startpose, true, true);
     }
-    
+
 
     desiredspeed->Set(goal->linearspeed,goal->linearspeedy,0);
- 
+
     this->SetLinearVelocityX(goal->linearspeed);
     this->SetLinearVelocityY(goal->linearspeedy);
 
@@ -72,8 +72,8 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
 
     endpose.Set(newTarget, neworientation);
     std::cout << "ON UPDATE"<< endpose.Pos().X() <<std::endl;
-    
-    
+
+
     //msgs::Vector3d* newTarget = new msgs::Vector3d();
     //newTarget->set_x(goal->goalPose.pose.position.x);
     //newTarget->set_y(goal->goalPose.pose.position.y);
@@ -175,7 +175,7 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
             "/" + this->model->GetName() + "/vel_cmd",1,
             boost::bind(&SimpleROSInterface::OnRosMsg, this, _1),
             ros::VoidPtr(), &this->rosQueue);
-    
+
     this->rosSub = nh.subscribe(so);
     */
     std::cout << "MODEL NAME " << this->model->GetName() << std::endl;
@@ -191,13 +191,20 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
 void SimpleROSInterface::OnUpdate(){
     current_pose = this->model->WorldPose();
-    //std::cout << "ON UPDATE: "<< sqrt(pow(current_pose.Pos().X() - goal_pose.Pos().X(),2) + pow(current_pose.Pos().Y() - goal_pose.Pos().Y(),2)) << std::endl; 
+    auto collision = this->link->GetCollision("person");
+    this->link->OnCollision(collision);
+    auto collisionstate = collision->GetState();
+
+    std::cout << collisionstate.IsZero() << std::endl;
+    std::cout << collisionstate << std::endl;
+    //std::cout << "ON UPDATE: "<< sqrt(pow(current_pose.Pos().X() - goal_pose.Pos().X(),2) + pow(current_pose.Pos().Y() - goal_pose.Pos().Y(),2)) << std::endl;
     //current_pose.Pos().X()<< ", " << goal_pose.Pos().X << std::endl;
      if (sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2))<0.25){
         ROS_ERROR("DONE");
         this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
-        this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));    
-        
+        this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
+        this->model->ResetPhysicsStates();
+
         std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
         std::swap(endpose,startpose);
         std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
@@ -216,7 +223,7 @@ void SimpleROSInterface::OnUpdate(){
             orientation.Z() -= (2*M_PI);
         }
         startpose.Rot().Euler(orientation.X(), orientation.Y(), orientation.Z());
-        
+
         this->link->SetWorldPose(startpose, true, true);
 
         endpose.Rot() = startpose.Rot();
