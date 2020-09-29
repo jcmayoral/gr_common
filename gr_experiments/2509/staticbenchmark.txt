@@ -1,0 +1,18 @@
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 74
+SM1 Metric: 6.72439898804
+SM2 Metric: 5.0782642519
+SM3 Metric: 8.66862185166
+COVARIANCE [[1.39637952 0.        ]
+ [0.         0.        ]]
+SCORE
+Number of detections 74
+SM1 Metric: 0.5
+SM2 Metric: 0.5
+SM3 Metric: 0.5
+COVARIANCE [[1.39637952 0.        ]
+ [0.         0.        ]]

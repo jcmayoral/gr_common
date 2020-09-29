@@ -1,0 +1,10 @@
+timestep:
+  min_value: 0.1
+  max_value: 2.5
+  increment: 0.1
+  default_value: 1.0
+nprimitives:
+  min_value: 1
+  max_value: 9
+  increment: 1
+  default_value: 3

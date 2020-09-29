@@ -5,6 +5,7 @@ from scipy.spatial import distance
 import rospy
 from numpy import cov
 import message_filters
+from gazebo_msgs.msg import ContactsState
 #import actionlib
 from gr_action_msgs.srv import GetMetrics, GetMetricsResponse
 
@@ -12,11 +13,13 @@ class RiskExtractor:
     def __init__(self, file_name, service_required = False):
         rospy.init_node("gr_experiment_tool")
         self.file_name = file_name
+        self.collision_detected = False
         self.reset()
         self.run = True
         #self.subscriber = rospy.Subscriber("/pointcloud_lidar_processing/found_object", FoundObjectsArray, self.cb)
         self.subscriber2 = rospy.Subscriber("/test_finished", Empty, self.test_cb)
         #self.subscriber3 = rospy.Subscriber("/safety_score", Float32, self.cb2)
+        self.subscriber2 = rospy.Subscriber("/bumper_vals", ContactsState, self.collision_cb)
 
         sub1 = message_filters.Subscriber("/pointcloud_lidar_processing/found_object", FoundObjectsArray)
         sub2 = message_filters.Subscriber("/safety_score", Float32)
@@ -38,8 +41,13 @@ class RiskExtractor:
             service = rospy.Service("get_metrics", GetMetrics, self.get_metrics)
             rospy.spin()
 
+    def collision_cb(self,msg):
+        if len(msg.states)>0:
+            print "COL detected"
+            self.collision_detected = True
+
     def get_metrics(self, req):
-        print "SERVICE REQUIRED"
+        print "SERVICE REQUIRED, " , req.file_name
         self.file_name = req.file_name + ".txt"
         r = GetMetricsResponse()
         m1 = self.generate_metric(self.obstacles)
@@ -59,6 +67,7 @@ class RiskExtractor:
     def reset(self):
         self.obstacles = []#dict()
         self.safety_scores = []
+        self.collision_detected = False
 
     def timed_cb(self, persons, score):
         rospy.loginfo_throttle(10, "timed cb " + str(len(self.obstacles)) + str(len(self.safety_scores)))
@@ -98,9 +107,9 @@ class RiskExtractor:
 
     def generate_metric(self, data):
         print "DATA", data, len(data)
-        if len(data)> 0:
+        if len(data)> 0 or self.collision_detected:
             data = [float(len(data)),float(SM1(data)),float(SM2(data)),float(SM3(data))]
         else:
-            data = [0.0,0.0,0.0,0.0]
+            data = [100000.0,100000.0,100000.0,100000.0]
         print data
         return data

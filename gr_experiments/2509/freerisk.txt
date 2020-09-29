@@ -1,0 +1,4 @@
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
