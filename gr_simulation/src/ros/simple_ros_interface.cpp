@@ -4,6 +4,7 @@ using namespace gazebo;
 SimpleROSInterface::SimpleROSInterface(): is_ok{true}{
     // Initialize ros, if it has not already bee initialized
     std::cout << "CONSTRUCTOR 10 "<<std::endl;
+    desiredspeed = new ignition::math::Vector3d();
     if (true){//!ros::isInitialized()){
         std::cout << "CONSTRUCTOR 10 initializing"<<std::endl;
 
@@ -20,6 +21,7 @@ SimpleROSInterface::SimpleROSInterface(): is_ok{true}{
 
 void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal){
     std::cout << "OK execute cb " << this->model->GetName() << std::endl;
+    forward = true;
     gr_action_msgs::SimMotionPlannerFeedback feedback;
     gr_action_msgs::SimMotionPlannerResult result;
     ignition::math::Vector3 curAngularVel = this->link->WorldAngularVel();
@@ -38,16 +40,20 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
     }
     //aserver->acceptNewGoal();
     //Set Start Pose
-    ignition::math::Pose3d pose;
-    if(goal->setstart){
-        pose.Pos().X() = goal->startpose.pose.position.x;
-        pose.Pos().Y() = goal->startpose.pose.position.y;
-        pose.Pos().Z() = goal->startpose.pose.position.z;
-        pose.Rot().Euler(0,0,tf2::getYaw(goal->startpose.pose.orientation));
+    //ignition::math::Pose3d startpose;
 
-        this->link->SetWorldPose(pose, true, true);
+    if(goal->setstart){
+        startpose.Pos().X() = goal->startpose.pose.position.x;
+        startpose.Pos().Y() = goal->startpose.pose.position.y;
+        startpose.Pos().Z() = goal->startpose.pose.position.z;
+        startpose.Rot().Euler(0,0,tf2::getYaw(goal->startpose.pose.orientation));
+
+        this->link->SetWorldPose(startpose, true, true);
     }
     
+
+    desiredspeed->Set(goal->linearspeed,goal->linearspeedy,0);
+ 
     this->SetLinearVelocityX(goal->linearspeed);
     this->SetLinearVelocityY(goal->linearspeedy);
 
@@ -59,17 +65,22 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
         return;
     }
     */
+    ignition::math::Vector3<double> newTarget;
+    newTarget.Set(goal->goalPose.pose.position.x,goal->goalPose.pose.position.y,0);
+    ignition::math::Vector3<double> neworientation;
+    neworientation.Set(0,0,tf2::getYaw(goal->goalPose.pose.orientation));
 
-    msgs::Vector3d* newTarget = new msgs::Vector3d();
+    endpose.Set(newTarget, neworientation);
+    std::cout << "ON UPDATE"<< endpose.Pos().X() <<std::endl;
+    
+    
+    //msgs::Vector3d* newTarget = new msgs::Vector3d();
+    //newTarget->set_x(goal->goalPose.pose.position.x);
+    //newTarget->set_y(goal->goalPose.pose.position.y);
+    //newTarget->set_z(tf2::getYaw(goal->goalPose.pose.orientation));
 
-    newTarget->set_x(goal->goalPose.pose.position.x);
-    newTarget->set_y(goal->goalPose.pose.position.y);
-    newTarget->set_z(tf2::getYaw(goal->goalPose.pose.orientation));
-
-
-
-    gazebo::transport::NodePtr node(new gazebo::transport::Node);
-    node->Init();
+    //gazebo::transport::NodePtr node(new gazebo::transport::Node);
+    //node->Init();
 
     auto start = std::chrono::high_resolution_clock::now();
     //bool res = this->motionplanner(node,this->model->GetName(), 100.0, newTarget);
@@ -82,10 +93,6 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
 
     //if (res){
     aserver->setSucceeded(result);
-    //}
-    //else{
-    //    aserver->setAborted(result);
-    //}
 }
 
 
@@ -99,21 +106,11 @@ void SimpleROSInterface::SetLinearVelocityX(const double &_vel){
     std::cout << "VELX "<< _vel <<std::endl;
     this->link->SetLinearVel(ignition::math::Vector3<double>(lin_velx,lin_vely,0.0));
 }
+
 void SimpleROSInterface::SetLinearVelocityY(const double &_vel){
     lin_vely = _vel;
     this->link->SetLinearVel(ignition::math::Vector3<double>(lin_velx,lin_vely,0.0));
 }
-
-/*
-
-void SimpleROSInterface::dyn_reconfigureCB(gr_simulation::PersonMotionConfig &config, uint32_t level){
-    std::cout << "BEFORE " << std::endl;
-    this->SetLinearVelocityX(config.linearvel);
-
-    std::cout << "AFTER " << std::endl;
-}
-
-*/
 
 void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     // Just output a message for now
@@ -142,10 +139,10 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     this->node = transport::NodePtr(new transport::Node());
     this->node->Init(this->model->GetWorld()->Name());
 
-    std::string pubtopicName = "/" + this->model->GetName() + "/odom";
-    this -> pub = this->node->Advertise<msgs::Pose>(pubtopicName);
-    std::string subtopicName = "/" + this->model->GetName() + "/vel_cmd";
-    this->sub = this->node->Subscribe(subtopicName,&SimpleROSInterface::OnMsg, this);
+    //std::string pubtopicName = "/" + this->model->GetName() + "/odom";
+    //this -> pub = this->node->Advertise<msgs::Pose>(pubtopicName);
+    //std::string subtopicName = "/" + this->model->GetName() + "/vel_cmd";
+    //this->sub = this->node->Subscribe(subtopicName,&SimpleROSInterface::OnMsg, this);
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&SimpleROSInterface::OnUpdate, this));
 
     std::cout << "oooooooooook"<<std::endl;
@@ -192,72 +189,48 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
 }
 
-void SimpleROSInterface::OnMsg(ConstVector3dPtr &_msg){
-    this->SetLinearVelocityX(_msg->x());
-    this->SetLinearVelocityY(_msg->y());
-    this->SetAngVelocity(_msg->z());
-    //current_pose = this->model->WorldPose();
-    //std::cout <<"X "<< current_pose.Pos().X();
-}
-
 void SimpleROSInterface::OnUpdate(){
-    current_pose = this->link->WorldPose();//this->model->WorldPose();
-    //std::cout << "ON UPDATE"<< std::endl;
-    this->pub->Publish(gazebo::msgs::Convert(current_pose));
+    current_pose = this->model->WorldPose();
+    //std::cout << "ON UPDATE: "<< sqrt(pow(current_pose.Pos().X() - goal_pose.Pos().X(),2) + pow(current_pose.Pos().Y() - goal_pose.Pos().Y(),2)) << std::endl; 
+    //current_pose.Pos().X()<< ", " << goal_pose.Pos().X << std::endl;
+     if (sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2))<0.25){
+        ROS_ERROR("DONE");
+        this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
+        this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));    
+        
+        std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
+        std::swap(endpose,startpose);
+        std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
+
+        //startpose.Rot().Z() += M_PI;// - startpose.Rot().Z();//
+        // - startpose.Rot().Z();
+        //if (startpose.Rot().Z() >= 2*M_PI){
+        //    startpose.Rot().Z() -= (2*M_PI);//
+        //}
+
+
+        ignition::math::Vector3<double> orientation;
+        orientation = startpose.Rot().Euler();
+        orientation.Z() +=M_PI;
+        if (orientation.Z()>=2*M_PI){
+            orientation.Z() -= (2*M_PI);
+        }
+        startpose.Rot().Euler(orientation.X(), orientation.Y(), orientation.Z());
+        
+        this->link->SetWorldPose(startpose, true, true);
+
+        endpose.Rot() = startpose.Rot();
+        desiredspeed->X(-desiredspeed->X());
+        desiredspeed->Y(-desiredspeed->Y());
+
+        endpose.Set(endpose.Pos(), endpose.Rot());
+
+        this->SetLinearVelocityX(desiredspeed->X());
+        this->SetLinearVelocityY(desiredspeed->Y());
+     }
+    //this->pub->Publish(gazebo::msgs::Convert(current_pose));
 }
 
-
-/*
-void SimpleROSInterface::goalCB(){
-    gr_action_msgs::SimMotionPlannerGoal goal = *(aserver->acceptNewGoal());
-    gr_action_msgs::SimMotionPlannerFeedback feedback;
-    gr_action_msgs::SimMotionPlannerResult result;
-
-    if (aserver->isPreemptRequested() || !ros::ok()){
-        aserver->setPreempted();
-    }
-
-    aserver->publishFeedback(feedback);
-
-    //gazebo::transport::NodePtr node(new gazebo::transport::Node);
-    //node->Init();
-
-    bool res = this->motionplanner(node,this->model->GetName(), mapsize);
-    if (res){
-        aserver->setSucceeded(result);
-    }
-    else{
-        aserver->setAborted(result);
-    }
-
-}
-*/
-
-void SimpleROSInterface::OnRosMsg(const geometry_msgs::TwistConstPtr &_msg){
-    //TOBE REMOVED ONCE TIMER WORKS
-    this->updatePose(ros::TimerEvent());
-
-    this->SetLinearVelocityX(_msg->linear.x);
-    this->SetLinearVelocityY(_msg->linear.y);
-    this->SetAngVelocity(_msg->angular.z);
-}
-
-/*
-
-void SimpleROSInterface::OnRosMsg2(const visualization_msgs::MarkerConstPtr _msg){
-    //TOBE REMOVED ONCE TIMER WORKS
-    this->updatePose(ros::TimerEvent());
-    ////this->SetLinearVelocityX(_msg->linear.x);
-    //this->SetLinearVelocityY(_msg->linear.y);
-    //this->SetAngVelocity(_msg->angular.z);
-    ignition::math::Pose3d pose;
-    pose.Pos().X(_msg->pose.position.x);
-    pose.Pos().Y(_msg->pose.position.y);
-    //this->model->SetWorldPose(pose, true, true);
-    this->link->SetWorldPose(pose, true, true);
-
-}
-*/
 
  void SimpleROSInterface::updatePose(const ros::TimerEvent& event){
     current_pose = this->model->WorldPose();

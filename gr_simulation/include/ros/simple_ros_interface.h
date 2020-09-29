@@ -67,11 +67,11 @@ namespace gazebo
 
         void executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal);
 
-        void OnMsg(ConstVector3dPtr &_msg);
+        //void OnMsg(ConstVector3dPtr &_msg);
         void OnUpdate();
 
     private:
-        void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg);
+        //void OnRosMsg(const geometry_msgs::TwistConstPtr &_msg);
         //void OnRosMsg2(const visualization_msgs::MarkerConstPtr _msg);
         void QueueThread();
         /// \brief Pointer to the model.
@@ -79,6 +79,7 @@ namespace gazebo
         physics::LinkPtr link;
 
         ignition::math::Pose3<double> current_pose;
+
         double ang_velocity = 0;
         double lin_velx = 0;
         double lin_vely = 0;
@@ -109,6 +110,14 @@ namespace gazebo
         std::promise<void> exitSignal;
         std::future<void> futureObj;
         boost::shared_ptr<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>> aserver;
+
+        ignition::math::Pose3d startpose;
+        ignition::math::Pose3d endpose;
+
+        ignition::math::Vector3d* desiredspeed;
+
+        bool forward;
+
 
   };
 
