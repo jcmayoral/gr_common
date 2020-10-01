@@ -18,8 +18,8 @@
 #include <actionlib/server/simple_action_server.h>
 #include <gr_action_msgs/SimMotionPlannerAction.h>
 
-//#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-//#include <tf2_ros/transform_listener.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/transform_listener.h>
 #include <tf2/utils.h>
 
 #include <nav_msgs/Path.h>
@@ -117,7 +117,10 @@ namespace gazebo
         ignition::math::Vector3d* desiredspeed;
 
         bool forward;
+        bool flag;
 
+        tf2_ros::Buffer tfBuffer;
+        tf2_ros::TransformListener tf2_listener;
 
   };
 

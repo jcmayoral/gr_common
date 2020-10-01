@@ -1,7 +1,8 @@
 #include <ros/simple_ros_interface.h>
 using namespace gazebo;
 
-SimpleROSInterface::SimpleROSInterface(): is_ok{true}{
+SimpleROSInterface::SimpleROSInterface(): is_ok{true}, flag{false}, tfBuffer(ros::Duration(5)),
+                                tf2_listener(tfBuffer){
     // Initialize ros, if it has not already bee initialized
     std::cout << "CONSTRUCTOR 10 "<<std::endl;
     desiredspeed = new ignition::math::Vector3d();
@@ -25,6 +26,10 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
     gr_action_msgs::SimMotionPlannerFeedback feedback;
     gr_action_msgs::SimMotionPlannerResult result;
     ignition::math::Vector3 curAngularVel = this->link->WorldAngularVel();
+
+    this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
+    this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
+    this->model->ResetPhysicsStates();
 
     std::cout << curAngularVel << "ANGULAR VEL" << std::endl;
 
@@ -191,23 +196,62 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
 void SimpleROSInterface::OnUpdate(){
     current_pose = this->model->WorldPose();
-    auto collision = this->link->GetCollision("person");
-    this->link->OnCollision(collision);
+    auto collision = this->link->GetCollision("box");
+    //this->link->OnCollision(collision);
+    if (collision == NULL){
+        std::cout << "ERROR " << std::endl;
+    }
     auto collisionstate = collision->GetState();
+    std::cout << "HERE "<<std::endl;
 
-    std::cout << collisionstate.IsZero() << std::endl;
-    std::cout << collisionstate << std::endl;
-    //std::cout << "ON UPDATE: "<< sqrt(pow(current_pose.Pos().X() - goal_pose.Pos().X(),2) + pow(current_pose.Pos().Y() - goal_pose.Pos().Y(),2)) << std::endl;
+    geometry_msgs::TransformStamped base_link_to_odom;
+    geometry_msgs::PoseStamped p;
+
+    //tfBuffer.waitForTransform("base_link", "odom", ros::Time(0), ros::Duration(1.0) );
+
+    try{
+        //orientation of current odometry to map
+        p.header.stamp = ros::Time::now();
+        p.header.frame_id = "odom";
+        p.pose.position.x = current_pose.Pos().X();
+        p.pose.position.y = current_pose.Pos().Y();
+        p.pose.orientation.w = 1.0;
+
+        base_link_to_odom = tfBuffer.lookupTransform("base_link", "odom", ros::Time(0));
+        tf2::doTransform(p, p, base_link_to_odom);
+    }
+    catch(tf2::TransformException &ex){
+        ROS_ERROR("%s",ex.what());
+        return;
+
+    }
+    double dist2robot = sqrt(pow(p.pose.position.x,2)+pow(p.pose.position.y,2));
+    std::cout << "Distance2robot " << dist2robot << std::endl;
+    double dist2goal = sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2));
+
+    //std::cout << "Not Collide" << collisionstate << std::endl;
+
+    if (!collisionstate.IsZero()){
+        std::cout << "Collide" << collisionstate << std::endl;
+    }
+    //std::cout << "ON UPDATE: "<< sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2)) << std::endl;
     //current_pose.Pos().X()<< ", " << goal_pose.Pos().X << std::endl;
-     if (sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2))<0.25){
+     if (dist2goal <0.5 || dist2goal < 0.3){
         ROS_ERROR("DONE");
         this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
-        this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
+        this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));        
         this->model->ResetPhysicsStates();
+        this->model->Reset();
 
-        std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
+        //std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
+        if (dist2goal < 0.3){
+            std::cout << "add offset to avoid collision"<< std::endl;
+            startpose.Pos().Y() += 2.0;
+            endpose.Pos().Y() += 2.0;
+        }
+        
         std::swap(endpose,startpose);
-        std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
+        //std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
 
         //startpose.Rot().Z() += M_PI;// - startpose.Rot().Z();//
         // - startpose.Rot().Z();
@@ -246,7 +290,7 @@ void SimpleROSInterface::OnUpdate(){
 }
 
 void SimpleROSInterface::QueueThread(){
-    static const double timeout = 0.01;
+    static const double timeout = 0.1;
     while (is_ok){
       ros::getGlobalCallbackQueue()->callAvailable(ros::WallDuration(0));
       my_callback_queue.callAvailable(ros::WallDuration());
