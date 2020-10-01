@@ -202,7 +202,7 @@ void SimpleROSInterface::OnUpdate(){
         std::cout << "ERROR " << std::endl;
     }
     auto collisionstate = collision->GetState();
-    std::cout << "HERE "<<std::endl;
+    //std::cout << "HERE "<<std::endl;
 
     geometry_msgs::TransformStamped base_link_to_odom;
     geometry_msgs::PoseStamped p;
@@ -226,7 +226,7 @@ void SimpleROSInterface::OnUpdate(){
 
     }
     double dist2robot = sqrt(pow(p.pose.position.x,2)+pow(p.pose.position.y,2));
-    std::cout << "Distance2robot " << dist2robot << std::endl;
+    //std::cout << "Distance2robot " << dist2robot << std::endl;
     double dist2goal = sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2));
 
     //std::cout << "Not Collide" << collisionstate << std::endl;
@@ -236,7 +236,7 @@ void SimpleROSInterface::OnUpdate(){
     }
     //std::cout << "ON UPDATE: "<< sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2)) << std::endl;
     //current_pose.Pos().X()<< ", " << goal_pose.Pos().X << std::endl;
-     if (dist2goal <0.5 || dist2goal < 0.3){
+     if (dist2goal <0.5 || dist2robot < 1.0){
         ROS_ERROR("DONE");
         this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
         this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));        
@@ -244,10 +244,12 @@ void SimpleROSInterface::OnUpdate(){
         this->model->Reset();
 
         //std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
-        if (dist2goal < 0.3){
+        if (dist2robot < 1.0){
             std::cout << "add offset to avoid collision"<< std::endl;
             startpose.Pos().Y() += 2.0;
             endpose.Pos().Y() += 2.0;
+            startpose.Pos().X() += 2.0;
+            endpose.Pos().X() += 2.0;
         }
         
         std::swap(endpose,startpose);
