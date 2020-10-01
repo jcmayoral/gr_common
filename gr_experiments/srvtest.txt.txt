@@ -1114,3 +1114,1353 @@ SM2 Metric: 0.0
 SM3 Metric: 1.0
 COVARIANCE [[ 1.02275188 -0.06570905]
  [-0.06570905  0.08753546]]
+OBSTACLES
+Number of detections 41
+SM1 Metric: 4.78075785177
+SM2 Metric: 4.24611139379
+SM3 Metric: 5.98635116734
+COVARIANCE [[ 0.22294007 -0.02525405]
+ [-0.02525405  0.00812195]]
+SCORE
+Number of detections 41
+SM1 Metric: 0.270731718075
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 0.22294007 -0.02525405]
+ [-0.02525405  0.00812195]]
+OBSTACLES
+Number of detections 88
+SM1 Metric: 3.73963988577
+SM2 Metric: 2.94160614164
+SM3 Metric: 5.74196865976
+COVARIANCE [[ 0.50285401 -0.0640223 ]
+ [-0.0640223   0.05001045]]
+SCORE
+Number of detections 88
+SM1 Metric: 0.518181821162
+SM2 Metric: 0.0
+SM3 Metric: 1.0
+COVARIANCE [[ 0.50285401 -0.0640223 ]
+ [-0.0640223   0.05001045]]
+OBSTACLES
+Number of detections 26
+SM1 Metric: 5.25193006488
+SM2 Metric: 4.97083968616
+SM3 Metric: 5.95101385354
+COVARIANCE [[ 0.07673481 -0.02936959]
+ [-0.02936959  0.01321903]]
+SCORE
+Number of detections 26
+SM1 Metric: 0.226827122844
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 0.07673481 -0.02936959]
+ [-0.02936959  0.01321903]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 23
+SM1 Metric: 5.00815913842
+SM2 Metric: 4.82750238636
+SM3 Metric: 5.434627795
+COVARIANCE [[ 0.03044197 -0.00811786]
+ [-0.00811786  0.00471344]]
+SCORE
+Number of detections 23
+SM1 Metric: 0.280434793752
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 0.03044197 -0.00811786]
+ [-0.00811786  0.00471344]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 22
+SM1 Metric: 4.83479923566
+SM2 Metric: 4.2419507994
+SM3 Metric: 5.93686578483
+COVARIANCE [[ 0.32732286 -0.02302373]
+ [-0.02302373  0.00491883]]
+SCORE
+Number of detections 22
+SM1 Metric: 0.279545465654
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 0.32732286 -0.02302373]
+ [-0.02302373  0.00491883]]
+OBSTACLES
+Number of detections 6
+SM1 Metric: 5.30599064832
+SM2 Metric: 5.16564825436
+SM3 Metric: 5.68550842616
+COVARIANCE [[0.03790799 0.00360657]
+ [0.00360657 0.015     ]]
+SCORE
+Number of detections 6
+SM1 Metric: 0.250000009934
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[0.03790799 0.00360657]
+ [0.00360657 0.015     ]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 36
+SM1 Metric: 3.07865174713
+SM2 Metric: 1.56884721228
+SM3 Metric: 5.08567539916
+COVARIANCE [[ 0.96404879 -0.10447935]
+ [-0.10447935  0.01806349]]
+SCORE
+Number of detections 36
+SM1 Metric: 0.427777780427
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[ 0.96404879 -0.10447935]
+ [-0.10447935  0.01806349]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 97
+SM1 Metric: 3.25152687602
+SM2 Metric: 1.60252213679
+SM3 Metric: 5.01270710424
+COVARIANCE [[ 0.73468829 -0.08984594]
+ [-0.08984594  0.02966065]]
+SCORE
+Number of detections 97
+SM1 Metric: 0.494845362668
+SM2 Metric: 0.0
+SM3 Metric: 1.0
+COVARIANCE [[ 0.73468829 -0.08984594]
+ [-0.08984594  0.02966065]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 16
+SM1 Metric: 4.31610833212
+SM2 Metric: 4.19011809407
+SM3 Metric: 4.65570260813
+COVARIANCE [[ 0.01563665 -0.00679189]
+ [-0.00679189  0.005625  ]]
+SCORE
+Number of detections 16
+SM1 Metric: 0.281250011176
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 0.01563665 -0.00679189]
+ [-0.00679189  0.005625  ]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 82
+SM1 Metric: 3.0216736341
+SM2 Metric: 2.05431071395
+SM3 Metric: 4.48365259535
+COVARIANCE [[ 0.50535605 -0.07344554]
+ [-0.07344554  0.03160644]]
+SCORE
+Number of detections 82
+SM1 Metric: 0.510975610919
+SM2 Metric: 0.0
+SM3 Metric: 1.0
+COVARIANCE [[ 0.50535605 -0.07344554]
+ [-0.07344554  0.03160644]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 52
+SM1 Metric: 6.71931498708
+SM2 Metric: 5.51836302896
+SM3 Metric: 9.55051711176
+COVARIANCE [[ 0.93122797 -0.09370305]
+ [-0.09370305  0.01925175]]
+SCORE
+Number of detections 52
+SM1 Metric: 0.179127004177
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 0.93122797 -0.09370305]
+ [-0.09370305  0.01925175]]
+OBSTACLES
+Number of detections 56
+SM1 Metric: 6.3419547183
+SM2 Metric: 5.19231125578
+SM3 Metric: 9.44592825225
+COVARIANCE [[ 1.16544009 -0.11994936]
+ [-0.11994936  0.01794397]]
+SCORE
+Number of detections 56
+SM1 Metric: 0.188451298246
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 1.16544009 -0.11994936]
+ [-0.11994936  0.01794397]]
+OBSTACLES
+Number of detections 41
+SM1 Metric: 7.1523191251
+SM2 Metric: 6.07364507958
+SM3 Metric: 9.96129233965
+COVARIANCE [[9.72732141e-01 1.14173553e-03]
+ [1.14173553e-03 4.21405161e-05]]
+SCORE
+Number of detections 41
+SM1 Metric: 0.00191208102354
+SM2 Metric: 0.0
+SM3 Metric: 0.0334695279598
+COVARIANCE [[9.72732141e-01 1.14173553e-03]
+ [1.14173553e-03 4.21405161e-05]]
+OBSTACLES
+Number of detections 74
+SM1 Metric: 6.48179061731
+SM2 Metric: 4.67843383505
+SM3 Metric: 10.4314627605
+COVARIANCE [[ 1.68687483 -0.12711453]
+ [-0.12711453  0.02038039]]
+SCORE
+Number of detections 74
+SM1 Metric: 0.169044089076
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 1.68687483 -0.12711453]
+ [-0.12711453  0.02038039]]
+OBSTACLES
+Number of detections 28
+SM1 Metric: 7.35558302982
+SM2 Metric: 6.67296007587
+SM3 Metric: 9.11321992152
+COVARIANCE [[4.34776748e-01 3.09500546e-03]
+ [3.09500546e-03 2.14167350e-04]]
+SCORE
+Number of detections 28
+SM1 Metric: 0.00675601648566
+SM2 Metric: 0.0
+SM3 Metric: 0.0557825416327
+COVARIANCE [[4.34776748e-01 3.09500546e-03]
+ [3.09500546e-03 2.14167350e-04]]
+OBSTACLES
+Number of detections 39
+SM1 Metric: 7.54123221041
+SM2 Metric: 6.83010753861
+SM3 Metric: 9.26000163335
+COVARIANCE [[3.45417072e-01 2.14192492e-03]
+ [2.14192492e-03 1.20170824e-04]]
+SCORE
+Number of detections 39
+SM1 Metric: 0.0020507792584
+SM2 Metric: 0.0
+SM3 Metric: 0.0676676407456
+COVARIANCE [[3.45417072e-01 2.14192492e-03]
+ [2.14192492e-03 1.20170824e-04]]
+OBSTACLES
+Number of detections 215
+SM1 Metric: 3.50366720608
+SM2 Metric: 3.48122819343
+SM3 Metric: 3.51379438824
+COVARIANCE [[2.39557649e-05 2.61449561e-05]
+ [2.61449561e-05 1.16279070e-03]]
+SCORE
+Number of detections 215
+SM1 Metric: 0.497674418605
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[2.39557649e-05 2.61449561e-05]
+ [2.61449561e-05 1.16279070e-03]]
+OBSTACLES
+Number of detections 158
+SM1 Metric: 3.62952421964
+SM2 Metric: 3.57186405754
+SM3 Metric: 3.69234740189
+COVARIANCE [[0.00136498 0.00017716]
+ [0.00017716 0.00158228]]
+SCORE
+Number of detections 158
+SM1 Metric: 0.496835443038
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[0.00136498 0.00017716]
+ [0.00017716 0.00158228]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 359
+SM1 Metric: 5.4772290591
+SM2 Metric: 4.16707212008
+SM3 Metric: 8.34846541274
+COVARIANCE [[ 1.35489149 -0.19495595]
+ [-0.19495595  0.03634629]]
+SCORE
+Number of detections 359
+SM1 Metric: 0.232338082533
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[ 1.35489149 -0.19495595]
+ [-0.19495595  0.03634629]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 233
+SM1 Metric: 4.3193961229
+SM2 Metric: 1.40388062847
+SM3 Metric: 8.43428062404
+COVARIANCE [[ 3.06154418 -0.41238998]
+ [-0.41238998  0.09085616]]
+SCORE
+Number of detections 233
+SM1 Metric: 0.431238262726
+SM2 Metric: 0.0
+SM3 Metric: 1.0
+COVARIANCE [[ 3.06154418 -0.41238998]
+ [-0.41238998  0.09085616]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 35
+SM1 Metric: 3.49139101382
+SM2 Metric: 3.4789943814
+SM3 Metric: 3.50396551796
+COVARIANCE [[3.24537112e-05 7.93269989e-05]
+ [7.93269989e-05 7.14285714e-03]]
+SCORE
+Number of detections 35
+SM1 Metric: 0.485714285714
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[3.24537112e-05 7.93269989e-05]
+ [7.93269989e-05 7.14285714e-03]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 630
+SM1 Metric: 2.19494949247
+SM2 Metric: 1.63285223104
+SM3 Metric: 5.22239740845
+COVARIANCE [[ 0.45183247 -0.06131504]
+ [-0.06131504  0.02665354]]
+SCORE
+Number of detections 630
+SM1 Metric: 0.953968254252
+SM2 Metric: 0.0
+SM3 Metric: 1.0
+COVARIANCE [[ 0.45183247 -0.06131504]
+ [-0.06131504  0.02665354]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 5
+SM1 Metric: 10.6230345886
+SM2 Metric: 10.4110150953
+SM3 Metric: 10.9632578202
+COVARIANCE [[ 0.06185689 -0.00251522]
+ [-0.00251522  0.00060901]]
+SCORE
+Number of detections 5
+SM1 Metric: 0.0110363841057
+SM2 Metric: 0.0
+SM3 Metric: 0.0551819205284
+COVARIANCE [[ 0.06185689 -0.00251522]
+ [-0.00251522  0.00060901]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 3
+SM1 Metric: 10.5342566011
+SM2 Metric: 10.2316005162
+SM3 Metric: 10.9637034793
+COVARIANCE [[0.14605062 0.        ]
+ [0.         0.        ]]
+SCORE
+Number of detections 3
+SM1 Metric: 0.0
+SM2 Metric: 0.0
+SM3 Metric: 0.0
+COVARIANCE [[0.14605062 0.        ]
+ [0.         0.        ]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 3
+SM1 Metric: 10.3781984626
+SM2 Metric: 10.0958881931
+SM3 Metric: 10.6985463054
+COVARIANCE [[0.09188434 0.        ]
+ [0.         0.        ]]
+SCORE
+Number of detections 3
+SM1 Metric: 0.0
+SM2 Metric: 0.0
+SM3 Metric: 0.0
+COVARIANCE [[0.09188434 0.        ]
+ [0.         0.        ]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 26
+SM1 Metric: 10.0048673271
+SM2 Metric: 9.03467661218
+SM3 Metric: 11.0222906278
+COVARIANCE [[0.37898402 0.        ]
+ [0.         0.        ]]
+SCORE
+Number of detections 26
+SM1 Metric: 0.0
+SM2 Metric: 0.0
+SM3 Metric: 0.0
+COVARIANCE [[0.37898402 0.        ]
+ [0.         0.        ]]
+OBSTACLES
+Number of detections 83
+SM1 Metric: 7.03271178699
+SM2 Metric: 4.75503376325
+SM3 Metric: 11.2627001783
+COVARIANCE [[ 3.38390124 -0.20321832]
+ [-0.20321832  0.02033879]]
+SCORE
+Number of detections 83
+SM1 Metric: 0.160403289799
+SM2 Metric: 0.0
+SM3 Metric: 0.303265333176
+COVARIANCE [[ 3.38390124 -0.20321832]
+ [-0.20321832  0.02033879]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 92
+SM1 Metric: 8.39708253011
+SM2 Metric: 7.24607521693
+SM3 Metric: 11.3633799951
+COVARIANCE [[1.55699115e+00 6.60249254e-05]
+ [6.60249254e-05 1.14930937e-04]]
+SCORE
+Number of detections 92
+SM1 Metric: 0.00198417567931
+SM2 Metric: 0.0
+SM3 Metric: 0.0909796059132
+COVARIANCE [[1.55699115e+00 6.60249254e-05]
+ [6.60249254e-05 1.14930937e-04]]
+OBSTACLES
+Number of detections 132
+SM1 Metric: 6.3152801078
+SM2 Metric: 4.37032517134
+SM3 Metric: 10.7942981336
+COVARIANCE [[ 2.27317869 -0.16131714]
+ [-0.16131714  0.02075029]]
+SCORE
+Number of detections 132
+SM1 Metric: 0.127250366738
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 2.27317869 -0.16131714]
+ [-0.16131714  0.02075029]]
+OBSTACLES
+Number of detections 171
+SM1 Metric: 6.13251095002
+SM2 Metric: 3.86249067305
+SM3 Metric: 10.299176385
+COVARIANCE [[ 2.68138927 -0.19265061]
+ [-0.19265061  0.0215509 ]]
+SCORE
+Number of detections 171
+SM1 Metric: 0.137397322352
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 2.68138927 -0.19265061]
+ [-0.19265061  0.0215509 ]]
+OBSTACLES
+Number of detections 219
+SM1 Metric: 6.82574631042
+SM2 Metric: 4.25742161391
+SM3 Metric: 11.2150758004
+COVARIANCE [[ 3.05050673 -0.19564152]
+ [-0.19564152  0.02059929]]
+SCORE
+Number of detections 219
+SM1 Metric: 0.112655597373
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 3.05050673 -0.19564152]
+ [-0.19564152  0.02059929]]
+OBSTACLES
+Number of detections 158
+SM1 Metric: 5.87590532184
+SM2 Metric: 3.40151544255
+SM3 Metric: 10.8387045328
+COVARIANCE [[ 3.2793805  -0.28889199]
+ [-0.28889199  0.03763466]]
+SCORE
+Number of detections 158
+SM1 Metric: 0.184056615498
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[ 3.2793805  -0.28889199]
+ [-0.28889199  0.03763466]]
+OBSTACLES
+Number of detections 192
+SM1 Metric: 6.82789619994
+SM2 Metric: 4.64278021429
+SM3 Metric: 11.1103362137
+COVARIANCE [[ 2.6461114  -0.17212418]
+ [-0.17212418  0.0209096 ]]
+SCORE
+Number of detections 192
+SM1 Metric: 0.119146391255
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 2.6461114  -0.17212418]
+ [-0.17212418  0.0209096 ]]
+OBSTACLES
+Number of detections 194
+SM1 Metric: 6.70673630949
+SM2 Metric: 4.4315173901
+SM3 Metric: 10.7598185862
+COVARIANCE [[ 2.52033497 -0.17192916]
+ [-0.17192916  0.0206231 ]]
+SCORE
+Number of detections 194
+SM1 Metric: 0.114414472234
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 2.52033497 -0.17192916]
+ [-0.17192916  0.0206231 ]]
+OBSTACLES
+Number of detections 153
+SM1 Metric: 7.43096546183
+SM2 Metric: 6.17946759872
+SM3 Metric: 11.2280455125
+COVARIANCE [[ 1.36480358 -0.08745721]
+ [-0.08745721  0.01719204]]
+SCORE
+Number of detections 153
+SM1 Metric: 0.0822666760084
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 1.36480358 -0.08745721]
+ [-0.08745721  0.01719204]]
+OBSTACLES
+Number of detections 190
+SM1 Metric: 6.3714998184
+SM2 Metric: 3.63190668395
+SM3 Metric: 10.8635160209
+COVARIANCE [[ 3.16513537 -0.24694051]
+ [-0.24694051  0.03078704]]
+SCORE
+Number of detections 190
+SM1 Metric: 0.133850554436
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[ 3.16513537 -0.24694051]
+ [-0.24694051  0.03078704]]
+OBSTACLES
+Number of detections 164
+SM1 Metric: 6.30744281335
+SM2 Metric: 3.83200916276
+SM3 Metric: 11.1853933095
+COVARIANCE [[ 3.16584736 -0.21915784]
+ [-0.21915784  0.02456046]]
+SCORE
+Number of detections 164
+SM1 Metric: 0.13892767772
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[ 3.16584736 -0.21915784]
+ [-0.21915784  0.02456046]]
+OBSTACLES
+Number of detections 154
+SM1 Metric: 7.22191913961
+SM2 Metric: 5.77357322432
+SM3 Metric: 11.3618752581
+COVARIANCE [[ 1.62701673 -0.11031885]
+ [-0.11031885  0.02106622]]
+SCORE
+Number of detections 154
+SM1 Metric: 0.120625521734
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 1.62701673 -0.11031885]
+ [-0.11031885  0.02106622]]
+OBSTACLES
+Number of detections 115
+SM1 Metric: 7.3104331302
+SM2 Metric: 5.9179199191
+SM3 Metric: 11.3565499923
+COVARIANCE [[ 1.94795498 -0.07782799]
+ [-0.07782799  0.01565614]]
+SCORE
+Number of detections 115
+SM1 Metric: 0.0756875041629
+SM2 Metric: 0.0
+SM3 Metric: 0.303265333176
+COVARIANCE [[ 1.94795498 -0.07782799]
+ [-0.07782799  0.01565614]]
+OBSTACLES
+Number of detections 150
+SM1 Metric: 6.74783819812
+SM2 Metric: 4.93219025397
+SM3 Metric: 10.8692926618
+COVARIANCE [[ 2.23695167 -0.13235115]
+ [-0.13235115  0.01889546]]
+SCORE
+Number of detections 150
+SM1 Metric: 0.099657952562
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 2.23695167 -0.13235115]
+ [-0.13235115  0.01889546]]
+OBSTACLES
+Number of detections 159
+SM1 Metric: 7.07502475002
+SM2 Metric: 5.4197947646
+SM3 Metric: 11.1916948175
+COVARIANCE [[ 1.64074915 -0.10404083]
+ [-0.10404083  0.01782417]]
+SCORE
+Number of detections 159
+SM1 Metric: 0.0855320231848
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 1.64074915 -0.10404083]
+ [-0.10404083  0.01782417]]
+OBSTACLES
+Number of detections 76
+SM1 Metric: 8.60386868063
+SM2 Metric: 7.82379791582
+SM3 Metric: 11.1713162615
+COVARIANCE [[ 8.50056306e-01 -9.88252567e-04]
+ [-9.88252567e-04  9.81913943e-05]]
+SCORE
+Number of detections 76
+SM1 Metric: 0.00232166332487
+SM2 Metric: 0.0
+SM3 Metric: 0.0551819205284
+COVARIANCE [[ 8.50056306e-01 -9.88252567e-04]
+ [-9.88252567e-04  9.81913943e-05]]
+OBSTACLES
+Number of detections 75
+SM1 Metric: 7.50582055308
+SM2 Metric: 6.08676801889
+SM3 Metric: 11.2987520807
+COVARIANCE [[ 1.49461487e+00 -5.75703308e-04]
+ [-5.75703308e-04  1.30166081e-04]]
+SCORE
+Number of detections 75
+SM1 Metric: 0.00209416236728
+SM2 Metric: 0.0
+SM3 Metric: 0.0909796059132
+COVARIANCE [[ 1.49461487e+00 -5.75703308e-04]
+ [-5.75703308e-04  1.30166081e-04]]
+OBSTACLES
+Number of detections 147
+SM1 Metric: 6.89655712357
+SM2 Metric: 5.15047396965
+SM3 Metric: 10.1513455186
+COVARIANCE [[ 1.58530812 -0.08629645]
+ [-0.08629645  0.01337487]]
+SCORE
+Number of detections 147
+SM1 Metric: 0.0602314938588
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 1.58530812 -0.08629645]
+ [-0.08629645  0.01337487]]
+OBSTACLES
+Number of detections 140
+SM1 Metric: 7.36954280347
+SM2 Metric: 5.94479739756
+SM3 Metric: 10.881635177
+COVARIANCE [[ 1.29108143 -0.07869426]
+ [-0.07869426  0.01648789]]
+SCORE
+Number of detections 140
+SM1 Metric: 0.0766012748238
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 1.29108143 -0.07869426]
+ [-0.07869426  0.01648789]]
+OBSTACLES
+Number of detections 127
+SM1 Metric: 6.84308509666
+SM2 Metric: 5.12595815132
+SM3 Metric: 10.6915724312
+COVARIANCE [[ 2.02671897 -0.10070382]
+ [-0.10070382  0.01531378]]
+SCORE
+Number of detections 127
+SM1 Metric: 0.0722289501697
+SM2 Metric: 0.0
+SM3 Metric: 0.300000011921
+COVARIANCE [[ 2.02671897 -0.10070382]
+ [-0.10070382  0.01531378]]
+OBSTACLES
+Number of detections 114
+SM1 Metric: 6.3210221558
+SM2 Metric: 3.87223679717
+SM3 Metric: 11.0367709082
+COVARIANCE [[ 3.56737218 -0.23514129]
+ [-0.23514129  0.02121708]]
+SCORE
+Number of detections 114
+SM1 Metric: 0.194524503591
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[ 3.56737218 -0.23514129]
+ [-0.23514129  0.02121708]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 246
+SM1 Metric: 4.90659526156
+SM2 Metric: 2.11632416698
+SM3 Metric: 11.3588396664
+COVARIANCE [[ 5.5572434  -0.88445395]
+ [-0.88445395  0.18866286]]
+SCORE
+Number of detections 246
+SM1 Metric: 0.527185750947
+SM2 Metric: 0.0
+SM3 Metric: 1.0
+COVARIANCE [[ 5.5572434  -0.88445395]
+ [-0.88445395  0.18866286]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 218
+SM1 Metric: 6.160324042
+SM2 Metric: 3.85705756661
+SM3 Metric: 11.1620952536
+COVARIANCE [[ 6.14622883 -0.42512428]
+ [-0.42512428  0.04309648]]
+SCORE
+Number of detections 218
+SM1 Metric: 0.222650123256
+SM2 Metric: 0.0
+SM3 Metric: 0.5
+COVARIANCE [[ 6.14622883 -0.42512428]
+ [-0.42512428  0.04309648]]
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0
+OBSTACLES
+Number of detections 0
+SCORE
+Number of detections 0

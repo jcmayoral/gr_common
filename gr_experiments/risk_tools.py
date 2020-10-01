@@ -42,9 +42,15 @@ class RiskExtractor:
             rospy.spin()
 
     def collision_cb(self,msg):
-        if len(msg.states)>0:
-            print "COL detected"
-            self.collision_detected = True
+
+        for state in msg.states:
+            if "ground" not in state.collision1_name and "ground" not in state.collision2_name:
+                print "COL detected"
+                #rospy.logerr(state)
+                rospy.logerr(len(msg.states))
+                self.collision_detected = True
+            #else:
+            #    print "OK"
 
     def get_metrics(self, req):
         print "SERVICE REQUIRED, " , req.file_name
@@ -54,6 +60,9 @@ class RiskExtractor:
         m2 = self.generate_metric(self.safety_scores)
         r.metrics.extend(m1)
         r.metrics.extend(m2)
+
+        in_collision = [int(self.collision_detected)]
+        r.metrics.extend(in_collision)
         print r.metrics
 
         #savefiles
@@ -107,7 +116,7 @@ class RiskExtractor:
 
     def generate_metric(self, data):
         print "DATA", data, len(data)
-        if len(data)> 0 or self.collision_detected:
+        if len(data)> 0:
             data = [float(len(data)),float(SM1(data)),float(SM2(data)),float(SM3(data))]
         else:
             data = [100000.0,100000.0,100000.0,100000.0]
