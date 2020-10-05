@@ -95,6 +95,7 @@ target_link_libraries(
   ${OCTOMAP_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${catkin_LIBRARIES} 
+  #{YAML_CPP_LIBRARIES} 
   yaml-cpp
 )
 
