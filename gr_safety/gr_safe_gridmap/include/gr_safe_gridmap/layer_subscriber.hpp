@@ -69,7 +69,7 @@ namespace gr_safe_gridmap{
                     return;
                 }
                 tf2::doTransform(in, in, to_global_transform);
-            }
+/            }
 
             void updateLayer(const safety_msgs::FoundObjectsArray& poses, int behaviour){
                 //boost::mutex::scoped_lock lc(mt);
@@ -158,7 +158,7 @@ namespace gr_safe_gridmap{
                 geometry_msgs::PoseStamped aux, aux2;
                 float radius = 1.0;
                 aux = in;
-                //MotionModel class TODO
+                //MotionModel class TODO MARKOV
                 double prob[9] ={0.5,0.25,0.25,0.05,0.05,0.05,0.05,0.05,0.05};
                 //auto norm = nprimitives_*exp(-0.3*(search_depth_-depth));
                 geometry_msgs::Pose p;
