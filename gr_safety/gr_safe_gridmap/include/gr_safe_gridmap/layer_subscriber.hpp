@@ -69,7 +69,7 @@ namespace gr_safe_gridmap{
                     return;
                 }
                 tf2::doTransform(in, in, to_global_transform);
-/            }
+            }
 
             void updateLayer(const safety_msgs::FoundObjectsArray& poses, int behaviour){
                 //boost::mutex::scoped_lock lc(mt);
