@@ -16,7 +16,9 @@ namespace gr_simulation{
     class ROSInterface{
         public:
             ROSInterface();
-            virtual ~ROSInterface();
+            virtual ~ROSInterface(){
+                dyn_server_.clearCallback();
+            };
             void dyn_reconfigureCB(gr_simulation::PersonMotionConfig &config, uint32_t level);
         private:
             dynamic_reconfigure::Server<gr_simulation::PersonMotionConfig> dyn_server_;

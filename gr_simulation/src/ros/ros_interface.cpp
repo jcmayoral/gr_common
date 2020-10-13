@@ -13,12 +13,6 @@ ROSInterface::ROSInterface(): tfBuffer(ros::Duration(5)),
     ros::spin();
 }
 
-
-ROSInterface::~ROSInterface(){
-    
-}
-
-
 void ROSInterface::dyn_reconfigureCB(gr_simulation::PersonMotionConfig &config, uint32_t level){
     std::cout << "BEFORE " << std::endl;
     gr_action_msgs::SimMotionPlannerGoal goal;

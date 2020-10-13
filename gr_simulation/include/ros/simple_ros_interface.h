@@ -53,7 +53,7 @@ namespace gazebo
           std::cout << "destroyeda"<< std::endl;
 
 
-          sub->Unsubscribe();
+          //sub->Unsubscribe();
           std::cout << "destroyed"<< std::endl;
         }
 
@@ -103,7 +103,7 @@ namespace gazebo
         //dynamic_reconfigure::Server<gr_simulation::PersonMotionConfig>::CallbackType dyn_server_cb_;
 
         transport::NodePtr node;
-        transport::SubscriberPtr sub;
+        //transport::SubscriberPtr sub;
         transport::PublisherPtr pub;
         event::ConnectionPtr updateConnection;
 
