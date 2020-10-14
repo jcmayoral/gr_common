@@ -24,17 +24,17 @@ extern gr_safe_gridmap::MainGrid gridmap;
 
 namespace gr_safe_gridmap{
     class LayerSubscriber{
-        public: 
+        public:
             void layerCB(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event){
                 //boost::mutex::scoped_lock lck(mt);
                 boost::shared_ptr<topic_tools::ShapeShifter const> const &ssmsg = msg_event.getConstMessage();
                 auto msginfo = msg_event.getConnectionHeader();
                 std::string def = ssmsg->getMessageDefinition();
-                
+
                 std::string msgtype = msginfo["type"];
                 //Check if path
                 //TODO behaviour according to type
-                
+
                 try{
                     nav_msgs::Path path;
                     path = *ssmsg->instantiate<nav_msgs::Path>();
@@ -56,7 +56,7 @@ namespace gr_safe_gridmap{
                 catch(...){
                     ROS_ERROR_STREAM("Not processed"<< msgtype);
                 }
-                
+
             }
 
             void addLayerTuple(std::string person_id){
@@ -93,7 +93,7 @@ namespace gr_safe_gridmap{
                 //index 0 reserved to robot
                 for (auto o : poses.objects){
                     addLayerTuple(o.object_id);
-                    gridmap.update_times_[o.object_id] = ros::Time::now();                        
+                    gridmap.update_times_[o.object_id] = ros::Time::now();
 
                     if (o.is_dynamic){
                         updateDynamic(o, poses.header.frame_id);
@@ -118,7 +118,7 @@ namespace gr_safe_gridmap{
                 //recursivity
                 search_depth_ = searchdepth;
                 generateCycle(aux,searchdepth, o.object_id, o.speed);
-                    
+
                 //Update current position
                 convert(currentpose);
                 updateGridLayer(o.object_id, currentpose,  exp(0), 0);
@@ -133,7 +133,7 @@ namespace gr_safe_gridmap{
                 convert(currentpose);
                 center(0) = currentpose.pose.position.x;
                 center(1) = currentpose.pose.position.y;
-                
+
                 bool validindex = gridmap.gridmap.getIndex(center, index);
                 if (!validindex){
                    return;
@@ -159,7 +159,7 @@ namespace gr_safe_gridmap{
                 float radius = 1.0;
                 aux = in;
                 //MotionModel class TODO MARKOV
-                double prob[9] ={0.5,0.25,0.25,0.05,0.05,0.05,0.05,0.05,0.05};
+                //double prob[9] ={0.5,0.25,0.25,0.05,0.05,0.05,0.05,0.05,0.05};
                 //auto norm = nprimitives_*exp(-0.3*(search_depth_-depth));
                 geometry_msgs::Pose p;
 
@@ -167,11 +167,11 @@ namespace gr_safe_gridmap{
                     //to mapframe
                     aux2 = generateMotion(in,i, v);
 
-                    if (aux2.pose.position.z > 1.1){
-                        std::cout << "GENCY " << depth << layer << std::endl;
-                    }
+                    //if (aux2.pose.position.z > 1.1){
+                    //    std::cout << "GENCY " << depth << layer << std::endl;
+                    //}
 
-                    float val = 1*exp(-0.5*(search_depth_-depth))*prob[i];
+                    float val = 1*exp(-0.5*(search_depth_-depth))*motion_prob_[i];
                     //val /=norm;
                     if (val > 1.0){
                         std::cout << "WTF WHYYYY "<<std::endl;
@@ -208,7 +208,7 @@ namespace gr_safe_gridmap{
 
                 center(0) = p.pose.position.x;
                 center(1) = p.pose.position.y;
-                
+
 
                 /*
                 bool validindex = gridmap.gridmap.getIndex(center, index);
@@ -271,7 +271,7 @@ namespace gr_safe_gridmap{
                         vx = fabs(ov.x);
                         //vx = std::max(resolution_,2.0);
                         th += M_PI+delta_th;
-                        
+
                         break;
                     case 5:
                         vx = -fabs(ov.x);
@@ -318,11 +318,20 @@ namespace gr_safe_gridmap{
                     return;
                 }
                 switch (config.mode){
-                    case 0: 
+                    case 0:
                         ROS_WARN_STREAM("reconfig" << subscriber_id_);
                         setnPrimitive(config.nprimitives);
                         setTimeStep(config.timestep);
                         setTrackingSamples(config.tracking);
+                        motion_prob_[0]= config.primitive_0;
+                        motion_prob_[1] = config.primitive_1;
+                        motion_prob_[2] = config.primitive_2;
+                        motion_prob_[3] = config.primitive_3;
+                        motion_prob_[4] = config.primitive_4;
+                        motion_prob_[5] = config.primitive_5;
+                        motion_prob_[6] = config.primitive_6;
+                        motion_prob_[7] = config.primitive_7;
+                        motion_prob_[8] = config.primitive_8;
                         break;
                     case 1:
                         ROS_WARN_STREAM("this must be implemented on safe gridmap" << subscriber_id_);
@@ -360,10 +369,10 @@ namespace gr_safe_gridmap{
 
                     c++;
                 }
-                gridmap.setDataFlag(true);  
+                gridmap.setDataFlag(true);
                 //gridmap.unlock();
             }
-            
+
             LayerSubscriber(const LayerSubscriber& other): local_frame_(other.local_frame_), tf_buffer_(), subscriber_id_(other.subscriber_id_),
                                                             map_frame_(other.local_frame_), search_depth_(other.search_depth_),
                                                             is_local_(other.is_local_), resolution_(other.resolution_), dt_(other.dt_),
@@ -381,11 +390,12 @@ namespace gr_safe_gridmap{
             }
 
             //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string id_nh, std::string input, double resolution, bool local, int tracking_time=2, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="odom"): 
+            LayerSubscriber(std::string id_nh, std::string input, double resolution, bool local, int tracking_time=2, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="odom"):
                                                                                                             tf_buffer_(),tf2_listener_(tf_buffer_), nh_(id_nh),
                                                                                                             search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
-                                                                                                            proxemic_distance_(proxemic_distance), dt_(0.5){
+                                                                                                            proxemic_distance_(proxemic_distance), dt_(0.5), motion_prob_{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
+{
                 std::cout << "constructor" << std::endl;
                 subscriber_id_ = id_nh;
                 last_reading_ = ros::Time::now();
@@ -420,9 +430,9 @@ namespace gr_safe_gridmap{
             boost::mutex layermtx;
             std::string topic_;
             boost::shared_ptr<ros::Subscriber> sub_;
-            ros::NodeHandle nh_;  
+            ros::NodeHandle nh_;
             ros::Subscriber rsub_;
-            ros::Publisher rpub_; 
+            ros::Publisher rpub_;
             geometry_msgs::PoseArray fb_msgs_;
             geometry_msgs::TransformStamped to_global_transform;
             tf2_ros::Buffer tf_buffer_;
@@ -440,8 +450,6 @@ namespace gr_safe_gridmap{
             float proxemic_distance_;
             double dt_;
             ros::Time last_reading_;
-
+            double motion_prob_[9];
     };
 };
-
-
