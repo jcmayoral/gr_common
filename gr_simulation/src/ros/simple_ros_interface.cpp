@@ -150,10 +150,6 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     //this->sub = this->node->Subscribe(subtopicName,&SimpleROSInterface::OnMsg, this);
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(std::bind(&SimpleROSInterface::OnUpdate, this));
 
-    std::cout << "oooooooooook"<<std::endl;
-
-
-     std::cout << "run init2"<<std::endl;
      if (!ros::isInitialized()){
         std::cout << "CONSTRUCTOR 10 initializing"<<std::endl;
 
@@ -163,26 +159,12 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
         //ros::spinOnce();
     }
 
-
-
-    //dyn_server_cb_ = boost::bind(&SimpleROSInterface::dyn_reconfigureCB, this, _1, _2);
-    //dyn_server_.setCallback(dyn_server_cb_);
-
     //Callback for ROS
     ros::NodeHandle nh;// = boost::make_shared<ros::NodeHandle>("~");
     nh.setCallbackQueue(&my_callback_queue);
     aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, "SimMotionPlanner/" + this->model->GetName(),
                                                                 boost::bind(&SimpleROSInterface::executeCB, this, _1), false);
 
-    // Create a named topic, and subscribe to it.
-    /*
-    ros::SubscribeOptions so = ros::SubscribeOptions::create<geometry_msgs::Twist>(
-            "/" + this->model->GetName() + "/vel_cmd",1,
-            boost::bind(&SimpleROSInterface::OnRosMsg, this, _1),
-            ros::VoidPtr(), &this->rosQueue);
-
-    this->rosSub = nh.subscribe(so);
-    */
     std::cout << "MODEL NAME " << this->model->GetName() << std::endl;
 
     // Spin up the queue helper thread.
@@ -207,7 +189,7 @@ void SimpleROSInterface::OnUpdate(){
     geometry_msgs::TransformStamped base_link_to_odom;
     geometry_msgs::PoseStamped p;
 
-    //tfBuffer.waitForTransform("base_link", "odom", ros::Time(0), ros::Duration(1.0) );
+    //tfBuffer.canTransform("base_link", "odom", ros::Time(0), ros::Duration(1.0) );
 
     try{
         //orientation of current odometry to map
@@ -245,7 +227,7 @@ void SimpleROSInterface::OnUpdate(){
         //std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
         if (dist2robot < 1.5){
             std::cout << "add offset to avoid collision"<< std::endl;
-	    startpose.Pos().Y() += 2.0;
+            startpose.Pos().Y() += 2.0;
             endpose.Pos().Y() += 2.0;
             startpose.Pos().X() += 2.0;
             endpose.Pos().X() += 2.0;
