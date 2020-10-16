@@ -21,12 +21,13 @@ class ROSPlaySound:
         file_ = random.choice(os.listdir(path))
         playsound(os.path.join(path,file_))
         self.current_state = 0
-        time.sleep(1)
+        #time.sleep(0.1)
 
 
     def safe_cb(self, msg):
-        index = int(msg.data*len(self.levels))
-        print index, msg.data*len(self.levels)
+        index = int(msg.data*(len(self.levels)-1))
+        print index, msg.data
+
         if index == self.current_state:
             rospy.loginfo("avoid state")
             return
@@ -35,7 +36,7 @@ class ROSPlaySound:
         file_ = random.choice(os.listdir(path))
         playsound(os.path.join(path,file_))
         self.current_state = index
-        time.sleep(1)
+        #time.sleep(0.)
 
 
 
