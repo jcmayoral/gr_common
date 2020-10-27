@@ -1,0 +1,42 @@
+OBSTACLES
+Number of detections 1
+SM1 Metric: 8.18431700363
+SM2 Metric: 8.18431700363
+SM3 Metric: 8.18431700363
+COVARIANCE [[nan nan]
+ [nan nan]]
+SCORE
+Number of detections 1
+SM1 Metric: 0.0
+SM2 Metric: 0.0
+SM3 Metric: 0.0
+COVARIANCE [[nan nan]
+ [nan nan]]
+OBSTACLES
+Number of detections 47
+SM1 Metric: 3.85878637491
+SM2 Metric: 1.62271170202
+SM3 Metric: 9.09716599194
+COVARIANCE [[ 8.12719797 -0.65491393]
+ [-0.65491393  0.12673451]]
+SCORE
+Number of detections 47
+SM1 Metric: 0.297872340426
+SM2 Metric: 0.0
+SM3 Metric: 1.0
+COVARIANCE [[ 8.12719797 -0.65491393]
+ [-0.65491393  0.12673451]]
+OBSTACLES
+Number of detections 133
+SM1 Metric: 4.75832052403
+SM2 Metric: 1.62271170202
+SM3 Metric: 9.09716599194
+COVARIANCE [[ 7.05170253 -0.63323296]
+ [-0.63323296  0.16482342]]
+SCORE
+Number of detections 133
+SM1 Metric: 0.260902256446
+SM2 Metric: 0.0
+SM3 Metric: 1.5
+COVARIANCE [[ 7.05170253 -0.63323296]
+ [-0.63323296  0.16482342]]

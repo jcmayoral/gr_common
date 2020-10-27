@@ -19,7 +19,7 @@ class RiskExtractor:
         #self.subscriber = rospy.Subscriber("/pointcloud_lidar_processing/found_object", FoundObjectsArray, self.cb)
         self.subscriber2 = rospy.Subscriber("/test_finished", Empty, self.test_cb)
         #self.subscriber3 = rospy.Subscriber("/safety_score", Float32, self.cb2)
-        self.subscriber2 = rospy.Subscriber("/bumper_vals", ContactsState, self.collision_cb)
+        self.subscriber4 = rospy.Subscriber("/bumper_vals", ContactsState, self.collision_cb)
 
         sub1 = message_filters.Subscriber("/pointcloud_lidar_processing/found_object", FoundObjectsArray)
         sub2 = message_filters.Subscriber("/safety_score", Float32)
