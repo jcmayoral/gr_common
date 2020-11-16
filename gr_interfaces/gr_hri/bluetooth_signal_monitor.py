@@ -29,23 +29,30 @@ class BluetoothMonitor(object):
 
         #wprint (name, host)
         sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-        #server_sock.bind(("", bluetooth.PORT_ANY))
-        print sock.getsockname()
-        #server_sock.listen(1)
-        sock.connect((host,port))
+        sock.bind(("", bluetooth.PORT_ANY))
+        #print sock.getsockname()
+        sock.listen(1)
 
-        #bluetooth.advertise_service(server_sock, "SampleServer", service_id=self.uuid,
-        #                            service_classes=[self.uuid, bluetooth.SERIAL_PORT_CLASS],
-        #                                profiles=[bluetooth.SERIAL_PORT_PROFILE],)
+        bluetooth.advertise_service(sock, "SampleServer", service_id=self.uuid,
+                                    service_classes=[self.uuid, bluetooth.SERIAL_PORT_CLASS],
+                                        profiles=[bluetooth.SERIAL_PORT_PROFILE],)
         print "waiting for connection on RFCOMM channel", port
-        time.sleep(3)
-        print "SEND TEXT"
+        client_sock, client_info = sock.accept()
+        try:
+            client_sock.send("HOLA")
+        except IOError:
+            print "error"
+            pass
+        #connect((host,port))
+        #print "SEND TEXT"
         while True:
             text = raw_input()
             print text
             if text == "quit":
                 break
-            sock.send(text);
+            client_sock.send(text);
+        client_sock.close()
+        print client_info
         sock.close()
 
 
