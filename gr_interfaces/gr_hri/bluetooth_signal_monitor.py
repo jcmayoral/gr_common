@@ -1,6 +1,8 @@
 #/usr/bin/python
 import bluetooth
 import time
+import threading
+import logging
 
 class BluetoothMonitor(object):
     def __init__(self):
@@ -25,14 +27,22 @@ class BluetoothMonitor(object):
         bluetooth.advertise_service(self.sock, "SampleServer", service_id=self.uuid,
                                     service_classes=[self.uuid, bluetooth.SERIAL_PORT_CLASS],
                                         profiles=[bluetooth.SERIAL_PORT_PROFILE],)
-        print "waiting for connection on RFCOMM channel", port
-
+        
+        if port:
+            print "waiting for connection on RFCOMM channel", port
+            return True
+        else:
+            print "turn bluetooth on"
+            return False
 
     def connect_with_client(self):
-        client_sock, client_info = self.sock.accept()
-        print "CLIENT INFO ", client_info
+        self.client_sock, self.client_info = self.sock.accept()
+        print "CLIENT INFO ", self.client_info
+
+
+    def send_to_client(self):
         try:
-            client_sock.send("Felicidades estas conectado")
+            self.client_sock.send("Felicidades estas conectado")
         except IOError:
             print "error"
             pass
@@ -42,14 +52,27 @@ class BluetoothMonitor(object):
             print text
             if text == "quit":
                 break
-            client_sock.send(text);
-        client_sock.close()
+            self.client_sock.send(text);
+
+    def receive_from_client(self):
+        while True:
+            data = client_sock.recv(1024)
+            print "received [%s]" % data
 
     def close(self):
+        self.client_sock.close()
         self.sock.close()
 
 if __name__ == '__main__':
     bluetooth_monitor = BluetoothMonitor()
-    bluetooth_monitor.setup()
-    bluetooth_monitor.connect_with_client()
-    bluetooth_monitor.close()
+    if bluetooth_monitor.setup():
+        bluetooth_monitor.connect_with_client()
+        logging.basicConfig(format=format, level=logging.INFO,
+                        datefmt="%H:%M:%S")
+        logging.info("Main    : before creating thread")
+        x = threading.Thread(bluetooth_monitor.send_to_client(), args=())
+        y = threading.Thread(bluetooth_monitor.receive_from_client(), args=())
+        x.join()
+        y.join()
+
+        bluetooth_monitor.close()
