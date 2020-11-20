@@ -8,6 +8,7 @@ class BluetoothMonitor(object):
         self.text = "quit"
 
     def setup(self):
+        port = None
         addr = "A8:5E:45:02:83:23"
         self.service_matches = bluetooth.find_service(address=addr)
         for i,service in enumerate(self.service_matches):
@@ -26,7 +27,7 @@ class BluetoothMonitor(object):
         bluetooth.advertise_service(self.sock, "SampleServer", service_id=self.uuid,
                                     service_classes=[self.uuid, bluetooth.SERIAL_PORT_CLASS],
                                         profiles=[bluetooth.SERIAL_PORT_PROFILE],) 
-        if port:
+        if port is not None:
             print "waiting for connection on RFCOMM channel", port
             return True
         else:
