@@ -21,7 +21,7 @@ namespace gazebo{
 
   class GrassRow : public ModelPlugin{
     /// \brief Constructor
-    public: 
+    public:
         GrassRow();
         ~GrassRow();
 
@@ -33,17 +33,17 @@ namespace gazebo{
         virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
         virtual void Init();
     private:
-        void OnEvent(bool state=true);
+        void OnEvent(bool state=true, float scale=1.0);
         //gazebo
         void OnRequest(GrassCutterRequestPtr &event);
         //ros
         void OnRosMsg(const std_msgs::BoolConstPtr& msg);
         void QueueThread();
-      
+
         /// \brief Pointer to the model.
         physics::ModelPtr model;
         physics::LinkPtr link;
-      
+
         ignition::math::Pose3<double> current_pose;
         double ang_velocity = 0;
         double lin_velx = 0;

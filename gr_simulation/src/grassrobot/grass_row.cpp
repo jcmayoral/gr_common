@@ -42,7 +42,7 @@ void GrassRow::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     this->model = _model;
     this->link = _model->GetLinks()[0];
     std::string topicName = "/" + this->model->GetName();
-        
+
     //Copying Poiners
     if(!use_ros){
         //this->gznode = transport::NodePtr(new transport::Node());
@@ -80,7 +80,7 @@ void GrassRow::OnRosMsg(const std_msgs::BoolConstPtr& msg){
     //this->model->Update();
 }
 
-void GrassRow::OnEvent(bool state){
+void GrassRow::OnEvent(bool state, float scale_factor){
     ignition::math::Vector3d nscale;
     nscale.X() = 1.0;
     nscale.Y() = 1.0;

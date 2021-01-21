@@ -33,10 +33,16 @@
       </distribution>
     </population-->
 
-    <include>
+    <!--include>
       <uri>model://ros_simple_human</uri>
       <pose>1 1 0 0 0 0</pose>
+    </include-->
+
+    <include>
+      <uri>model://animated_human</uri>
+      <pose>1 -1 0 0 0 0</pose>
     </include>
+
 
     <!--include>
       <uri>model://animation_human</uri>

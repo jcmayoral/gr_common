@@ -111,6 +111,7 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
     pose.Pos().Z(goal->startpose.pose.position.z+1.05);
     this->model->SetWorldPose(pose);
     this->actor->SetWorldPose(pose, true, true);
+    startpose = pose;
     this->Reset();
   }
 
@@ -144,7 +145,7 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
 
 
   auto start = std::chrono::high_resolution_clock::now();
-  while (!is_motionfinished);
+  //while (!is_motionfinished);
 
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finish - start;
@@ -225,8 +226,14 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
   double distance = pos.Length();
 
   if (distance < 0.2){
-    is_motionfinished = true;
-    motion_type = static_cast<std::string>("stand");
+    //is_motionfinished = true;
+    //motion_type = static_cast<std::string>("stand");
+    ignition::math::Vector3d newTarget;
+    newTarget.X(startpose.Pos().X());
+    newTarget.Y(startpose.Pos().Y());
+    newTarget.Z(startpose.Pos().Z());
+    this->target = newTarget;
+    startpose = pose;
     Reset();
     return;
   }

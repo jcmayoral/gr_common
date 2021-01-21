@@ -217,7 +217,7 @@ void SimpleROSInterface::OnUpdate(){
     if (!collisionstate.IsZero()){
         std::cout << "Collide" << collisionstate << std::endl;
     }
-     if (dist2goal <2.0 || dist2robot < 1.5){
+     if (dist2goal <0.5 || dist2robot < 1.5){
         ROS_ERROR("DONE");
         this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
         this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));        

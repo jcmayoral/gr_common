@@ -35,7 +35,7 @@ namespace gazebo
 {
   class GZ_PLUGIN_VISIBLE GazeboROSAnimation : public ModelPlugin
   {
-    const std::list<std::string> AVAILABLEMOTIONS = std::list<std::string>({"moonwalk", "run", "sit_down", 
+    const std::list<std::string> AVAILABLEMOTIONS = std::list<std::string>({"moonwalk", "run", "sit_down",
                                           "sitting", "stand_up", "stand", "talk_a", "talk_b", "walk"});
 
     /// \brief Constructor
@@ -95,8 +95,8 @@ namespace gazebo
 
     /// \brief Custom trajectory info.
     private: physics::TrajectoryInfoPtr trajectoryInfo;
-    
-    
+
+
     private: boost::shared_ptr<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>> aserver;
     private: ros::CallbackQueue my_callback_queue;
 
@@ -107,6 +107,7 @@ namespace gazebo
     private: std::string motion_type;
     private: bool is_motionfinished;
 
+    ignition::math::Pose3d startpose;
 
   };
 }
