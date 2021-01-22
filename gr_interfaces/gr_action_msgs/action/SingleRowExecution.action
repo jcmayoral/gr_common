@@ -3,6 +3,7 @@ std_msgs/String row_id
 float32 cmd_distance
 uint8 repetitions
 float32 linearspeed
+bool request_metrics
 ---
 std_msgs/String message
 float32[] metrics
