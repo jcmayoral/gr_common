@@ -32,6 +32,8 @@ GazeboROSAnimation::GazeboROSAnimation(): is_motionfinished(true), motion_type("
     }
     std::cout << "RUN"<<std::endl;;
     this->published_time = ros::Time::now();
+    backward_motion=false;
+    is_infinite_motion =false;
 }
 
 /////////////////////////////////////////////////
@@ -83,7 +85,7 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   //As a HACK
   this->published_time = ros::Time::now();
   this->rosPub = nh.advertise<geometry_msgs::Vector3Stamped>( "/" + this->model->GetName() + "/location", 1);
-
+  //this->reset = nh.advertise<std_msgs::Bool>( "/" + this->model->GetName() + "/reset", 1);
 
   aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, std::string("SimMotionPlanner")+"/" + this->model->GetName(),
                                                                 boost::bind(&GazeboROSAnimation::executeCB, this, _1), false);
@@ -145,12 +147,19 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
     motion_type = static_cast<std::string> ("run");
   }
 
+  this->is_infinite_motion = goal->is_infinite_motion;
+  auto start = std::chrono::high_resolution_clock::now();
+
+  if (!goal->is_infinite_motion){
+    backward_motion = false;
+    while(!backward_motion);
+    feedback.backward = true;
+    aserver->publishFeedback(feedback);
+  }
+
 
   this->Reset();
-
-
-  auto start = std::chrono::high_resolution_clock::now();
-  //while (!is_motionfinished);
+  while (!is_motionfinished);
 
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finish - start;
@@ -235,13 +244,22 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
     //is_motionfinished = true;
     std::cout << "GOAL REACHED" << std::endl;
     //motion_type = static_cast<std::string>("stand");
-    ignition::math::Vector3d newTarget;
-    newTarget.X(startpose.Pos().X());
-    newTarget.Y(startpose.Pos().Y());
-    newTarget.Z(startpose.Pos().Z());
-    this->startpose.Pos() = this->target;
-    this->target = newTarget;
-    Reset();
+    if (this->is_infinite_motion){
+      ignition::math::Vector3d newTarget;
+      newTarget.X(startpose.Pos().X());
+      newTarget.Y(startpose.Pos().Y());
+      newTarget.Z(startpose.Pos().Z());
+      this->startpose.Pos() = this->target;
+      this->target = newTarget;
+      Reset();
+    }
+    else{
+      if(backward_motion){
+        is_motionfinished = true;
+      }
+    }
+    //if (backward_motion)
+    backward_motion=!backward_motion;
     return;
   }
 

@@ -42,6 +42,7 @@ namespace gazebo
     /// \brief Constructor
     public: GazeboROSAnimation();
     virtual ~GazeboROSAnimation(){
+      //systhis->rosQueueThread.reset();
       this->rosPub.shutdown();
 
       for (auto c: this->connections){
@@ -104,7 +105,6 @@ namespace gazebo
     /// \brief Custom trajectory info.
     private: physics::TrajectoryInfoPtr trajectoryInfo;
 
-
     private: boost::shared_ptr<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>> aserver;
     private: ros::CallbackQueue my_callback_queue;
 
@@ -120,6 +120,8 @@ namespace gazebo
     private: ros::Publisher rosPub;
 
     ignition::math::Pose3d startpose;
+    bool backward_motion;
+    private: bool is_infinite_motion;
 
   };
 }
