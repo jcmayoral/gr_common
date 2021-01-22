@@ -1,4 +1,4 @@
-
+import numpy as np
 #HACK
 distance_sensor_vehicle = 10
 
@@ -13,3 +13,6 @@ def SM2(persons):
 def SM3(persons):
     print ("TODO ADD -> Use MAX instead")
     return max(persons)
+def SM4(persons):
+    print ("NEW SM4 -> Variance")
+    return np.var(np.asarray(persons))

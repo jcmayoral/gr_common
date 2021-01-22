@@ -25,12 +25,14 @@ class RiskExtractor:
         sub2 = message_filters.Subscriber("/safety_score", Float32)
         self.ts = message_filters.ApproximateTimeSynchronizer([sub1, sub2], queue_size=10, slop=0.5, allow_headerless=True)
         self.ts.registerCallback(self.timed_cb)
+        self.save_file = False
 
 
         if not service_required:
             while not rospy.is_shutdown() and self.run:
                 pass
             #print "OBSTACLES"
+            self.save_file = False
             self.execute(self.obstacles, "OBSTACLES")
             #print "SAFETY SCORES ", self.safety_scores
             self.execute(self.safety_scores, "SCORE")
@@ -38,6 +40,7 @@ class RiskExtractor:
             #TODO SERVICE?
             #self._as = actionlib.SimpleActionServer("SingleRowExecutionAction", SingleRowExecutionAction, execute_cb=self.execute_cb, auto_start = False)
             #self._as.start()
+            self.save_file = True
             service = rospy.Service("get_metrics", GetMetrics, self.get_metrics)
             rospy.spin()
 
@@ -63,11 +66,16 @@ class RiskExtractor:
 
         in_collision = [int(self.collision_detected)]
         r.metrics.extend(in_collision)
-        print r.metrics
+        #print r.metrics
+        covar = cov(self.obstacles, self.safety_scores)
+        r.metrics.extend([covar[0,0]])
+        r.metrics.extend([covar[0,1]])
+        r.metrics.extend([covar[1,1]])
 
         #savefiles
-        self.execute(self.obstacles, "OBSTACLES")
-        self.execute(self.safety_scores, "SCORE")
+        if self.save_file:
+            self.execute(self.obstacles, "OBSTACLES")
+            self.execute(self.safety_scores, "SCORE")
         self.reset()
 
         return r
@@ -111,14 +119,15 @@ class RiskExtractor:
             f.write("SM1 Metric: " + str(SM1(data))+"\n")
             f.write("SM2 Metric: " + str(SM2(data))+"\n")
             f.write("SM3 Metric: " + str(SM3(data))+"\n")
+            f.write("SM4 Metric: " + str(SM4(data))+"\n")
             f.write("COVARIANCE " + str(cov(self.obstacles, self.safety_scores))+"\n")
         f.close()
 
     def generate_metric(self, data):
         print "DATA", data, len(data)
         if len(data)> 0:
-            data = [float(len(data)),float(SM1(data)),float(SM2(data)),float(SM3(data))]
+            data = [float(len(data)),float(SM1(data)),float(SM2(data)),float(SM3(data)), float(SM4(data))]
         else:
-            data = [100000.0,100000.0,100000.0,100000.0]
+            data = [100000.0,100000.0,100000.0,100000.0, 100000.0]
         print data
         return data
