@@ -115,6 +115,8 @@ namespace gazebo
     private: std::string motion_type;
     private: bool is_motionfinished;
 
+    private: ros::Time published_time;
+
     private: ros::Publisher rosPub;
 
     ignition::math::Pose3d startpose;

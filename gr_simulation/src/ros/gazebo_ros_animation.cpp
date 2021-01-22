@@ -31,7 +31,7 @@ GazeboROSAnimation::GazeboROSAnimation(): is_motionfinished(true), motion_type("
         ros::spinOnce();
     }
     std::cout << "RUN"<<std::endl;;
-
+    this->published_time = ros::Time::now();
 }
 
 /////////////////////////////////////////////////
@@ -81,6 +81,7 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   nh.setCallbackQueue(&my_callback_queue);
 
   //As a HACK
+  this->published_time = ros::Time::now();
   this->rosPub = nh.advertise<geometry_msgs::Vector3Stamped>( "/" + this->model->GetName() + "/location", 1);
 
 
@@ -232,13 +233,14 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
 
   if (distance < 0.2){
     //is_motionfinished = true;
+    std::cout << "GOAL REACHED" << std::endl;
     //motion_type = static_cast<std::string>("stand");
     ignition::math::Vector3d newTarget;
     newTarget.X(startpose.Pos().X());
     newTarget.Y(startpose.Pos().Y());
     newTarget.Z(startpose.Pos().Z());
+    this->startpose.Pos() = this->target;
     this->target = newTarget;
-    startpose = pose;
     Reset();
     return;
   }
@@ -260,12 +262,18 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
   // Adjust the direction vector by avoiding obstacles
   this->HandleObstacles(pos);
 
+  ros::Time current_time = ros::Time::now();
+  double diff_time = (current_time - published_time).toSec(); 
+  std::cout << diff_time << std::endl;
 
-  fb_msg.header.frame_id = "odom";
-  fb_msg.vector.x = pose.Pos().X();
-  fb_msg.vector.y = pose.Pos().Y();
-  fb_msg.vector.z = pose.Pos().Z();
-  this->rosPub.publish(fb_msg);
+  if (diff_time > 0.1){
+    fb_msg.header.frame_id = "odom";
+    fb_msg.vector.x = pose.Pos().X();
+    fb_msg.vector.y = pose.Pos().Y();
+    fb_msg.vector.z = pose.Pos().Z();
+    this->rosPub.publish(fb_msg);
+    published_time = current_time;
+  }
 
   // Compute the yaw orientation
   ignition::math::Angle yaw = atan2(pos.Y(), pos.X()) + 1.5707 - rpy.Z();
