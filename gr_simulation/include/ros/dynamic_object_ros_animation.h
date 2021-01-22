@@ -27,6 +27,7 @@
 
 #include <gr_action_msgs/SimMotionPlannerAction.h>
 #include <actionlib/server/simple_action_server.h>
+#include <geometry_msgs/Vector3Stamped.h>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 
@@ -40,6 +41,13 @@ namespace gazebo
 
     /// \brief Constructor
     public: GazeboROSAnimation();
+    virtual ~GazeboROSAnimation(){
+      this->rosPub.shutdown();
+
+      for (auto c: this->connections){
+        c.reset();
+      }
+    }
 
     /// \brief Load the actor plugin.
     /// \param[in] _model Pointer to the parent model.
@@ -106,6 +114,8 @@ namespace gazebo
     private: std::thread rosQueueThread;
     private: std::string motion_type;
     private: bool is_motionfinished;
+
+    private: ros::Publisher rosPub;
 
     ignition::math::Pose3d startpose;
 

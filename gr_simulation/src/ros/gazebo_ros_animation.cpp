@@ -80,6 +80,10 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   ros::NodeHandle nh;// = boost::make_shared<ros::NodeHandle>("~");
   nh.setCallbackQueue(&my_callback_queue);
 
+  //As a HACK
+  this->rosPub = nh.advertise<geometry_msgs::Vector3Stamped>( "/" + this->model->GetName() + "/location", 1);
+
+
   aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, std::string("SimMotionPlanner")+"/" + this->model->GetName(),
                                                                 boost::bind(&GazeboROSAnimation::executeCB, this, _1), false);
   this->rosQueueThread = std::thread(std::bind(&GazeboROSAnimation::QueueThread, this));
@@ -216,6 +220,7 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
   if (is_motionfinished){
     return;
   }
+  geometry_msgs::Vector3Stamped fb_msg;
 
     // Time delta
   double dt = (_info.simTime - this->lastUpdate).Double();
@@ -254,6 +259,13 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
 
   // Adjust the direction vector by avoiding obstacles
   this->HandleObstacles(pos);
+
+
+  fb_msg.header.frame_id = "odom";
+  fb_msg.vector.x = pose.Pos().X();
+  fb_msg.vector.y = pose.Pos().Y();
+  fb_msg.vector.z = pose.Pos().Z();
+  this->rosPub.publish(fb_msg);
 
   // Compute the yaw orientation
   ignition::math::Angle yaw = atan2(pos.Y(), pos.X()) + 1.5707 - rpy.Z();
