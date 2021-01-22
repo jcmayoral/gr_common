@@ -150,16 +150,23 @@ void GazeboROSAnimation::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
   this->is_infinite_motion = goal->is_infinite_motion;
   auto start = std::chrono::high_resolution_clock::now();
 
+
   if (!goal->is_infinite_motion){
-    backward_motion = false;
-    while(!backward_motion);
+    int count = 0;
+    //This is horrible but it is faster to implement
+    bool flag = true;
+    while(count < 3){
+      while(flag == backward_motion);
+      flag=!flag;
+      count++;
+      feedback.backward = backward_motion;
+      aserver->publishFeedback(feedback);
+    };
     feedback.backward = true;
-    aserver->publishFeedback(feedback);
+    is_motionfinished = true;
   }
 
-
   this->Reset();
-  while (!is_motionfinished);
 
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finish - start;
@@ -242,24 +249,21 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
 
   if (distance < 0.2){
     //is_motionfinished = true;
-    std::cout << "GOAL REACHED" << std::endl;
-    //motion_type = static_cast<std::string>("stand");
-    if (this->is_infinite_motion){
-      ignition::math::Vector3d newTarget;
-      newTarget.X(startpose.Pos().X());
-      newTarget.Y(startpose.Pos().Y());
-      newTarget.Z(startpose.Pos().Z());
-      this->startpose.Pos() = this->target;
-      this->target = newTarget;
-      Reset();
-    }
-    else{
-      if(backward_motion){
-        is_motionfinished = true;
-      }
-    }
-    //if (backward_motion)
+    std::cout << "GOAL REACHED" << backward_motion << std::endl;
     backward_motion=!backward_motion;
+    //motion_type = static_cast<std::string>("stand");
+    ignition::math::Vector3d newTarget;
+    newTarget.X(startpose.Pos().X());
+    newTarget.Y(startpose.Pos().Y());
+    newTarget.Z(startpose.Pos().Z());
+    this->startpose.Pos() = this->target;
+    this->target = newTarget;
+    Reset();
+    //else{
+      //if(!backward_motion){
+        //is_motionfinished = true;
+     // }
+    //if (backward_motion)
     return;
   }
 
@@ -282,7 +286,7 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
 
   ros::Time current_time = ros::Time::now();
   double diff_time = (current_time - published_time).toSec(); 
-  std::cout << diff_time << std::endl;
+  //std::cout << diff_time << std::endl;
 
   if (diff_time > 0.1){
     fb_msg.header.frame_id = "odom";
