@@ -268,6 +268,7 @@ void GazeboROSAnimation::OnUpdate(const common::UpdateInfo &_info)
 
   if (diff_time > 0.1){
     fb_msg.header.frame_id = "odom";
+    fb_msg.header.stamp = current_time;
     fb_msg.vector.x = pose.Pos().X();
     fb_msg.vector.y = pose.Pos().Y();
     fb_msg.vector.z = pose.Pos().Z();
