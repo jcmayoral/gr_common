@@ -2,6 +2,7 @@ string object_id
 string motion_type
 bool setstart
 bool is_motion
+bool is_infinite_motion
 float64 linearspeed
 float64 linearspeedy
 geometry_msgs/PoseStamped startpose
@@ -10,4 +11,5 @@ geometry_msgs/PoseStamped goalPose
 bool succeeded
 float64 executing_time
 ---
+bool backward
 bool is_alive
