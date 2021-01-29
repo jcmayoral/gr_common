@@ -5,6 +5,8 @@ find_package(catkin REQUIRED
         COMPONENTS
             std_msgs
             geometry_msgs
+	    safety_msgs
+	    sensor_msgs
             actionlib_msgs
 	    message_generation
 )
@@ -12,7 +14,8 @@ find_package(catkin REQUIRED
 
 add_action_files(
   DIRECTORY action
-  FILES GRNavigation.action SimMotionPlanner.action SingleRowExecution.action
+  FILES GRNavigation.action SimMotionPlanner.action 
+  	SingleRowExecution.action GrPCProcess.action
 )
 
 add_service_files(
@@ -21,7 +24,9 @@ add_service_files(
 )
 
 generate_messages(
-  DEPENDENCIES actionlib_msgs std_msgs geometry_msgs
+  DEPENDENCIES actionlib_msgs std_msgs 
+  	geometry_msgs sensor_msgs
+	safety_msgs
 )
 
 
@@ -29,6 +34,8 @@ catkin_package(
     CATKIN_DEPENDS
         std_msgs
         geometry_msgs
+	sensor_msgs
+	safety_msgs
         actionlib_msgs
 )
 

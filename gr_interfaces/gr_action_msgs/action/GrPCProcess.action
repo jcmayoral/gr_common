@@ -1,0 +1,7 @@
+#goal
+sensor_msgs/PointCloud2 goal_pc
+---
+#result
+safety_msgs/FoundObjectsArray found_objects
+---
+#feedback
