@@ -9,6 +9,7 @@ find_package(catkin REQUIRED
 	    sensor_msgs
             actionlib_msgs
 	    message_generation
+	    darknet_ros_msgs
 )
 
 
@@ -16,6 +17,7 @@ add_action_files(
   DIRECTORY action
   FILES GRNavigation.action SimMotionPlanner.action 
   	SingleRowExecution.action GRPCProcess.action
+	GRDepthProcess.action
 )
 
 add_service_files(
@@ -26,7 +28,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES actionlib_msgs std_msgs 
   	geometry_msgs sensor_msgs
-	safety_msgs
+	safety_msgs darknet_ros_msgs
 )
 
 
@@ -37,6 +39,7 @@ catkin_package(
 	sensor_msgs
 	safety_msgs
         actionlib_msgs
+	darknet_ros_msgs
 )
 
 
