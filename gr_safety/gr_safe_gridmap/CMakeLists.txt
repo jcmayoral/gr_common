@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(gr_safe_gridmap)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -31,7 +31,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
 )
 
-find_package(OpenCV 3.4 REQUIRED)
+find_package(OpenCV 4 REQUIRED)
 find_package(octomap REQUIRED)
 find_package(YAML-CPP 0.6 REQUIRED)
 
@@ -43,7 +43,7 @@ catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-  DEPENDS system_lib safety_msgs 
+  DEPENDS safety_msgs 
 )
 
 ###########
@@ -99,7 +99,7 @@ target_link_libraries(
   yaml-cpp
 )
 
-add_dependencies(safe_gridmap_node ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(safe_gridmap_node ${PROJECT_NAME}_gencfg ${catkin_EXPORTED_TARGETS})
 
 
 # Mark executables and/or libraries for installation

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(gr_safety_policies)
 #set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpic")
@@ -18,7 +18,7 @@ find_package(catkin REQUIRED
         message_filters
 )
 
-find_package(OpenCV 3.2 REQUIRED)
+find_package(OpenCV  REQUIRED)
 find_package(PCL REQUIRED)
 
 #find_package(PkgConfig REQUIRED)
