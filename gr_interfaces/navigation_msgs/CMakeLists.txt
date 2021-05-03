@@ -18,6 +18,7 @@ add_message_files(
    FILES
    TopologicalMap.msg
    TopologicalNode.msg
+   TopologicalInfo.msg
    Vertex.msg
    Edge.msg
 )
