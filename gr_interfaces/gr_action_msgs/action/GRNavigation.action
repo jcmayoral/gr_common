@@ -1,4 +1,5 @@
 std_msgs/String start_node
+visualization_msgs/MarkerArray plan
 ---
 std_msgs/String completed_edge
 float64 executing_time

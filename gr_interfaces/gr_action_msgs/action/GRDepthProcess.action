@@ -1,6 +1,7 @@
 #goal
 sensor_msgs/Image depth_image
 darknet_ros_msgs/BoundingBoxes bounding_boxes
+sensor_msgs/CameraInfo depth_info
 ---
 #result
 safety_msgs/FoundObjectsArray found_objects

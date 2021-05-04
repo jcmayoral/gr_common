@@ -6,6 +6,7 @@ find_package(catkin REQUIRED
             std_msgs
             geometry_msgs
 	    safety_msgs
+	    visualization_msgs
 	    sensor_msgs
             actionlib_msgs
 	    message_generation
@@ -28,7 +29,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES actionlib_msgs std_msgs 
   	geometry_msgs sensor_msgs
-	safety_msgs darknet_ros_msgs
+	safety_msgs visualization_msgs darknet_ros_msgs
 )
 
 
