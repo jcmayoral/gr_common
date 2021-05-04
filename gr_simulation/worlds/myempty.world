@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://simple_plane</uri>
+      <name>ground_plane</name>
+      <pose>0 0 0   0 0 0</pose>
+    </include>
+    <scene>
+       <background>1 1 1 1.0</background>
+       <!--sky></sky-->
+       <shadow>false</shadow>
+       <ambient>1 1 1 1</ambient>
+       <!--shadows>0</shadows-->
+   </scene>
+    <!--include>
+      <uri>model://grass_ground_plane</uri>
+    </include-->
+    <!--population name="human_population1">
+      <model name="human1">
+        <include>
+          <static>false</static>
+          <uri>model://ros_super_person</uri>
+        </include>
+      </model>
+      <pose>0 0 0 0 0 0</pose>
+      <box>
+        <size>10 10 0.01</size>
+      </box>
+      <model_count>1</model_count>
+      <distribution>
+        <type>random</type>
+      </distribution>
+    </population-->
+
+    <!--include>
+      <uri>model://ros_simple_human</uri>
+      <pose>1 1 0 0 0 0</pose>
+    </include-->
+
+    <include>
+      <uri>model://animated_human</uri>
+      <pose>1 -1 0 0 0 0</pose>
+    </include>
+
+
+    <!--include>
+      <uri>model://animation_human</uri>
+      <pose>1 1 0 1.5 1.5 1.5</pose>
+    </include-->
+  </world>
+</sdf>
