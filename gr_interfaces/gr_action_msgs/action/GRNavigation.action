@@ -3,6 +3,7 @@ visualization_msgs/MarkerArray plan
 ---
 std_msgs/String completed_edge
 float64 executing_time
+bool suceeded
 ---
 float64 next_offset
 bool suceeded
