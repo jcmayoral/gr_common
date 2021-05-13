@@ -1,0 +1,8 @@
+float64 long_left_bottom
+float64 long_right_top
+float64 lan_left_bottom
+float64 lan_right_top
+float64 width_meters
+float64 height_meters
+---
+bool result

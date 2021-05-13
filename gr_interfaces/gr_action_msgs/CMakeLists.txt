@@ -18,12 +18,13 @@ add_action_files(
   DIRECTORY action
   FILES GRNavigation.action SimMotionPlanner.action 
   	SingleRowExecution.action GRPCProcess.action
-	GRDepthProcess.action
+	GRDepthProcess.action GREdges.action
 )
 
 add_service_files(
   FILES
   GetMetrics.srv
+  GREdges2.srv
 )
 
 generate_messages(
