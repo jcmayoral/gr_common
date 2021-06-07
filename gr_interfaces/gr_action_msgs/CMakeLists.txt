@@ -19,6 +19,7 @@ add_action_files(
   FILES GRNavigation.action SimMotionPlanner.action 
   	SingleRowExecution.action GRPCProcess.action
 	GRDepthProcess.action GREdges.action
+	PolyFitRow.action
 )
 
 add_service_files(

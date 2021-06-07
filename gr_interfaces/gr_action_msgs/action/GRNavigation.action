@@ -1,5 +1,10 @@
 std_msgs/String start_node
 visualization_msgs/MarkerArray plan
+uint8 VISIT_ALL=0
+uint8 VISIT_SOME=1
+uint8 JUST_END=2
+uint8 mode
+uint8 span
 ---
 std_msgs/String completed_edge
 float64 executing_time
