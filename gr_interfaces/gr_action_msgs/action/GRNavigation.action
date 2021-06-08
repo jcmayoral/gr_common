@@ -1,4 +1,5 @@
 std_msgs/String start_node
+uint16 row_id
 visualization_msgs/MarkerArray plan
 uint8 VISIT_ALL=0
 uint8 VISIT_SOME=1
