@@ -7,9 +7,11 @@ uint8 JUST_END=2
 uint8 mode
 uint8 span
 ---
-std_msgs/String completed_edge
-float64 executing_time
+float64 next_offset
 bool suceeded
 ---
-float64 next_offset
+#feedback
+std_msgs/String reached_node
+std_msgs/String completed_edge
+float64 executing_time
 bool suceeded
