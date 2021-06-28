@@ -1,0 +1,4 @@
+float32 time_of_execution
+float32 transport_time
+float32 covered_distance
+string taskid

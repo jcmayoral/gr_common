@@ -25,6 +25,7 @@ add_message_files(
    DiagnosticArray.msg
    DiagnosticStatus.msg
    KeyValue.msg
+   ExecutionMetadata.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
