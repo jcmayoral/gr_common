@@ -12,7 +12,7 @@ int main(int argc, char** argv){
     if (localstr.compare("global") == 0){
         localgr = false;
     }
-
+    std::cout << localgr << std::endl;
     safe_gridmap = new SafeGridMap(localgr);
 
     ros::Duration r(0.10);

@@ -98,7 +98,7 @@ void SafeGridMap::initializeGridMap(bool localgridmap){
         factor = 3;
     }
     else{
-        map_frame = "base_link";
+        map_frame = "velodyne";
         factor = 1;
     }
     
@@ -210,10 +210,12 @@ void SafeGridMap::loadRegions(std::string iid){
 void SafeGridMap::updateGrid(){
     boost::mutex::scoped_lock lltk(smtx);
     boost::mutex::scoped_lock ltk(gridmap.mtx);
+    /*
     if (!gridmap.isNewDataAvailable()){
 	    ROS_ERROR("NO UPDATES");
     return;	    
     }
+    */
 
         gridmap.gridmap.add("conv", 0);
         auto safety_layer = gridmap.gridmap.get("safetyregions");
@@ -229,6 +231,7 @@ void SafeGridMap::updateGrid(){
             }
 
             object_id = l.substr(l.find("object_")); 
+            ROS_ERROR_STREAM("layers: " << l);
 
             if (object_id.empty()){
                 continue;
@@ -240,6 +243,7 @@ void SafeGridMap::updateGrid(){
                 continue;
             }
             auto layer = gridmap.gridmap.get(object_id);
+            //ROS_INFO_STREAM(layer);
             //std::cout << "MAX OBJECT LAYER g" << layer.maxCoeff()<<std::endl;
             // auto normlayer = layer/layer.maxCoeff();
             float object_risk_index = layer.cwiseProduct(safety_layer).maxCoeff();
@@ -269,7 +273,7 @@ void SafeGridMap::updateGrid(){
 
         std_msgs::Float32 score;
         gridmap.gridmap["conv"] = gridmap.gridmap.get("conv").cwiseProduct(safety_layer);
-        ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
+        //ROS_INFO_STREAM("debug this line after testing " << gridmap.gridmap["conv"].maxCoeff());
         score.data = gridmap.gridmap.get("conv").maxCoeff();//sum();
 
         //ROS_ERROR_STREAM_THROTTLE(1,"risk sum " << score.data << " MEAN SAFETY " << score.data/nobjects << "MAX COEFF "<<gridmap.gridmap.get("conv").maxCoeff());
@@ -284,6 +288,13 @@ void SafeGridMap::updateGrid(){
         //Publish Score
         safety_grader_.publish(score);
         objects_risk_pub_.publish(indexes);
-        publishGrid();
+        //publishGrid();
+        gridmap.gridmap.setTimestamp(ros::Time::now().toNSec());
+        grid_map_msgs::GridMap message;
+        //boost::mutex::scoped_lock ltk(gridmap.mtx);{
+            grid_map::GridMapRosConverter::toMessage(gridmap.gridmap, message);
+            //};
+    rpub_.publish(message);
+
 	gridmap.setDataFlag(false);
 }

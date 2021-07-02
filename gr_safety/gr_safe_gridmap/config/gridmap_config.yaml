@@ -2,9 +2,9 @@ safety_threshold: 0.8
 resolution: 0.3
 mapsize: 15
 timeout: 0.1
-trackingtime: 6
-nprimitives: 3
-proxemicradius: 0.6
+trackingtime: 5
+nprimitives: 9
+proxemicradius: 0.2
 detection_topics:
     #- /found_object
     #- /pointcloud_processing_node/detected_objects

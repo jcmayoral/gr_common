@@ -46,16 +46,16 @@ namespace gr_safe_gridmap{
 
                 }
 
-               try{
+               //try{
                     safety_msgs::FoundObjectsArray parr;
                     parr = *ssmsg->instantiate<safety_msgs::FoundObjectsArray>();
                     updateLayer(parr, 1);
                     return;
-                }
+                //}
 
-                catch(...){
-                    ROS_ERROR_STREAM("Not processed"<< msgtype);
-                }
+                //catch(...){
+                  //  ROS_ERROR_STREAM("Not processed"<< msgtype);
+                //}
 
             }
 
@@ -220,7 +220,7 @@ namespace gr_safe_gridmap{
                 std::string layname{"Time_"+std::to_string(timeindex)};
                 //std::cout << "update " << layname << std::endl;
 
-                for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_);!iterator.isPastEnd(); ++iterator) {
+                for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_*2 );!iterator.isPastEnd(); ++iterator) {
                     gridmap.gridmap.at(layer_id, *iterator) = std::max( gridmap.gridmap.at(layer_id, *iterator) ,val);
                     gridmap.gridmap.at(layname, *iterator) =  std::max( gridmap.gridmap.at(layname, *iterator) ,val);
                 }
