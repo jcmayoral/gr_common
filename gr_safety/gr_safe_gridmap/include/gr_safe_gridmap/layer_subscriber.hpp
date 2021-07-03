@@ -34,27 +34,39 @@ namespace gr_safe_gridmap{
                 std::string msgtype = msginfo["type"];
                 //Check if path
                 //TODO behaviour according to type
-
-                try{
+                //std::cout << msgtype << std::endl;
+                if (type_.find("path") != std::string::npos) {
+//                try{
+                    std::cout << "PATH FOUND "<< std::endl;
                     nav_msgs::Path path;
                     path = *ssmsg->instantiate<nav_msgs::Path>();
                     //local gridmap -> 1
-                    updateLayer(path, is_local_);
+                    updateLayer(path, 1);
                     return;
                 }
-                catch(...){
+  //              }
+    //            catch(...){
 
-                }
+      //          }
 
                //try{
+                std::cout << "TYPE " << std::endl;
+                std::cout << type_ << std::endl;
+                std::cout << "topic " << std::endl;
+                std::cout << topic_ << std::endl;
+                
+                if (type_.find("obstacles") != std::string::npos) {
+                    std::cout << "obstacles FOUND "<< std::endl;
                     safety_msgs::FoundObjectsArray parr;
                     parr = *ssmsg->instantiate<safety_msgs::FoundObjectsArray>();
                     updateLayer(parr, 1);
                     return;
+
+                }
                 //}
 
                 //catch(...){
-                  //  ROS_ERROR_STREAM("Not processed"<< msgtype);
+                ROS_ERROR_STREAM("Some erro processed -> TO DO SOMETHING TO STOP "<< type_);
                 //}
 
             }
@@ -78,7 +90,7 @@ namespace gr_safe_gridmap{
                 grid_map::Index index;
 
                 float radius = 0.5;
-                to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time::now(), ros::Duration(0.1) );
+                //to_global_transform = tf_buffer_.lookupTransform(map_frame_, poses.header.frame_id, ros::Time(0), ros::Duration(0.5) );
 
                 boost::mutex::scoped_lock lck(gridmap.mtx);{
                 for (int i = 0; i <=tracking_time_; i++){
@@ -345,61 +357,61 @@ namespace gr_safe_gridmap{
                 boost::mutex::scoped_lock lck(gridmap.mtx);
                 grid_map::Position position;
                 grid_map::Index index;
-                addLayerTuple(std::to_string(0));
+                addLayerTuple("PATH");//std::to_string(0));
                 //gridmap.lock();
-                if (behaviour==1){
+                //if (behaviour==1){
                     std::string path_frame = path.header.frame_id;
-                    to_global_transform = tf_buffer_.lookupTransform(map_frame_, path_frame, ros::Time::now(), ros::Duration(0.1) );
-                }
+                    std::cout << "convert from  " << path_frame << " to "<< map_frame_ <<std::endl;
+                    to_global_transform = tf_buffer_.lookupTransform(map_frame_, path_frame, ros::Time::now(), ros::Duration(0.5) );
+                    std::cout << "WWWW" <<std::endl;
+
+                //}
 
                 int c = 0;
                 for (auto p : path.poses){
-                    if (behaviour==1){
+                    //if (behaviour==1){
+                        std::cout << "call convert"<<std::endl;
                         convert(p);
-                    }
+                        std::cout << "CONVERT DONE << " <<p <<std::endl;
+                    //}
                     position(0) = p.pose.position.x;
                     position(1) = p.pose.position.y;
                     gridmap.gridmap.getIndex(position, index);
 
                     //TODO UPDATE
-                    gridmap.gridmap.at(std::to_string(0), index) = std::max(static_cast<double>(gridmap.gridmap.at(std::to_string(0), index)),exp(-0.005*c));
-                    if (gridmap.gridmap.at(std::to_string(0), index) < 0){
-                        gridmap.gridmap.at(std::to_string(0), index) = std::max(static_cast<double>(gridmap.gridmap.at(std::to_string(0),index)),0.1*c);
+                    gridmap.gridmap.at("PATH", index) = std::max(static_cast<double>(gridmap.gridmap.at("PATH", index)),exp(-0.005*c));
+                    if (gridmap.gridmap.at("PATH", index) < 0){
+                        gridmap.gridmap.at("PATH", index) = std::max(static_cast<double>(gridmap.gridmap.at("PATH",index)),0.1*c);
                     }
 
                     c++;
                 }
+                std::cout << "PROCESSED"<<std::endl;
                 gridmap.setDataFlag(true);
                 //gridmap.unlock();
             }
 
             LayerSubscriber(const LayerSubscriber& other): local_frame_(other.local_frame_), tf_buffer_(), subscriber_id_(other.subscriber_id_),
-                                                            map_frame_(other.local_frame_), search_depth_(other.search_depth_),
+                                                            map_frame_(other.map_frame_), search_depth_(other.search_depth_),
                                                             is_local_(other.is_local_), resolution_(other.resolution_), dt_(other.dt_),
                                                             tracking_time_(other.tracking_time_), nprimitives_(other.nprimitives_),
+                                                            type_(other.type_),
                                                             proxemic_distance_(other.proxemic_distance_), ops(other.ops),tf2_listener_(tf_buffer_),nh_(other.nh_){
+                std::cout << "COPY CONSTRUCTOR "<< type_ << std::endl;
                 topic_ = other.topic_;
+                std::cout << "COPY CONSTRUCTOR topic "<< topic_ << std::endl;
+                type_ = other.type_;
                 last_reading_ = other.last_reading_;
                 config();
+            }
+
+            std::string getTopic(){
+                return topic_;
             }
 
 
             void config(){
                 rpub_ = nh_.advertise<geometry_msgs::PoseArray>("feedback", 1);
-                rsub_ = nh_.subscribe(ops);
-            }
-
-            //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
-            LayerSubscriber(std::string id_nh, std::string input, double resolution, bool local, int tracking_time=2, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="odom"):
-                                                                                                            tf_buffer_(),tf2_listener_(tf_buffer_), nh_(id_nh),
-                                                                                                            search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
-                                                                                                            resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
-                                                                                                            proxemic_distance_(proxemic_distance), dt_(0.5), motion_prob_{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}
-{
-                std::cout << "constructor" << std::endl;
-                subscriber_id_ = id_nh;
-                last_reading_ = ros::Time::now();
-                topic_ = "/" + input;
                 ops.topic = topic_;//"/" + input;//options_.rate_control_topic;
                 ops.queue_size = 1;
                 ops.md5sum = ros::message_traits::md5sum<topic_tools::ShapeShifter>();
@@ -407,10 +419,33 @@ namespace gr_safe_gridmap{
                 ops.helper = boost::make_shared<ros::SubscriptionCallbackHelperT<
                         const ros::MessageEvent<topic_tools::ShapeShifter const> &> >(
                                 boost::bind(&LayerSubscriber::layerCB, this, _1));
+                rsub_ = nh_.subscribe(ops);
+                ROS_INFO_STREAM("CONFIG"<< type_);
+                ROS_INFO_STREAM("TOPIC "<< topic_);
+                
+            }
 
-                for (auto i=0; i<=tracking_time_; i++){
-                    addLayerTuple("Time_" + std::to_string(i));
-                }
+            //do not modify local_frame ("frame of the messages of the persons" or get it from the message it self)
+            LayerSubscriber(std::string type, std::string id_nh, std::string topic, double resolution, bool local, int tracking_time=2, int nprimitives=3, float proxemic_distance=5.0, std::string map_frame="map"):
+                                                                                                            tf_buffer_(),tf2_listener_(tf_buffer_), nh_(id_nh),
+                                                                                                            search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
+                                                                                                            resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
+                                                                                                            proxemic_distance_(proxemic_distance), dt_(0.5), motion_prob_{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
+                                                                                                            type_(type)
+            {
+                std::cout << "constructor " << type_ << " INPUT "<< topic <<  std::endl;
+                std::cout << " type " << type << std::endl;
+                std::cout << "ID_NH " << id_nh <<std::endl;
+                std::cout << "topic " << topic << std::endl;
+                std::cout << "resolution " << resolution << std::endl;
+                std::cout << "local " <<  local << std::endl;
+                std::cout << "trackingtime " << tracking_time << std::endl;
+                std::cout << "NPRIM " << nprimitives << std::endl;
+                std::cout << "PROX" << proxemic_distance << std::endl;
+                std::cout << "MAP FRAME " << map_frame << std::endl;
+                subscriber_id_ = id_nh;
+                last_reading_ = ros::Time::now();
+                topic_ = topic;
                 config();
             }
 
@@ -432,6 +467,7 @@ namespace gr_safe_gridmap{
             boost::shared_ptr<ros::Subscriber> sub_;
             ros::NodeHandle nh_;
             ros::Subscriber rsub_;
+            std::string type_;
             ros::Publisher rpub_;
             geometry_msgs::PoseArray fb_msgs_;
             geometry_msgs::TransformStamped to_global_transform;

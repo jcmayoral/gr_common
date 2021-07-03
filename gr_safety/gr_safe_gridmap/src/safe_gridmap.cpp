@@ -94,13 +94,15 @@ void SafeGridMap::initializeGridMap(bool localgridmap){
     int factor;
 
     if (!localgridmap){
-        map_frame = "odom";
+        map_frame = "map";
         factor = 3;
     }
     else{
         map_frame = "velodyne";
         factor = 1;
     }
+    ROS_ERROR_STREAM("Global frame: "<< map_frame);
+
     
     boost::mutex::scoped_lock(gridmap.mtx);
     {   
@@ -112,6 +114,12 @@ void SafeGridMap::initializeGridMap(bool localgridmap){
     //TODO INTEGRATE DYNAMIC SAFETY REGIOS FOR GLOBAL GRIDMAP
     addStaticLayer("safetyregions");
     loadRegions("safetyregions");
+
+    for (auto i=0; i<=tracking_time; i++){
+        addStaticLayer("Time_" + std::to_string(i));
+    }
+
+    addStaticLayer("PATH");
     
     /*
     std::vector<std::sting> blayers;
@@ -126,10 +134,9 @@ void SafeGridMap::initializeGridMap(bool localgridmap){
     request_stop_ = nh.advertise<std_msgs::Bool>("/lock_all", 1, true);
 
     // Transformin the entire path of location can be computaitonal expensive
-    if(!localgridmap){
-        auto pathtopic = config_yaml["pathtopic"].as<std::string>();
-        layer_subscribers.emplace_back("path", pathtopic.c_str(), resolution, localgridmap, tracking_time, nprimitives, proxemicdistance, map_frame);
-    }
+    //if(!localgridmap){
+      
+    //}
 
     const YAML::Node& detection_topics = config_yaml["detection_topics"];
     std::cout << "Number of Obstacle Topics to Subscribe " << detection_topics.size() << std::endl;
@@ -145,9 +152,16 @@ void SafeGridMap::initializeGridMap(bool localgridmap){
         nh_id = nh.getNamespace() + std::to_string(index);
         ROS_INFO_STREAM("Subscribing to " << topic << nh_id);
         sensors_ids_ += nh_id.c_str();//+ " , ";
-        layer_subscribers.emplace_back(nh_id.c_str(),topic.c_str(), resolution, localgridmap, tracking_time, nprimitives, proxemicdistance, map_frame);
+        layer_subscribers.emplace_back("obstacles", nh_id.c_str(),topic.c_str(), resolution, localgridmap, tracking_time, nprimitives, proxemicdistance, map_frame);
     }
 
+    /*
+    auto pathtopic = config_yaml["pathtopic"].as<std::string>();
+    ROS_INFO_STREAM("Getting informaiton from path "<< pathtopic);
+    layer_subscribers.emplace_back("path", "path_0", pathtopic.c_str(), resolution, localgridmap, tracking_time, nprimitives, proxemicdistance, map_frame);
+    */
+
+   
     /*
     std::map<std::string, std::string> enum_map = {{"Key 1", "Value 1"}, {"Key 2", "Value 2"}};
     std::string enum_value = enum_map["Key 1"];
@@ -161,6 +175,13 @@ void SafeGridMap::initializeGridMap(bool localgridmap){
 
 
     clear_timer_ = nh.createTimer(ros::Duration(clearing_timeout), &SafeGridMap::timer_callback, this);
+
+    /*
+    for (auto it: layer_subscribers){
+        //it.config();
+        std::cout << "TOPIC " << it.getTopic() << std::endl;
+    }
+    */
     //ros::spin();
 }
 
@@ -210,12 +231,10 @@ void SafeGridMap::loadRegions(std::string iid){
 void SafeGridMap::updateGrid(){
     boost::mutex::scoped_lock lltk(smtx);
     boost::mutex::scoped_lock ltk(gridmap.mtx);
-    /*
-    if (!gridmap.isNewDataAvailable()){
-	    ROS_ERROR("NO UPDATES");
-    return;	    
-    }
-    */
+    //`if (!gridmap.isNewDataAvailable()){
+	   //` ROS_ERROR("NO UPDATES");
+    //`return;	    
+    //}
 
         gridmap.gridmap.add("conv", 0);
         auto safety_layer = gridmap.gridmap.get("safetyregions");
