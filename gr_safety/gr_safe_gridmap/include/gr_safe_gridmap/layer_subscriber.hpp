@@ -104,7 +104,7 @@ namespace gr_safe_gridmap{
 
                 //index 0 reserved to robot
                 for (auto o : poses.objects){
-                    addLayerTuple(o.object_id);
+                    //addLayerTuple(o.object_id);
                     gridmap.update_times_[o.object_id] = ros::Time::now();
 
                     if (o.is_dynamic){
@@ -151,9 +151,9 @@ namespace gr_safe_gridmap{
                    return;
                 }
 
-                for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
+                /*for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
                     gridmap.gridmap.at(o.object_id, *iterator) = 1.0;
-                }
+                }*/
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, proxemic_distance_);!iterator.isPastEnd(); ++iterator) {
                     for (int i = 0; i < tracking_time_; i++){
@@ -233,7 +233,7 @@ namespace gr_safe_gridmap{
                 //std::cout << "update " << layname << std::endl;
 
                 for (grid_map::CircleIterator iterator(gridmap.gridmap, center, resolution_*2 );!iterator.isPastEnd(); ++iterator) {
-                    gridmap.gridmap.at(layer_id, *iterator) = std::max( gridmap.gridmap.at(layer_id, *iterator) ,val);
+                    //gridmap.gridmap.at(layer_id, *iterator) = std::max( gridmap.gridmap.at(layer_id, *iterator) ,val);
                     gridmap.gridmap.at(layname, *iterator) =  std::max( gridmap.gridmap.at(layname, *iterator) ,val);
                 }
 

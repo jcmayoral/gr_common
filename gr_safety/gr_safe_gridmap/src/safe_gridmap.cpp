@@ -245,23 +245,23 @@ void SafeGridMap::updateGrid(){
         safety_msgs::RiskIndexes indexes;
 
         for (auto l :  layers){
-            if (l.find("object_") == std::string::npos) {
+            if (l.find("Time_") == std::string::npos) {
                 continue;
             }
 
-            object_id = l.substr(l.find("object_")); 
+            //object_id = l.substr(l.find("object_")); 
             ROS_ERROR_STREAM("layers: " << l);
 
-            if (object_id.empty()){
-                continue;
-            }
+            //if (object_id.empty()){
+            //    continue;
+            //}
 
 
-            if(!gridmap.gridmap.exists(object_id)){
-                std::cout << "avoid "<<std::endl;
-                continue;
-            }
-            auto layer = gridmap.gridmap.get(object_id);
+            //if(!gridmap.gridmap.exists(object_id)){
+            //    std::cout << "avoid "<<std::endl;
+            //    continue;
+            //}
+            auto layer = gridmap.gridmap.get(l);
             //ROS_INFO_STREAM(layer);
             //std::cout << "MAX OBJECT LAYER g" << layer.maxCoeff()<<std::endl;
             // auto normlayer = layer/layer.maxCoeff();
