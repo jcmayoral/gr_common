@@ -261,32 +261,32 @@ namespace gr_safe_gridmap{
                 switch(motion_type){
                     case 0:
                         //th += delta_th;
-                        vx = fabs(ov.x);
+                        vx = fabs(ov.x*linearfactor_);
                         //vx = std::max(resolution_,2.0);
                         break;
                     case 1:
-                        vx = fabs(ov.x);
+                        vx = fabs(ov.x*linearfactor_);
                         //vx = std::max(resolution_,2.0);
                         th += delta_th;
                         break;
                     case 2:
-                        vx = fabs(ov.x);
+                        vx = fabs(ov.x*linearfactor_);
                         //vx = std::max(resolution_,2.0);
                         th -= delta_th;
                         break;
                     case 3:
-                        vx = fabs(ov.x);
+                        vx = fabs(ov.x*linearfactor_);
                         //vx = std::max(resolution_,2.0);
                         th -= M_PI+delta_th;
                         break;
                     case 4:
-                        vx = fabs(ov.x);
+                        vx = fabs(ov.x*linearfactor_);
                         //vx = std::max(resolution_,2.0);
                         th += M_PI+delta_th;
 
                         break;
                     case 5:
-                        vx = -fabs(ov.x);
+                        vx = -fabs(ov.x*linearfactor_);
                         //vx = -std::max(resolution_,2.0);
                         //vy = 1;
                         //th -= delta_th;
@@ -332,9 +332,10 @@ namespace gr_safe_gridmap{
                 switch (config.mode){
                     case 0:
                         ROS_WARN_STREAM("reconfig" << subscriber_id_);
-                        setnPrimitive(config.nprimitives);
+			setnPrimitive(config.nprimitives);
                         setTimeStep(config.timestep);
-                        setTrackingSamples(config.tracking);
+			setLinearFactor(config.linearfactor);
+                        //setTrackingSamples(config.tracking);
                         motion_prob_[0]= config.primitive_0;
                         motion_prob_[1] = config.primitive_1;
                         motion_prob_[2] = config.primitive_2;
@@ -395,7 +396,7 @@ namespace gr_safe_gridmap{
                                                             map_frame_(other.map_frame_), search_depth_(other.search_depth_),
                                                             is_local_(other.is_local_), resolution_(other.resolution_), dt_(other.dt_),
                                                             tracking_time_(other.tracking_time_), nprimitives_(other.nprimitives_),
-                                                            type_(other.type_),
+                                                            type_(other.type_), linearfactor_(other.linearfactor_),
                                                             proxemic_distance_(other.proxemic_distance_), ops(other.ops),tf2_listener_(tf_buffer_),nh_(other.nh_){
                 std::cout << "COPY CONSTRUCTOR "<< type_ << std::endl;
                 topic_ = other.topic_;
@@ -431,7 +432,7 @@ namespace gr_safe_gridmap{
                                                                                                             search_depth_(3), local_frame_("velodyne"), map_frame_(map_frame), is_local_(local),
                                                                                                             resolution_(resolution), tracking_time_(tracking_time),nprimitives_(nprimitives),
                                                                                                             proxemic_distance_(proxemic_distance), dt_(0.5), motion_prob_{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
-                                                                                                            type_(type)
+                                                                                                            type_(type), linearfactor_(1.0)
             {
                 std::cout << "constructor " << type_ << " INPUT "<< topic <<  std::endl;
                 std::cout << " type " << type << std::endl;
@@ -461,6 +462,10 @@ namespace gr_safe_gridmap{
                 nprimitives_ = prims;
             }
 
+            void setLinearFactor(float factor){
+                linearfactor_ = factor;
+            }
+
         private:
             boost::mutex layermtx;
             std::string topic_;
@@ -483,6 +488,7 @@ namespace gr_safe_gridmap{
             bool is_local_;
             float tracking_time_;
             double resolution_;
+	    float linearfactor_;
             float proxemic_distance_;
             double dt_;
             ros::Time last_reading_;

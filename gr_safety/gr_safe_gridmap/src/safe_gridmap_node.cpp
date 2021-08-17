@@ -10,6 +10,7 @@ int main(int argc, char** argv){
     bool localgr = true;
 
     if (localstr.compare("global") == 0){
+	std::cout << "GLOBAL" << std::endl;
         localgr = false;
     }
     std::cout << localgr << std::endl;
