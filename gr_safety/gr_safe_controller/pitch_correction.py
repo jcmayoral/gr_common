@@ -6,13 +6,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class PitchCorrection:
-    def __init__(self, pub_visualizer = False):
+    def __init__(self):
         rospy.loginfo("IIMU")
         self.imu_gain = 0.0
         self.imu_msg = Imu()
+        self.euler_angles = [0,0,0]
+        self.pub = rospy.Publisher("terrain_euler", PoseStamped)
         rospy.Subscriber("/imu/filtered",Imu, self.imu_cb)
-        if pub_visualizer:
-            self.pub = rospy.Publisher("terrain_euler", PoseStamped)
+
 
     def imu_cb(self, msg):
         self.imu_msg = msg
@@ -23,16 +24,18 @@ class PitchCorrection:
         msg.pose.orientation = self.imu_msg.orientation
         self.pub.publish(msg)
 
-    def get_euler_angles(self):
+    def update_euler_angles(self):
         quaternion = (
             self.imu_msg.orientation.x,
             self.imu_msg.orientation.y,
             self.imu_msg.orientation.z,
             self.imu_msg.orientation.w)
-        return tf.transformations.euler_from_quaternion(quaternion)
+        self.euler_angles =  tf.transformations.euler_from_quaternion(quaternion)
+        return self.euler_angles
 
-    def get_vel_factor(self, pitch):
-        return np.cos(pitch)
+    def get_vel_factor(self):
+        self.update_euler_angles()
+        return np.cos(self.euler_angles[1])
 
 
 
@@ -45,7 +48,7 @@ if __name__ =="__main__":
     data = np.zeros((maxsize,4))
 
     rospy.init_node("imu_experiments")
-    pitch_correction = PitchCorrection(pub_visualizer=True)
+    pitch_correction = PitchCorrection()
 
     fig, (ax1, ax2) = plt.subplots(2)
     fig.suptitle('Vertically stacked subplots')
@@ -58,8 +61,8 @@ if __name__ =="__main__":
         pitch_correction.publish_fb()
         if i >= maxsize:
             i=0
-        data[i,:3]  = pitch_correction.get_euler_angles()
-        data[i,3] = pitch_correction.get_vel_factor(data[i,1])
+        data[i,:3]  = pitch_correction.update_euler_angles()
+        data[i,3] = pitch_correction.get_vel_factor()
         i = i+1
         ax1.plot(dt, data[:,0])
         ax1.plot(dt, data[:,1])
