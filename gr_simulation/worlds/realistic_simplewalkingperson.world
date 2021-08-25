@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <!--include>
+      <uri>model://ground_plane</uri>
+      <name>ground_plane</name>
+      <pose>0 0 0   0 0 0</pose>
+    </include-->
+    <scene>
+       <background>0.5 0.8 1.0 1.0</background>
+       <sky></sky>
+    </scene>
+    <include>
+      <uri>model://grass_plane_2</uri>
+      <!--uri>model://grass_plane</uri-->
+    </include>
+    <population name="can_population1">
+      <model name="plants">
+        <include>
+          <static>true</static>
+          <uri>model://plant_1</uri>
+        </include>
+      </model>
+      <pose>3 0 0 0 0 0</pose>
+      <box>
+        <size>5 0.5 0.01</size>
+      </box>
+      <model_count>40</model_count>
+      <distribution>
+        <type>uniform</type>
+      </distribution>
+    </population>
+
+    <!--include>
+      <uri>model://ros_simple_human</uri>
+      <pose>1 1 0 0 0 0</pose>
+    </include-->
+
+    <include>
+      <uri>model://animated_human</uri>
+      <pose>1 -1 0 0 0 0</pose>
+    </include>
+
+
+    <!--include>
+      <uri>model://animation_human</uri>
+      <pose>1 1 0 1.5 1.5 1.5</pose>
+    </include-->
+  </world>
+</sdf>
