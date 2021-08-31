@@ -22,7 +22,7 @@ find_package(OpenCV 3.2 REQUIRED)
 find_package(PCL REQUIRED)
 
 #find_package(PkgConfig REQUIRED)
-find_package(YAML-CPP 0.6 REQUIRED)
+find_package(YAML-CPP 0.5 REQUIRED)
 
 #pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
 
