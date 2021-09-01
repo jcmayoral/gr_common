@@ -91,7 +91,7 @@ target_link_libraries(
 
 target_link_libraries(
   safe_gridmap_node
-  #${PROJECT_NAME}
+  ${PROJECT_NAME}
   ${OCTOMAP_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${catkin_LIBRARIES} 
