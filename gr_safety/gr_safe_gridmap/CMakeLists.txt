@@ -43,7 +43,7 @@ catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-  DEPENDS safety_msgs 
+	safety_msgs 
 )
 
 ###########
@@ -91,7 +91,7 @@ target_link_libraries(
 
 target_link_libraries(
   safe_gridmap_node
-  ${PROJECT_NAME}
+  #${PROJECT_NAME}
   ${OCTOMAP_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${catkin_LIBRARIES} 
