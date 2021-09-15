@@ -68,6 +68,14 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
   // Add our own name to models we should ignore when avoiding obstacles.
   this->ignoreModels.push_back(this->actor->GetName());
 
+  std::string modelname(this->model->GetName());
+
+  if (_sdf->HasElement("name"))
+  {
+    sdf::ElementPtr nameelement = _sdf->GetElement("name");
+    modelname = nameelement->Get<std::string>();
+  }
+
   // Read in the other obstacles to ignore
   if (_sdf->HasElement("ignore_obstacles"))
   {
@@ -84,10 +92,10 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 
   //As a HACK
   this->published_time = ros::Time::now();
-  this->rosPub = nh.advertise<geometry_msgs::Vector3Stamped>( "/" + this->model->GetName() + "/location", 1);
+  this->rosPub = nh.advertise<geometry_msgs::Vector3Stamped>( "/" + modelname + "/location", 1);
   //this->reset = nh.advertise<std_msgs::Bool>( "/" + this->model->GetName() + "/reset", 1);
 
-  aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, std::string("SimMotionPlanner")+"/" + this->model->GetName(),
+  aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, std::string("SimMotionPlanner")+"/" + modelname,
                                                                 boost::bind(&GazeboROSAnimation::executeCB, this, _1), false);
   this->rosQueueThread = std::thread(std::bind(&GazeboROSAnimation::QueueThread, this));
   aserver->start();

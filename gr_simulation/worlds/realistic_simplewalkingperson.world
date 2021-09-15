@@ -121,5 +121,10 @@
       <pose>1 1 0 1.5 1.5 1.5</pose>
     </include>
 
+    <include>
+      <uri>model://animated_human</uri>
+      <pose>1 2 0 1.5 1.5 1.5</pose>
+      <name>animated_human2</name>
+    </include>
   </world>
 </sdf>
