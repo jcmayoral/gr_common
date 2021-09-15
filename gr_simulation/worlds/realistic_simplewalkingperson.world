@@ -71,24 +71,55 @@
     <include>
       <uri>model://grassrow</uri>
       <name>row1</name>
-      <pose>-3 25 0 0 0 1.575</pose>
+      <pose>-1.6 25 0 0 0 1.575</pose>
     </include>
 
     <include>
       <uri>model://grassrow</uri>
       <name>row2</name>
-      <pose>-6 25 0 0 0 1.575</pose>
+      <pose>-3.2 25 0 0 0 1.575</pose>
     </include>
 
     <include>
       <uri>model://grassrow</uri>
       <name>row3</name>
-      <pose>-9 25 0 0 0 1.575</pose>
+      <pose>-4.8 25 0 0 0 1.575</pose>
     </include>
 
-    <!--include>
-      <uri>model://animation_human</uri>
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row4</name>
+      <pose>-6.4 25 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row5</name>
+      <pose>-8.0 25 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row6</name>
+      <pose>-9.6 25 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row7</name>
+      <pose>-11.2 25 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row8</name>
+      <pose>-12.8 25 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://animated_human</uri>
       <pose>1 1 0 1.5 1.5 1.5</pose>
-    </include-->
+    </include>
+
   </world>
 </sdf>
