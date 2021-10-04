@@ -76,6 +76,8 @@ void GazeboROSAnimation::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     modelname = nameelement->Get<std::string>();
   }
 
+  std::cout << " MODEL NAME " << modelname << std::endl;
+
   // Read in the other obstacles to ignore
   if (_sdf->HasElement("ignore_obstacles"))
   {

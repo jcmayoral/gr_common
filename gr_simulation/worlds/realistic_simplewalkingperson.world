@@ -119,12 +119,14 @@
     <include>
       <uri>model://animated_human</uri>
       <pose>1 1 0 1.5 1.5 1.5</pose>
+      <name>animated_human</name>
     </include>
 
-    <include>
-      <uri>model://animated_human</uri>
+    <!-- some error with two animations -->
+    <!--include>
+      <uri>model://animated_human2</uri>
       <pose>1 2 0 1.5 1.5 1.5</pose>
-      <name>animated_human2</name>
-    </include>
+      <actor_name>animated_human2</actor_name>
+    </include-->
   </world>
 </sdf>
