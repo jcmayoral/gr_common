@@ -12,6 +12,7 @@
     <scene>
        <background>0.5 0.8 1.0 1.0</background>
        <sky></sky>
+       <shadows> true </shadows>
     </scene>
     <include>
       <uri>model://grass_plane_2</uri>
@@ -63,57 +64,326 @@
 
     <include>
       <uri>model://grassrow</uri>
-      <name>row0</name>
+      <name>row05</name>
       <pose>0 25 0 0 0 1.575</pose>
     </include>
 
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row04</name>
+      <pose>0 20 0 0 0 1.575</pose>
+    </include>
 
     <include>
       <uri>model://grassrow</uri>
-      <name>row1</name>
+      <name>row03</name>
+      <pose>0 15 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row02</name>
+      <pose>0 10 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row01</name>
+      <pose>0 5 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row00</name>
+      <pose>0 0 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row15</name>
       <pose>-1.6 25 0 0 0 1.575</pose>
     </include>
 
     <include>
       <uri>model://grassrow</uri>
-      <name>row2</name>
+      <name>row14</name>
+      <pose>-1.6 20 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row13</name>
+      <pose>-1.6 15 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row12</name>
+      <pose>-1.6 10 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row11</name>
+      <pose>-1.6 5 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row10</name>
+      <pose>-1.6 0 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row25</name>
       <pose>-3.2 25 0 0 0 1.575</pose>
     </include>
 
     <include>
       <uri>model://grassrow</uri>
-      <name>row3</name>
+      <name>row24</name>
+      <pose>-3.2 20 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row23</name>
+      <pose>-3.2 15 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row22</name>
+      <pose>-3.2 10 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row21</name>
+      <pose>-3.2 5 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row20</name>
+      <pose>-3.2 0 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row35</name>
       <pose>-4.8 25 0 0 0 1.575</pose>
     </include>
 
     <include>
       <uri>model://grassrow</uri>
-      <name>row4</name>
+      <name>row34</name>
+      <pose>-4.8 20 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row33</name>
+      <pose>-4.8 15 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row32</name>
+      <pose>-4.8 10 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row31</name>
+      <pose>-4.8 5 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row30</name>
+      <pose>-4.8 0 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row45</name>
       <pose>-6.4 25 0 0 0 1.575</pose>
     </include>
 
     <include>
       <uri>model://grassrow</uri>
-      <name>row5</name>
+      <name>row44</name>
+      <pose>-6.4 20 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row43</name>
+      <pose>-6.4 15 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row42</name>
+      <pose>-6.4 10 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row41</name>
+      <pose>-6.4 5 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row40</name>
+      <pose>-6.4 0 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row55</name>
       <pose>-8.0 25 0 0 0 1.575</pose>
     </include>
 
     <include>
       <uri>model://grassrow</uri>
-      <name>row6</name>
+      <name>row54</name>
+      <pose>-8.0 20 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row53</name>
+      <pose>-8.0 15 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row52</name>
+      <pose>-8.0 10 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row51</name>
+      <pose>-8.0 5 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row50</name>
+      <pose>-8.0 0 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row65</name>
       <pose>-9.6 25 0 0 0 1.575</pose>
     </include>
 
     <include>
       <uri>model://grassrow</uri>
-      <name>row7</name>
+      <name>row64</name>
+      <pose>-9.6 20 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row63</name>
+      <pose>-9.6 15 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row62</name>
+      <pose>-9.6 10 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row61</name>
+      <pose>-9.6 5 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row60</name>
+      <pose>-9.6 0 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row75</name>
       <pose>-11.2 25 0 0 0 1.575</pose>
     </include>
 
     <include>
       <uri>model://grassrow</uri>
-      <name>row8</name>
+      <name>row74</name>
+      <pose>-11.2 20 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row73</name>
+      <pose>-11.2 15 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row72</name>
+      <pose>-11.2 10 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row71</name>
+      <pose>-11.2 5 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row70</name>
+      <pose>-11.2 0 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row85</name>
       <pose>-12.8 25 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row84</name>
+      <pose>-12.8 20 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row83</name>
+      <pose>-12.8 15 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row82</name>
+      <pose>-12.8 10 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row81</name>
+      <pose>-12.8 5 0 0 0 1.575</pose>
+    </include>
+
+    <include>
+      <uri>model://grassrow</uri>
+      <name>row80</name>
+      <pose>-12.8 0 0 0 0 1.575</pose>
     </include>
 
     <include>
