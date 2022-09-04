@@ -13,3 +13,11 @@
     </description>
   </class>
 </library>
+
+<library path="lib/libgr_state_transition_policies">
+  <class name="gr_safety_policies/StateTransitionPolicy" type="gr_safety_policies::StateTransitionPolicy" base_class_type="safety_core::SafePolicy">
+    <description>
+      A Safe State Transition policy.
+    </description>
+  </class>
+</library>
