@@ -31,7 +31,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
 )
 
-find_package(OpenCV 3 REQUIRED)
+find_package(OpenCV 4 REQUIRED)
 find_package(octomap REQUIRED)
 find_package(YAML-CPP REQUIRED)
 
