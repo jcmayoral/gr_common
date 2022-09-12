@@ -1,4 +1,4 @@
-#include "gr_safety_policies/state_transition_policy.h"
+#include "gr_safety_policies/policies/state_transition_policy.h"
 #include <pluginlib/class_list_macros.h>
 #include <iostream>
 

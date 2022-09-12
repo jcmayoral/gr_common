@@ -1,46 +1,46 @@
-#include "gr_safety_policies/hri_policy.h"
+#include "gr_safety_policies/policies/speech_policy.h"
 #include <pluginlib/class_list_macros.h>
 #include <iostream>
 
-/*PLUGINLIB_DECLARE_CLASS(gr_safety_policies, HRIPolicy,
-                        gr_safety_policies::HRIPolicy,
+/*PLUGINLIB_DECLARE_CLASS(gr_safety_policies, SpeechPolicy,
+                        gr_safety_policies::SpeechPolicy,
                         safety_core::SafePolicy)
 */
-PLUGINLIB_EXPORT_CLASS(gr_safety_policies::HRIPolicy,
+PLUGINLIB_EXPORT_CLASS(gr_safety_policies::SpeechPolicy,
                         safety_core::SafePolicy)
 using namespace safety_core;
 
 
 namespace gr_safety_policies
 {
-    HRIPolicy::HRIPolicy(): action_loader_("safety_core", "safety_core::SafeAction"),
+    SpeechPolicy::SpeechPolicy(): action_loader_("safety_core", "safety_core::SafeAction"),
                             is_action_executed_(false), is_stop_requested_(false),
                             is_action_requested_(false), speech_enabler_command_("continue"){
         loadActionClasses();
-        policy_.id_ = "HRI_POLICY";
+        policy_.id_ = "Speech_POLICY";
         policy_.action_ =  -1;
         policy_.state_ = PolicyDescription::UNKNOWN;
         policy_.type_ = PolicyDescription::ACTIVE;
-        ROS_INFO("HRI Policy initialized");
+        ROS_INFO("Speech Policy initialized");
     }
 
-    HRIPolicy::~HRIPolicy(){
+    SpeechPolicy::~SpeechPolicy(){
 
     }
 
-    void HRIPolicy::loadActionClasses(){
+    void SpeechPolicy::loadActionClasses(){
         action_classes_ = action_loader_.getDeclaredClasses();
     }
 
-    void HRIPolicy::instantiateServices(ros::NodeHandle nh){
-        command_sub_ = nh.subscribe("commands", 1, &HRIPolicy::commands_CB, this);
+    void SpeechPolicy::instantiateServices(ros::NodeHandle nh){
+        command_sub_ = nh.subscribe("commands", 1, &SpeechPolicy::commands_CB, this);
     }
 
-    bool HRIPolicy::checkPolicy(){
+    bool SpeechPolicy::checkPolicy(){
         return is_action_requested_;
     }
 
-    void HRIPolicy::suggestAction(){
+    void SpeechPolicy::suggestAction(){
         if (!is_action_executed_){
             current_action_->execute();
             policy_.state_ = PolicyDescription::UNSAFE;
@@ -57,7 +57,7 @@ namespace gr_safety_policies
 
     }
 
-    void HRIPolicy::commands_CB(const std_msgs::String::ConstPtr& command){
+    void SpeechPolicy::commands_CB(const std_msgs::String::ConstPtr& command){
         if (command->data.empty()){
           ROS_WARN("Empty command string...ignoring");
           return;
@@ -82,7 +82,7 @@ namespace gr_safety_policies
         }
     }
 
-    void HRIPolicy::instantiateRequestedAction(std::string desired_action){
+    void SpeechPolicy::instantiateRequestedAction(std::string desired_action){
         try{
              if(action_loader_.isClassAvailable(desired_action)){
                  ROS_INFO("Available Action... Loading");

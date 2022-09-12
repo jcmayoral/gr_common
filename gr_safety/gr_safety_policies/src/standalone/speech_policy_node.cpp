@@ -1,11 +1,11 @@
-#include <gr_safety_policies/hri_policy.h>
+#include <gr_safety_policies/policies/speech_policy.h>
 
 using namespace gr_safety_policies;
 
 int main(int argc, char** argv){
-    ros::init(argc, argv, "hri_policy_node");
+    ros::init(argc, argv, "speech_policy_node");
     ros::NodeHandle nh;
-    HRIPolicy* policy = new HRIPolicy();
+    SpeechPolicy* policy = new SpeechPolicy();
     policy->instantiateServices(nh);
 
     while(ros::ok()){

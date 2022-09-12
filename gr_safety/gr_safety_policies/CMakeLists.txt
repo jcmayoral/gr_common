@@ -61,7 +61,7 @@ file(GLOB ACTIONS src/safe_actions/*.cpp)
 add_library(gr_safety_policies ${POLICIES} src/policies_manager.cpp)
 add_library(gr_safe_actions ${ACTIONS})
 add_executable(proximity_policy_node src/standalone/proximity_policy_node.cpp)
-add_executable(hri_policy_node src/standalone/hri_policy_node.cpp)
+add_executable(speech_policy_node src/standalone/speech_policy_node.cpp)
 add_executable(state_transition_policy_node src/standalone/state_transition_policy_node.cpp)
 
 add_executable(policies_manager_node src/policies_manager_node.cpp)
@@ -72,7 +72,7 @@ add_definitions(-DCURL_STATICLIB)
 target_link_libraries(gr_safety_policies ${catkin_LIBRARIES} curl ${JSON_INCLUDE_DIRS} ${PCL_LIBRARIES} ${YAML_CPP_LIBRARIES} yaml-cpp)
 #Independent policies
 target_link_libraries(proximity_policy_node gr_safety_policies gr_safe_actions)
-target_link_libraries(hri_policy_node gr_safety_policies gr_safe_actions)
+target_link_libraries(speech_policy_node gr_safety_policies gr_safe_actions)
 target_link_libraries(state_transition_policy_node gr_safety_policies gr_safe_actions)
 
 #Policies Manager
@@ -82,7 +82,7 @@ target_link_libraries(action_manager_node ${catkin_LIBRARIES} ${Boost_LIBRARIES}
 
 add_dependencies(gr_safety_policies ${catkin_EXPORTED_TARGETS} gr_safety_policies_gencfg)
 add_dependencies(proximity_policy_node gr_safety_policies gr_safe_actions gr_safety_policies_gencfg)
-add_dependencies(hri_policy_node gr_safety_policies gr_safe_actions gr_safety_policies_gencfg)
+add_dependencies(speech_policy_node gr_safety_policies gr_safe_actions gr_safety_policies_gencfg)
 add_dependencies(state_transition_policy_node gr_safety_policies gr_safe_actions gr_safety_policies_gencfg)
 
 add_dependencies(policies_manager_node gr_safety_policies gr_safe_actions gr_safety_policies_gencfg)
@@ -93,7 +93,7 @@ install(TARGETS gr_safety_policies gr_safe_actions
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(TARGETS proximity_policy_node hri_policy_node
+install(TARGETS proximity_policy_node speech_policy_node
                 state_transition_policy_node
                 policies_manager_node action_manager_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -2,7 +2,7 @@
 #define POLICIES_MANAGER_H
 
 #include <safety_core/safe_policy.h>
-#include <gr_safety_policies/proximity_policy.h>
+#include <gr_safety_policies/policies/proximity_policy.h>
 
 #include <vector>
 

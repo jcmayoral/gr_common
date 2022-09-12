@@ -1,4 +1,4 @@
-#include <gr_safety_policies/proximity_policy.h>
+#include <gr_safety_policies/policies/proximity_policy.h>
 
 using namespace gr_safety_policies;
 

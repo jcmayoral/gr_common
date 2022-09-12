@@ -1,5 +1,5 @@
-#ifndef HRI_POLICY_H
-#define HRI_POLICY_H
+#ifndef Speech_POLICY_H
+#define Speech_POLICY_H
 
 #include <ros/ros.h>
 #include <string>
@@ -20,12 +20,12 @@
 namespace gr_safety_policies
 {
 
-  class HRIPolicy : public safety_core::SafePolicy
+  class SpeechPolicy : public safety_core::SafePolicy
   {
     public:
 
-      HRIPolicy();
-      ~HRIPolicy();
+      SpeechPolicy();
+      ~SpeechPolicy();
 
       void instantiateServices(ros::NodeHandle nh);
       bool checkPolicy();

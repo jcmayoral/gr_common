@@ -1,4 +1,4 @@
-#include "gr_safety_policies/proximity_policy.h"
+#include "gr_safety_policies/policies/proximity_policy.h"
 #include <pluginlib/class_list_macros.h>
 #include <iostream>
 
