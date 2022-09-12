@@ -1,19 +1,19 @@
-#include <gr_safety_policies/safe_actions/dynamic_reconfigure_safe_action.h>
+#include <gr_safety_policies/safe_actions/reconfigure_controller_safe_action.h>
 #include <pluginlib/class_list_macros.h>
 
-PLUGINLIB_EXPORT_CLASS(gr_safety_policies::DynamicReconfigureSafeAction,safety_core::SafeAction);
+PLUGINLIB_EXPORT_CLASS(gr_safety_policies::ReconfigureControllerSafeAction,safety_core::SafeAction);
 using namespace gr_safety_policies;
 
 
-DynamicReconfigureSafeAction::DynamicReconfigureSafeAction(){
+ReconfigureControllerSafeAction::ReconfigureControllerSafeAction(){
     ROS_INFO("Dynamic Reconfigure Safe Action");
     safety_id_ = 1;
 };
 
-DynamicReconfigureSafeAction::~DynamicReconfigureSafeAction(){
+ReconfigureControllerSafeAction::~ReconfigureControllerSafeAction(){
 };
 
-void DynamicReconfigureSafeAction::execute(){
+void ReconfigureControllerSafeAction::execute(){
     ROS_INFO("Execute Dynamic Reconfigure Safe Action");
     dynamic_reconfigure::ReconfigureRequest srv_req;
     dynamic_reconfigure::ReconfigureResponse srv_resp;
@@ -45,7 +45,7 @@ void DynamicReconfigureSafeAction::execute(){
     ros::service::call("/move_base/DWAPlannerROS/set_parameters", srv_req, srv_resp);
 };
 
-void DynamicReconfigureSafeAction::stop(){
+void ReconfigureControllerSafeAction::stop(){
     ROS_INFO("Stopping setting to default params");
     dynamic_reconfigure::ReconfigureRequest srv_req;
     dynamic_reconfigure::ReconfigureResponse srv_resp;

@@ -5,9 +5,9 @@
     </description>
   </class>
 
-  <class name="slow_action" type="gr_safety_policies::DynamicReconfigureSafeAction" base_class_type="safety_core::SafeAction">
+  <class name="slow_action" type="gr_safety_policies::ReconfigureControllerSafeAction" base_class_type="safety_core::SafeAction">
     <description>
-      Dynamic Reconfigure Safe Action
+      Reconfigure Controller Safe Action
     </description>
   </class>
 

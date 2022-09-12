@@ -18,7 +18,7 @@
 #include <geometry_msgs/PoseArray.h>
 
 #include <gr_safety_policies/safe_actions/publisher_safe_action.h>
-#include <gr_safety_policies/safe_actions/dynamic_reconfigure_safe_action.h>
+#include <gr_safety_policies/safe_actions/reconfigure_controller_safe_action.h>
 #include <safety_core/safe_action.h>
 #include <safety_core/safe_policy.h>
 

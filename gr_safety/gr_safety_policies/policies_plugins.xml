@@ -7,7 +7,7 @@
 </library>
 
 <library path="lib/libgr_safety_policies">
-  <class name="gr_safety_policies/HRIPolicy" type="gr_safety_policies::HRIPolicy" base_class_type="safety_core::SafePolicy">
+  <class name="gr_safety_policies/SpeechPolicy" type="gr_safety_policies::SpeechPolicy" base_class_type="safety_core::SafePolicy">
     <description>
       A HRI policy.
     </description>

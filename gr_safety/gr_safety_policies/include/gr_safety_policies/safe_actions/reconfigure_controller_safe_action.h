@@ -9,10 +9,10 @@
 #include <dynamic_reconfigure/BoolParameter.h>
 
 namespace gr_safety_policies{
-    class DynamicReconfigureSafeAction : public safety_core::SafeAction{
+    class ReconfigureControllerSafeAction : public safety_core::SafeAction{
         public:
-            DynamicReconfigureSafeAction();
-            ~DynamicReconfigureSafeAction();
+            ReconfigureControllerSafeAction();
+            ~ReconfigureControllerSafeAction();
             virtual void execute();
             virtual void stop();
     };

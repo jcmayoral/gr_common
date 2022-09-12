@@ -246,12 +246,12 @@ namespace gr_safety_policies
             //Stop any action which is not DANGER AND WARNING
             ROS_INFO_STREAM("Stopping previous action " << action_executer_->getSafetyID());
             action_executer_->stop();
-            action_executer_ = new DynamicReconfigureSafeAction();
+            action_executer_ = new ReconfigureControllerSafeAction();
             action_executer_->execute();
           }
         }
         else{//init if NULL
-          action_executer_ = new DynamicReconfigureSafeAction();
+          action_executer_ = new ReconfigureControllerSafeAction();
           action_executer_->execute();
         }
         break;
