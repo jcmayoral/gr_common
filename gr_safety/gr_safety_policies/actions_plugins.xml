@@ -11,7 +11,7 @@
     </description>
   </class>
 
-  <class name="power_action" type="gr_safety_policies::ServiceCallerSafeAction" base_class_type="safety_core::SafeAction">
+  <class name="human_intervention" type="gr_safety_policies::HumanInterventionSafeAction" base_class_type="safety_core::SafeAction">
     <description>
       ROS SERVICE Safe Action
     </description>

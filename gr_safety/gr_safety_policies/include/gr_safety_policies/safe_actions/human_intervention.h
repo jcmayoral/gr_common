@@ -9,10 +9,10 @@
 #include <dynamic_reconfigure/BoolParameter.h>
 
 namespace gr_safety_policies{
-    class ServiceCallerSafeAction : public safety_core::SafeAction{
+    class HumanInterventionSafeAction : public safety_core::SafeAction{
         public:
-            ServiceCallerSafeAction();
-            ~ServiceCallerSafeAction();
+            HumanInterventionSafeAction();
+            ~HumanInterventionSafeAction();
             virtual void execute();
             virtual void stop();
     };
