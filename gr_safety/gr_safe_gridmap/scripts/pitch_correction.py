@@ -11,7 +11,7 @@ class PitchCorrection:
         self.imu_gain = 0.0
         self.imu_msg = Imu()
         self.euler_angles = [0,0,0]
-        self.pub = rospy.Publisher("terrain_euler", PoseStamped)
+        self.pub = rospy.Publisher("terrain_euler", PoseStamped, queue_size=1)
         rospy.Subscriber("/imu/filtered",Imu, self.imu_cb)
 
 
