@@ -14,5 +14,7 @@ bool intervention
 #feedback
 std_msgs/String reached_node
 std_msgs/String completed_edge
+std_msgs/String safety_msg
+bool intervention
 float64 executing_time
 bool suceeded
