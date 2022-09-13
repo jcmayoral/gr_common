@@ -8,6 +8,7 @@ string task_id
 ---
 float64 next_offset
 bool suceeded
+std_msgs/String safety_msg
 ---
 #feedback
 std_msgs/String reached_node
