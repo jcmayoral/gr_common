@@ -12,5 +12,6 @@ bool suceeded
 #feedback
 std_msgs/String reached_node
 std_msgs/String completed_edge
+std_msgs/String safety_msgs
 float64 executing_time
 bool suceeded
