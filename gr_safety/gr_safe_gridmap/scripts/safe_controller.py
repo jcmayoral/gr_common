@@ -12,7 +12,7 @@ class SafeController(PitchCorrection):
         self.penalization_factor = 0.0
         self.twist = Twist()
         #self.cmd_pub = rospy.Publisher("/nav_vel", Twist,queue_size=1)
-        self.cmd_pub = rospy.Publisher("/cmd_vel", Twist ,queue_size=1)
+        self.cmd_pub = rospy.Publisher("/safe_nav_vel", Twist ,queue_size=1)
         #change to message filter?
         rospy.Subscriber("/safety_score",Float32, self.safety_cb)
         rospy.Subscriber("/movebase_vel",Twist, self.vel_cb)
