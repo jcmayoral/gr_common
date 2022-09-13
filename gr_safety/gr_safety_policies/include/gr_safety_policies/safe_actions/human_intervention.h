@@ -3,10 +3,9 @@
 
 #include <safety_core/safe_action.h>
 #include <ros/ros.h>
-#include <dynamic_reconfigure/Reconfigure.h>
-#include <dynamic_reconfigure/Config.h>
-#include <dynamic_reconfigure/DoubleParameter.h>
-#include <dynamic_reconfigure/BoolParameter.h>
+#include<std_srvs/SetBool.h>
+#include<std_srvs/SetBoolResponse.h>
+
 
 namespace gr_safety_policies{
     class HumanInterventionSafeAction : public safety_core::SafeAction{

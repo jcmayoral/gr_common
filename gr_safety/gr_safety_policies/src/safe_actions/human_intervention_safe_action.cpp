@@ -14,9 +14,13 @@ HumanInterventionSafeAction::~HumanInterventionSafeAction(){
 };
 
 void HumanInterventionSafeAction::execute(){
-
+    std_srvs::SetBool::Request srv_req;
+    std_srvs::SetBool::Response srv_resp;
+    ros::service::call("/gr_human_intervention", srv_req, srv_resp);
 };
 
 void HumanInterventionSafeAction::stop(){
-    //ros::service::call("/move_base/DWAPlannerROS/set_parameters", srv_req, srv_resp);
+    std_srvs::SetBool::Request srv_req;
+    std_srvs::SetBool::Response srv_resp;
+    ros::service::call("/gr_human_intervention", srv_req, srv_resp);
 };
