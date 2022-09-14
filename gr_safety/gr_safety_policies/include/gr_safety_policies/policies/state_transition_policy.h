@@ -15,6 +15,11 @@
 #include <boost/algorithm/string.hpp>
 
 
+#include <gr_safety_policies/utils/action_helper.hpp>
+#include <gr_safety_policies/utils/transition_structure.hpp>
+
+
+
 //#include <dynamic_reconfigure/server.h>
 
 namespace gr_safety_policies
@@ -32,9 +37,12 @@ namespace gr_safety_policies
       void suggestAction();
 
     private:
-      boost::shared_ptr<safety_core::SafeAction> current_action_;
+      //manager includes all transactions informations
+      TransitionsManager* manager_;
+      //This instantiate a single class
+      boost::shared_ptr<ActionHelper<safety_core::SafeAction>> current_action_;
       boost::recursive_mutex mutex;
-
+    
       pluginlib::ClassLoader<safety_core::SafeAction> action_loader_;
 
   };

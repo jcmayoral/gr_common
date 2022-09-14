@@ -1,0 +1,45 @@
+number_states: 4
+
+transitions:
+  - 0:
+    name: Lethal
+    transitions:
+      - Lethal: Lethal
+      - Danger: !stop_action
+      - Warning: human_intervention
+      - Safe: human_intervention
+  - 1:
+    name: Danger
+    transitions:
+      - 
+      -
+      - Warning: !stop_action
+      - Safe: human_intervention
+  - 2:
+    name: Warning
+    transitions:
+      - 
+      -
+      -
+      -
+  - 3:
+    name: Safe
+    transitions:
+      - 
+      -
+      -
+      -
+  - 4:
+    name: Unknown
+    transitions:
+      - 
+      -
+      -
+      -
+
+        Safe      Warning   Danger  Lethal  Unknown
+Safe    Idle     Slowdown   H.I     H.I     Slowdown
+Warning Speed-up Idle       Stop    H.I     Slowdown
+Danger  H.I.     Resume     Idle    Stop    Stop
+Lethal  H.I      H.I        Resume  Idle    Stop
+Unknown Resume   Resume     Stop    H.I.    Idle

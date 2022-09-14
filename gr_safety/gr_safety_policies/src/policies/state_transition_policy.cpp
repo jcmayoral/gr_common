@@ -12,6 +12,11 @@ namespace gr_safety_policies
     StateTransitionPolicy::StateTransitionPolicy(): 
         action_loader_("safety_core", "safety_core::SafeAction")
     {
+        manager_ = new TransitionsManager[4]();
+
+        for (auto i=0; i<4; ++i){
+            manager_[i].transitions = new Transition[4]();
+        }
         //loadActionClasses();
         policy_.id_ = "STATE_TRANSITION_POLICY";
         policy_.action_ =  -1;

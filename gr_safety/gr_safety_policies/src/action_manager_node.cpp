@@ -1,6 +1,7 @@
 #include <pluginlib/class_loader.h>
 #include <safety_core/safe_action.h>
 #include <memory>
+#include <unistd.h>
 
 int main(int argc, char** argv)
 {
@@ -22,6 +23,7 @@ int main(int argc, char** argv)
     }
 
     std::cin >> action_selected;
+    std::cin.sync();
 
     if (action_selected == -1){
       ROS_WARN("ABORTING");
@@ -35,6 +37,9 @@ int main(int argc, char** argv)
       action = action_loader.createInstance(desired_str.c_str());
       ROS_INFO("Created safe_action %s", classes[action_selected].c_str());
       action->execute();
+      sleep(3);
+      std::cout << "Wait for key to stop " << std::endl;
+      std::cin >> action_selected;
       action->stop();
       action.reset();
     }
