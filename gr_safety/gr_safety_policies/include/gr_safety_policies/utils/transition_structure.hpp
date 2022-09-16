@@ -30,7 +30,7 @@ namespace gr_safety_policies{
     {
         public:
             std::string name;
-            Transition* transitions;
+            std::map<std::string,Transition*> transitions;
         /* data */
     };
 

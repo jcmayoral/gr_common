@@ -1,45 +1,39 @@
-number_states: 4
+states:
+  - Lethal
+  - Danger
+  - Warning
+  - Safe
+  - Unknown
 
 transitions:
-  - 0:
-    name: Lethal
-    transitions:
-      - Lethal: Lethal
-      - Danger: !stop_action
-      - Warning: human_intervention
-      - Safe: human_intervention
-  - 1:
-    name: Danger
-    transitions:
-      - 
-      -
-      - Warning: !stop_action
-      - Safe: human_intervention
-  - 2:
-    name: Warning
-    transitions:
-      - 
-      -
-      -
-      -
-  - 3:
-    name: Safe
-    transitions:
-      - 
-      -
-      -
-      -
-  - 4:
-    name: Unknown
-    transitions:
-      - 
-      -
-      -
-      -
+  - Lethal:
+    - Unknown: stop_action
+    - Lethal: idle
+    - Danger: !stop_action
+    - Warning: human_intervention
+    - Safe: human_intervention
+  - Danger:
+    - Unknown: stop_action
+    - Lethal: stop_action
+    - Danger: idle
+    - Warning: !stop_action
+    - Safe: human_intervention
+  - Warning:
+    - Unknown: slow_action
+    - Lethal: human_intervention
+    - Danger: stop_action
+    - Warning: idle
+    - Safe: !slow_action
+  - Safe:
+    - Unknown: slow_action
+    - Lethal: human_intervetnion
+    - Danger: human_intervention
+    - Warning: slow_action
+    - Safe: idle
+  - Unknown:
+    - Unknown: idle
+    - Lethal: human_intervention
+    - Danger: stop_action
+    - Warning: !stop_action
+    - Safe: !stop_action
 
-        Safe      Warning   Danger  Lethal  Unknown
-Safe    Idle     Slowdown   H.I     H.I     Slowdown
-Warning Speed-up Idle       Stop    H.I     Slowdown
-Danger  H.I.     Resume     Idle    Stop    Stop
-Lethal  H.I      H.I        Resume  Idle    Stop
-Unknown Resume   Resume     Stop    H.I.    Idle

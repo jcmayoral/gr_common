@@ -9,16 +9,18 @@ using namespace safety_core;
 
 namespace gr_safety_policies
 {
-    StateTransitionPolicy::StateTransitionPolicy(): 
+    StateTransitionPolicy::StateTransitionPolicy(): state_("unknown"),
+        last_state_("unknown"),
         action_loader_("safety_core", "safety_core::SafeAction")
     {
         manager_ = new TransitionsManager[4]();
 
         for (auto i=0; i<4; ++i){
-            manager_[i].transitions = new Transition[4]();
+            manager_[i].transitions["risk_level"] = new Transition[4]();
         }
         //loadActionClasses();
         policy_.id_ = "STATE_TRANSITION_POLICY";
+        //TODO remove action
         policy_.action_ =  -1;
         policy_.state_ = PolicyDescription::UNKNOWN;
         policy_.type_ = PolicyDescription::ACTIVE;

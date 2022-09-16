@@ -37,12 +37,16 @@ namespace gr_safety_policies
       void suggestAction();
 
     private:
+      //get state
+      std::string state_;
+      std::string last_state_;
+
       //manager includes all transactions informations
       TransitionsManager* manager_;
       //This instantiate a single class
       boost::shared_ptr<ActionHelper<safety_core::SafeAction>> current_action_;
       boost::recursive_mutex mutex;
-    
+
       pluginlib::ClassLoader<safety_core::SafeAction> action_loader_;
 
   };
