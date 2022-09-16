@@ -18,4 +18,16 @@ void parseFile(std::string config_file){
         //strategy_selector_[name] = config["strategy"].as<std::string>();
         //config["strategy"]>> strategy_selector_[name];
     }
+
+    node = config_yaml["transitions"];
+    for (YAML::const_iterator a= node.begin(); a != node.end(); ++a){
+        YAML::Node transition = a->second;
+        std::cout << "state " << a->first   << std::endl;
+        //Each cases
+        for (YAML::const_iterator b= transition.begin(); b != transition.end(); ++b){
+            std::cout << "transiiton "<< b->first.as<std::string>() << b->second.as<std::string>() << std::endl;
+        }
+    }
+ 
+
 }
