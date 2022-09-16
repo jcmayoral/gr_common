@@ -17,8 +17,7 @@
 
 #include <gr_safety_policies/utils/action_helper.hpp>
 #include <gr_safety_policies/utils/transition_structure.hpp>
-
-
+#include <gr_safety_policies/utils/yaml-parser.hpp>
 
 //#include <dynamic_reconfigure/server.h>
 
