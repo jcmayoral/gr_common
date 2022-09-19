@@ -1,6 +1,9 @@
 #include <yaml-cpp/yaml.h>
 #include <ros/ros.h>
 
+
+using namespace gr_safety_policies;
+
 void parseFile(std::string config_file){
     YAML::Node node;
     std::string path = ros::package::getPath("gr_safety_policies");

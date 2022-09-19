@@ -5,8 +5,15 @@ namespace gr_safety_policies
 {
     template <class T> 
     class ActionHelper{
-        ActionHelper(){
+        ActionHelper(bool negate){
             action_ = new T();
+
+            if (negate){
+                action_.stop();
+            }
+            else{
+                action_.execute();
+            }
         }
 
         protected:
