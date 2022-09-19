@@ -14,13 +14,6 @@ namespace gr_safety_policies
         action_loader_("safety_core", "safety_core::SafeAction")
     {
         manager_ = parseFile("config/state_policy.yaml");
-        /*manager_ = new TransitionsManager[4]();
-        for (auto i=0; i<4; ++i){
-            manager_[i].transitions["risk_level"] = new Transition[4]();
-        }
-        */
-
-
 
         //loadActionClasses();
         policy_.id_ = "STATE_TRANSITION_POLICY";
@@ -42,14 +35,26 @@ namespace gr_safety_policies
     */
 
    void StateTransitionPolicy::states_CB(detection_msgs::BoundingBoxesConstPtr current_detections){
-    std::string current_state = "Unknown";
+    //Asssumes topic is just published when at least one person is detected
+    if (current_detections->bounding_boxes.size()==0){
+        ROS_ERROR("NO DETECTIONS");
+        //Add timer or approach to handle personas getting out of the plane
+        return;
+    }
+    int current_state = std::numeric_limits<int>::max();
+    std::string current_state_str = "";
 
     for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
-        ROS_WARN_STREAM(it->Class << it->probability);
+        //ROS_WARN_STREAM(it->Class << it->probability);
+        ROS_WARN_STREAM(manager_.levels[it->Class]);
+        if (manager_.levels[it->Class]< current_state){
+            current_state = manager_.levels[it->Class];
+            current_state_str = it->Class;
+        }
     }
     ROS_INFO_STREAM(last_state_ << " " << current_state);
-    ROS_INFO_STREAM(manager_[last_state_][current_state].action);
-    last_state_ = "LETHAL";
+    ROS_INFO_STREAM(manager_.transition[last_state_][current_state_str].action);
+    last_state_ = current_state_str;
    }
 
     void StateTransitionPolicy::instantiateServices(ros::NodeHandle nh){

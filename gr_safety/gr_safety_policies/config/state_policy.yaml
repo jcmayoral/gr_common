@@ -1,9 +1,8 @@
 states:
-  - Lethal
-  - Danger
-  - Warning
-  - Safe
-  - Unknown
+  Lethal: "0"
+  Danger: "1"
+  Warning: "2"
+  Safe: "3"
 
 transitions:
   Lethal:

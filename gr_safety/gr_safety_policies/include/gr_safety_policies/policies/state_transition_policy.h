@@ -43,7 +43,7 @@ namespace gr_safety_policies
       ros::Subscriber states_sub_;
       //manager includes all transactions informations
       //TransitionsManager* manager_;
-      TransitionArray manager_;
+      RiskManager manager_;
       //This instantiate a single class
       boost::shared_ptr<ActionHelper<safety_core::SafeAction>> current_action_;
       pluginlib::ClassLoader<safety_core::SafeAction> action_loader_;

@@ -1,10 +1,10 @@
 #include <yaml-cpp/yaml.h>
 #include <ros/ros.h>
-#include <gr_safety_policies/utils/transition_structure.hpp>
+#include <gr_safety_policies/utils/types_definitions.hpp>
 
 using namespace gr_safety_policies;
 
-TransitionArray parseFile(std::string config_file){
+RiskManager parseFile(std::string config_file){
     //YAML-CPP
     YAML::Node node;
     std::string path = ros::package::getPath("gr_safety_policies");
@@ -13,7 +13,7 @@ TransitionArray parseFile(std::string config_file){
     int number_states = node.size();
 
     //Transitions
-    TransitionArray array;
+    RiskManager manager;
     //TransitionInfo info;
     //info.name = "action";
     //info.negate = true;
@@ -21,10 +21,10 @@ TransitionArray parseFile(std::string config_file){
 
     std::cout << "Parsing file " << path+"/"+config_file <<  std::endl;
     for (YAML::const_iterator a= node.begin(); a != node.end(); ++a){
-        //std::string name = a->first.as<std::string>();
+        std::string name = a->first.as<std::string>();
         //YAML::Node config = a->second;
-        std::string name = a->as<std::string>();
-        std::cout << name << std::endl;
+        int state_value = a->second.as<int>();
+        manager.levels[name] = state_value;
         //strategy_selector_[name] = config["strategy"].as<std::string>();
         //config["strategy"]>> strategy_selector_[name];
     }
@@ -48,7 +48,7 @@ TransitionArray parseFile(std::string config_file){
             }
             info[state2].action = action;
         }
-        array[state1] = info;
+        manager.transition[state1] = info;
     }
-    return array;
+    return manager;
 }

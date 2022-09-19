@@ -9,4 +9,10 @@ namespace gr_safety_policies{
 
     typedef std::map<std::string, TransitionInfo> TTransition;
     typedef std::map<std::string, TTransition> TransitionArray;
+    typedef std::map<std::string, int> RiskLevels;
+
+    struct RiskManager {
+        TransitionArray transition;
+        RiskLevels levels;
+    };
 }
