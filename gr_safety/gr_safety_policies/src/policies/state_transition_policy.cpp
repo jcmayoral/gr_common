@@ -9,8 +9,8 @@ using namespace safety_core;
 
 namespace gr_safety_policies
 {
-    StateTransitionPolicy::StateTransitionPolicy(): state_("unknown"),
-        last_state_("unknown"),
+    StateTransitionPolicy::StateTransitionPolicy():
+        last_state_("Unknown"),
         action_loader_("safety_core", "safety_core::SafeAction")
     {
         manager_ = parseFile("config/state_policy.yaml");
@@ -19,6 +19,7 @@ namespace gr_safety_policies
             manager_[i].transitions["risk_level"] = new Transition[4]();
         }
         */
+
 
 
         //loadActionClasses();
@@ -40,8 +41,19 @@ namespace gr_safety_policies
     }
     */
 
+   void StateTransitionPolicy::states_CB(detection_msgs::BoundingBoxesConstPtr current_detections){
+    std::string current_state = "Unknown";
+
+    for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
+        ROS_WARN_STREAM(it->Class << it->probability);
+    }
+    ROS_INFO_STREAM(last_state_ << " " << current_state);
+    ROS_INFO_STREAM(manager_[last_state_][current_state].action);
+    last_state_ = "LETHAL";
+   }
+
     void StateTransitionPolicy::instantiateServices(ros::NodeHandle nh){
-        //command_sub_ = nh.subscribe("commands", 1, &HRIPolicy::commands_CB, this);
+        states_sub_ = nh.subscribe("/yolov5/detections", 1, &StateTransitionPolicy::states_CB, this);
     }
 
     bool StateTransitionPolicy::checkPolicy(){

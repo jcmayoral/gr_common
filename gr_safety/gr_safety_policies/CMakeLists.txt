@@ -14,8 +14,10 @@ find_package(catkin REQUIRED
         sensor_msgs
         geometry_msgs
         std_msgs
+        detection_msgs
 	#cv_bridge
         message_filters
+        detection_msgs
 )
 
 find_package(OpenCV 4 REQUIRED)
