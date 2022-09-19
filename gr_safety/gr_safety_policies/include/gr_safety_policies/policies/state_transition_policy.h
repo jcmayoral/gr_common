@@ -16,7 +16,6 @@
 
 
 #include <gr_safety_policies/utils/action_helper.hpp>
-#include <gr_safety_policies/utils/transition_structure.hpp>
 #include <gr_safety_policies/utils/yaml-parser.hpp>
 
 //#include <dynamic_reconfigure/server.h>
@@ -41,7 +40,8 @@ namespace gr_safety_policies
       std::string last_state_;
 
       //manager includes all transactions informations
-      TransitionsManager* manager_;
+      //TransitionsManager* manager_;
+      TransitionArray manager_;
       //This instantiate a single class
       boost::shared_ptr<ActionHelper<safety_core::SafeAction>> current_action_;
       boost::recursive_mutex mutex;

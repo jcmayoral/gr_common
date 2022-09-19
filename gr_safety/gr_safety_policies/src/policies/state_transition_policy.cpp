@@ -13,12 +13,14 @@ namespace gr_safety_policies
         last_state_("unknown"),
         action_loader_("safety_core", "safety_core::SafeAction")
     {
-        parseFile("config/state_policy.yaml");
-        manager_ = new TransitionsManager[4]();
-
+        manager_ = parseFile("config/state_policy.yaml");
+        /*manager_ = new TransitionsManager[4]();
         for (auto i=0; i<4; ++i){
             manager_[i].transitions["risk_level"] = new Transition[4]();
         }
+        */
+
+
         //loadActionClasses();
         policy_.id_ = "STATE_TRANSITION_POLICY";
         //TODO remove action
