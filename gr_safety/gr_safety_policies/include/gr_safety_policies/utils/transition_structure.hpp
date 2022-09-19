@@ -1,6 +1,15 @@
 #include<string>
 
 namespace gr_safety_policies{
+    //typedef TransitionInfo = std::tuple<std::string, bool>
+    struct TransitionInfo {
+        std::string name;
+        bool negate; 
+    };
+
+    typedef std::map<std::string, TransitionInfo> TTransition;
+    typedef std::map<std::string, TTransition> TransitionArray;
+
     class Transition{
         std::string name_;
         bool negate_;
@@ -24,14 +33,22 @@ namespace gr_safety_policies{
                 name_ = name;
             }
 
+
     };
+
+
+    /*
+    constexpr T& operator[](std::string name){
+        return a[z * Y * X + y * X + x];
+    }
+    */
+        
 
     struct TransitionsManager
     {
         public:
             std::string name;
             std::map<std::string,Transition*> transitions;
-        /* data */
     };
 
 }
