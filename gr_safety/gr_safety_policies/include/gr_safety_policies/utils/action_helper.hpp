@@ -20,6 +20,19 @@ namespace gr_safety_policies
             boost::shared_ptr<T> action_;
 
     };
+
+
+    template <typename T> 
+    void executeAction(bool negate){
+        boost::shared_ptr<T> action_ = new T();
+        if (negate){
+            action_.stop();
+        }
+        else{
+            action_.execute();
+        }
+    };
+
 }
 
 #endif
