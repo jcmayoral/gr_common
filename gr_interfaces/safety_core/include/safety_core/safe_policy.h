@@ -9,7 +9,7 @@ namespace safety_core {
       virtual void instantiateServices(ros::NodeHandle nh) = 0;
       virtual bool checkPolicy() = 0;
       virtual void reportState(){
-          if (policy_.getType() == PolicyDescription::ACTIVE){
+          if (policy_.getType() != PolicyDescription::PASSIVE){
             suggestAction();
           }
           else{
