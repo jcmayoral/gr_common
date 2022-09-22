@@ -50,7 +50,8 @@ namespace gr_safety_policies
 
     for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
         // ROS_WARN_STREAM(it->Class << " " << it->probability);
-        if (manager_.levels[it->Class]<current_state_){
+        //If risk state is higher than actual and last_state is different to detected
+        if (manager_.levels[it->Class]<current_state_ && it->Class.compare(last_state_str_)!=0){
             changed = true;
             current_state_ = manager_.levels[it->Class];
             current_state_str_ = it->Class;
@@ -70,7 +71,6 @@ namespace gr_safety_policies
     void StateTransitionPolicy::instantiateServices(ros::NodeHandle nh){
         states_sub_ = nh.subscribe("/yolov5/detections", 10, &StateTransitionPolicy::states_CB, this);
         timer_ = nh.createTimer(ros::Duration(0.05), &StateTransitionPolicy::updateState,this);
-        timer_ = nh.createTimer(ros::Duration(0.5), &StateTransitionPolicy::clearState,this);
     }
 
     bool StateTransitionPolicy::checkPolicy(){
@@ -107,24 +107,28 @@ namespace gr_safety_policies
     }
 
     void StateTransitionPolicy::updateState(const ros::TimerEvent& event){
+        double execution_time = (ros::Time::now() - last_detection_time_).toSec();//seconds
+        ROS_INFO_STREAM("update action " <<action_info_->action.c_str() << " last state "<< current_state_str_);
+
+        ROS_INFO_STREAM("clear "<< execution_time);
+        if (execution_time >= clear_delay_){
+            clearState();
+        }
+        
         if (!update_){
             return;
         }
-        ROS_WARN("Update");
+        ROS_WARN("Restart studdd");
         std::scoped_lock lock(mtx_);
         current_state_ = std::numeric_limits<int>::max();
         action_info_ = new TransitionInfo();
         last_state_str_= current_state_str_;
     }
 
-    void StateTransitionPolicy::clearState(const ros::TimerEvent& event){
-        double execution_time = (ros::Time::now() - last_detection_time_).toNSec();//seconds
-        ROS_INFO_STREAM("clear "<< execution_time);
-        if (execution_time < clear_delay_){
-            return;
-        }
-        
-        if(action_loader_.isClassAvailable(last_state_str_)){
+    void StateTransitionPolicy::clearState(){
+        //std::scoped_lock lock(mtx_);
+        ROS_INFO_STREAM("clear action " <<action_info_->action.c_str());
+        if(action_loader_.isClassAvailable(action_info_->action)){
             boost::shared_ptr<safety_core::SafeAction> action;
             ROS_ERROR("calling action");
             action = action_loader_.createInstance(action_info_->action);
@@ -137,6 +141,8 @@ namespace gr_safety_policies
                 action->execute();
             }
         }
+
+        last_detection_time_ = ros::Time::now();
         update_ = true;
     }
 
