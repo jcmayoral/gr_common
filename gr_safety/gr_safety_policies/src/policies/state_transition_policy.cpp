@@ -12,7 +12,7 @@ namespace gr_safety_policies
     StateTransitionPolicy::StateTransitionPolicy():
         last_state_("Unknown"),
         action_loader_("safety_core", "safety_core::SafeAction"),
-        action_{"idle"}
+        action_{"idle"}, current_state_{std::numeric_limits<int>::max()}
     {
         manager_ = parseFile("config/state_policy.yaml");
 
@@ -36,7 +36,8 @@ namespace gr_safety_policies
     */
 
    void StateTransitionPolicy::states_CB(detection_msgs::BoundingBoxesConstPtr current_detections){
-    boost::unique_lock<boost::mutex> lock(mtx_);
+    std::scoped_lock lock(mtx_);
+    ROS_INFO("NEW MESSAGE");
     //Asssumes topic is just published when at least one person is detected
     if (current_detections->bounding_boxes.size()==0){
         ROS_ERROR("NO DETECTIONS");
@@ -48,8 +49,8 @@ namespace gr_safety_policies
 
     for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
         //ROS_WARN_STREAM(it->Class << it->probability);
-        ROS_WARN_STREAM(manager_.levels[it->Class]);
-        if (manager_.levels[it->Class]< current_state){
+        ROS_WARN_STREAM(it->Class << " " << it->probability);
+        if (manager_.levels[it->Class]<=current_state){
             current_state = manager_.levels[it->Class];
             current_state_str = it->Class;
         }
@@ -64,16 +65,18 @@ namespace gr_safety_policies
    }
 
     void StateTransitionPolicy::instantiateServices(ros::NodeHandle nh){
-        states_sub_ = nh.subscribe("/yolov5/detections", 1, &StateTransitionPolicy::states_CB, this);
+        states_sub_ = nh.subscribe("/yolov5/detections", 10, &StateTransitionPolicy::states_CB, this);
     }
 
     bool StateTransitionPolicy::checkPolicy(){
+        //Restart
+        current_state_ = std::numeric_limits<int>::max();
         return action_ != "idle";
     }
 
     void StateTransitionPolicy::suggestAction(){
-        boost::unique_lock<boost::mutex> lock(mtx_);
-        ROS_INFO_STREAM(action_);
+        std::scoped_lock lock(mtx_);
+        ROS_INFO_STREAM("MY ACTION" << action_);
         action_ = "idle";
     }
 

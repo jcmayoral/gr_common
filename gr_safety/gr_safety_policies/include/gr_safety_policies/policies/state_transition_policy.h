@@ -37,6 +37,7 @@ namespace gr_safety_policies
 
     private:
       std::string action_;
+      int current_state_;
       //get state
       //std::string state_;
       std::string last_state_;
