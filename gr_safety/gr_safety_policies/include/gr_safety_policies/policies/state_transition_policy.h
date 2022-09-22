@@ -17,8 +17,7 @@
 #include <gr_safety_policies/utils/action_helper.hpp>
 #include <gr_safety_policies/utils/yaml-parser.hpp>
 
-
-
+#include <boost/thread/mutex.hpp>
 //#include <dynamic_reconfigure/server.h>
 
 namespace gr_safety_policies
@@ -37,6 +36,7 @@ namespace gr_safety_policies
       void states_CB(const detection_msgs::BoundingBoxesConstPtr current_detections);
 
     private:
+      std::string action_;
       //get state
       //std::string state_;
       std::string last_state_;
@@ -47,6 +47,7 @@ namespace gr_safety_policies
       //This instantiate a single class
       boost::shared_ptr<ActionHelper<safety_core::SafeAction>> current_action_;
       pluginlib::ClassLoader<safety_core::SafeAction> action_loader_;
+      boost::mutex mtx_;
 
   };
 

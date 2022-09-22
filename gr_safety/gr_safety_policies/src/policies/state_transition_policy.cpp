@@ -11,7 +11,8 @@ namespace gr_safety_policies
 {
     StateTransitionPolicy::StateTransitionPolicy():
         last_state_("Unknown"),
-        action_loader_("safety_core", "safety_core::SafeAction")
+        action_loader_("safety_core", "safety_core::SafeAction"),
+        action_{"idle"}
     {
         manager_ = parseFile("config/state_policy.yaml");
 
@@ -35,6 +36,7 @@ namespace gr_safety_policies
     */
 
    void StateTransitionPolicy::states_CB(detection_msgs::BoundingBoxesConstPtr current_detections){
+    boost::unique_lock<boost::mutex> lock(mtx_);
     //Asssumes topic is just published when at least one person is detected
     if (current_detections->bounding_boxes.size()==0){
         ROS_ERROR("NO DETECTIONS");
@@ -52,8 +54,12 @@ namespace gr_safety_policies
             current_state_str = it->Class;
         }
     }
+
+    /*
     ROS_INFO_STREAM(last_state_ << " " << current_state);
     ROS_INFO_STREAM(manager_.transition[last_state_][current_state_str].action);
+    */
+    action_ = manager_.transition[last_state_][current_state_str].action;
     last_state_ = current_state_str;
    }
 
@@ -62,11 +68,13 @@ namespace gr_safety_policies
     }
 
     bool StateTransitionPolicy::checkPolicy(){
-        return true;//is_action_requested_;
+        return action_ != "idle";
     }
 
     void StateTransitionPolicy::suggestAction(){
-
+        boost::unique_lock<boost::mutex> lock(mtx_);
+        ROS_INFO_STREAM(action_);
+        action_ = "idle";
     }
 
 
