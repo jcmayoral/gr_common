@@ -13,7 +13,8 @@ namespace gr_safety_policies
         last_state_str_("Unknown"),
         current_state_(std::numeric_limits<int>::max()),
         action_loader_("safety_core", "safety_core::SafeAction"),
-        action_info_(new TransitionInfo()), current_state_str_("Unknown")
+        action_info_(new TransitionInfo()), current_state_str_("Unknown"),
+        update_(false)
     {
         manager_ = parseFile("config/state_policy.yaml");
 
@@ -24,6 +25,7 @@ namespace gr_safety_policies
         policy_.state_ = PolicyDescription::UNKNOWN;
         policy_.type_ = PolicyDescription::ACTIVE;
         ROS_INFO("State Transition Policy initialized");
+
     }
 
     StateTransitionPolicy::~StateTransitionPolicy(){
@@ -38,19 +40,16 @@ namespace gr_safety_policies
 
    void StateTransitionPolicy::states_CB(detection_msgs::BoundingBoxesConstPtr current_detections){
     std::scoped_lock lock(mtx_);
-    ROS_INFO("NEW MESSAGE");
-    ROS_ERROR_STREAM("current state " << current_state_str_);
-    //Asssumes topic is just published when at least one person is detected
+    //ROS_INFO("NEW MESSAGE");
+    //ROS_ERROR_STREAM("current state " << current_state_str_);
     if (current_detections->bounding_boxes.size()==0){
-        ROS_ERROR("NO DETECTIONS");
-        //Add timer or approach to handle personas getting out of the plane
+        //ROS_ERROR("NO DETECTIONS");
         return;
     }
     bool changed = false;
 
     for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
-        //ROS_WARN_STREAM(it->Class << it->probability);
-        ROS_WARN_STREAM(it->Class << " " << it->probability);
+        // ROS_WARN_STREAM(it->Class << " " << it->probability);
         if (manager_.levels[it->Class]<current_state_){
             changed = true;
             current_state_ = manager_.levels[it->Class];
@@ -60,8 +59,8 @@ namespace gr_safety_policies
 
     /*
     ROS_INFO_STREAM(last_state_ << " " << current_state);
-    ROS_INFO_STREAM(manager_.transition[last_state_][current_state_str].action);
     */
+    ROS_INFO_STREAM(manager_.transition[last_state_][current_state_str].action);
     if (!changed){
         return;
     }
@@ -70,6 +69,7 @@ namespace gr_safety_policies
 
     void StateTransitionPolicy::instantiateServices(ros::NodeHandle nh){
         states_sub_ = nh.subscribe("/yolov5/detections", 10, &StateTransitionPolicy::states_CB, this);
+        timer_ = nh.createTimer(ros::Duration(0.05), &StateTransitionPolicy::updateState,this);
     }
 
     bool StateTransitionPolicy::checkPolicy(){
@@ -100,10 +100,16 @@ namespace gr_safety_policies
                 action->execute();
             }
         }
+        update_ = true;
 
     }
 
-    void StateTransitionPolicy::updateState(){
+    void StateTransitionPolicy::updateState(const ros::TimerEvent& event){
+        if (!update_){
+            return;
+        }
+        ROS_WARN("Update");
+        std::scoped_lock lock(mtx_);
         current_state_ = std::numeric_limits<int>::max();
         action_info_ = new TransitionInfo();
         last_state_str_= current_state_str_;

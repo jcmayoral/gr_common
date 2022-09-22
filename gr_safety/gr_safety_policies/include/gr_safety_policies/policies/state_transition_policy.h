@@ -36,10 +36,11 @@ namespace gr_safety_policies
       bool checkPolicy();
       void suggestAction();
       void states_CB(const detection_msgs::BoundingBoxesConstPtr current_detections);
-      void updateState();
+      void updateState(const ros::TimerEvent& event);
 
     private:
       std::string action_;
+      bool update_;
       int current_state_;
       std::string current_state_str_;
       TransitionInfo* action_info_;
@@ -54,6 +55,8 @@ namespace gr_safety_policies
       boost::shared_ptr<ActionHelper<safety_core::SafeAction>> current_action_;
       pluginlib::ClassLoader<safety_core::SafeAction> action_loader_;
       boost::mutex mtx_;
+
+      ros::Timer timer_;
 
   };
 
