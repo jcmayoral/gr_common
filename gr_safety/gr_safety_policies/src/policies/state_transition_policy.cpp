@@ -14,7 +14,7 @@ namespace gr_safety_policies
         current_state_(std::numeric_limits<int>::max()),
         action_loader_("safety_core", "safety_core::SafeAction"),
         action_info_(new TransitionInfo()), current_state_str_("Unknown"),
-        update_(false)
+        update_(false), last_detection_time_(ros::Time::now()), clear_delay_(5.0)
     {
         manager_ = parseFile("config/state_policy.yaml");
 
@@ -55,12 +55,12 @@ namespace gr_safety_policies
             current_state_ = manager_.levels[it->Class];
             current_state_str_ = it->Class;
         }
+        last_detection_time_ = ros::Time::now();
     }
 
     /*
     ROS_INFO_STREAM(last_state_ << " " << current_state);
     */
-    ROS_INFO_STREAM(manager_.transition[last_state_][current_state_str].action);
     if (!changed){
         return;
     }
@@ -70,10 +70,12 @@ namespace gr_safety_policies
     void StateTransitionPolicy::instantiateServices(ros::NodeHandle nh){
         states_sub_ = nh.subscribe("/yolov5/detections", 10, &StateTransitionPolicy::states_CB, this);
         timer_ = nh.createTimer(ros::Duration(0.05), &StateTransitionPolicy::updateState,this);
+        timer_ = nh.createTimer(ros::Duration(0.5), &StateTransitionPolicy::clearState,this);
     }
 
     bool StateTransitionPolicy::checkPolicy(){
         //Restart
+
         if(action_info_->action != "None"){
             return true;
         }
@@ -113,6 +115,29 @@ namespace gr_safety_policies
         current_state_ = std::numeric_limits<int>::max();
         action_info_ = new TransitionInfo();
         last_state_str_= current_state_str_;
+    }
+
+    void StateTransitionPolicy::clearState(const ros::TimerEvent& event){
+        double execution_time = (ros::Time::now() - last_detection_time_).toNSec() * 1e-3;//seconds
+        ROS_INFO_STREAM("clear "<< execution_time);
+        if (execution_time < clear_delay_){
+            return;
+        }
+        
+        if(action_loader_.isClassAvailable(last_state_str_)){
+            boost::shared_ptr<safety_core::SafeAction> action;
+            ROS_ERROR("calling action");
+            action = action_loader_.createInstance(action_info_->action);
+            if (!action_info_->negate){
+                ROS_INFO("Cancel negate action");
+                action->stop();
+            }
+            else{
+                ROS_INFO("Cancel Execute action");
+                action->execute();
+            }
+        }
+        update_ = true;
     }
 
 

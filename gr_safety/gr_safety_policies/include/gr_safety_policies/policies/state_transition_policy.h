@@ -37,11 +37,14 @@ namespace gr_safety_policies
       void suggestAction();
       void states_CB(const detection_msgs::BoundingBoxesConstPtr current_detections);
       void updateState(const ros::TimerEvent& event);
+      void clearState(const ros::TimerEvent& event);
 
     private:
       std::string action_;
       bool update_;
       int current_state_;
+      double clear_delay_;
+
       std::string current_state_str_;
       TransitionInfo* action_info_;
       //get state
@@ -57,6 +60,7 @@ namespace gr_safety_policies
       boost::mutex mtx_;
 
       ros::Timer timer_;
+      ros::Time last_detection_time_;
 
   };
 
