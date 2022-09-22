@@ -3,7 +3,7 @@
 namespace gr_safety_policies{
     //typedef TransitionInfo = std::tuple<std::string, bool>
     struct TransitionInfo {
-        std::string action;
+        std::string action="None";
         bool negate = false; 
     };
 

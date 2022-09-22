@@ -1,5 +1,5 @@
-#ifndef HRI_POLICY_H
-#define HRI_POLICY_H
+#ifndef STATE_POLICY_H
+#define STATE_POLICY_H
 
 #include <ros/ros.h>
 #include <string>
@@ -18,6 +18,8 @@
 #include <gr_safety_policies/utils/yaml-parser.hpp>
 
 #include <boost/thread/mutex.hpp>
+#include <pluginlib/class_loader.h>
+
 //#include <dynamic_reconfigure/server.h>
 
 namespace gr_safety_policies
@@ -34,13 +36,16 @@ namespace gr_safety_policies
       bool checkPolicy();
       void suggestAction();
       void states_CB(const detection_msgs::BoundingBoxesConstPtr current_detections);
+      void updateState();
 
     private:
       std::string action_;
       int current_state_;
+      std::string current_state_str_;
+      TransitionInfo* action_info_;
       //get state
       //std::string state_;
-      std::string last_state_;
+      std::string last_state_str_;
       ros::Subscriber states_sub_;
       //manager includes all transactions informations
       //TransitionsManager* manager_;
