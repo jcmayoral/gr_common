@@ -118,7 +118,7 @@ namespace gr_safety_policies
     }
 
     void StateTransitionPolicy::clearState(const ros::TimerEvent& event){
-        double execution_time = (ros::Time::now() - last_detection_time_).toNSec() * 1e-3;//seconds
+        double execution_time = (ros::Time::now() - last_detection_time_).toNSec();//seconds
         ROS_INFO_STREAM("clear "<< execution_time);
         if (execution_time < clear_delay_){
             return;
