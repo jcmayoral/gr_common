@@ -11,10 +11,9 @@ namespace gr_safety_policies
 {
     StateTransitionPolicy::StateTransitionPolicy():
         state_t1_str_("Unknown"),
-        state_t_(std::numeric_limits<int>::max()),
         action_loader_("safety_core", "safety_core::SafeAction"),
         action_info_(new TransitionInfo()), state_t_str_("Unknown"),
-        update_(false), last_detection_time_(ros::Time::now()), clear_delay_(5.0),
+        update_(false), last_detection_time_(ros::Time::now()), clear_delay_(10.0),
         last_executed_action_("")
     {
         manager_ = parseFile("config/state_policy.yaml");
@@ -46,20 +45,31 @@ namespace gr_safety_policies
         //ROS_ERROR("NO DETECTIONS");
         return;
     }
-    bool changed = false;
+
+    int state_t = 10000;//manager_.levels[state_t_str_];
+    //If not riskier state detected not update transition
+    int state_t1 = manager_.levels[state_t1_str_];
 
     for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
         // ROS_WARN_STREAM(it->Class << " " << it->probability);
         //If risk state is higher than actual and last_state is different to state in t-1
-        if (manager_.levels[it->Class]<state_t_ && it->Class.compare(state_t1_str_)!=0){
-            changed = true;
-            state_t_ = manager_.levels[it->Class];
+        if (manager_.levels[it->Class]< state_t){
+            state_t = manager_.levels[it->Class];
             state_t_str_ = it->Class;
         }
         last_detection_time_ = ros::Time::now();
     }
 
-    if (!changed){
+
+    if (state_t == state_t1 || state_t == 10000){
+        /*
+        if (current_detections->bounding_boxes.size()>0){
+            ROS_ERROR_STREAM("DETECTIONS but no change.. state " << state_t_str_);
+        }   
+        else{
+            ROS_WARN("No detection NO change");
+        }
+        */
         return;
     }
 
@@ -73,7 +83,6 @@ namespace gr_safety_policies
 
     bool StateTransitionPolicy::checkPolicy(){
         //Restart
-
         if(action_info_->action != "None"){
             return true;
         }
@@ -83,14 +92,14 @@ namespace gr_safety_policies
     }
 
     void StateTransitionPolicy::doAction(){
-        std::scoped_lock lock(mtx_);
-        ROS_INFO_STREAM("MY ACTION " << action_info_->action);
+        //std::scoped_lock lock(mtx_);
+        //ROS_INFO_STREAM("DO ACTION " << action_info_->action);
         ROS_INFO_STREAM("transition " << state_t1_str_ << " to "<< state_t_str_);
 
         if(action_loader_.isClassAvailable(action_info_->action)){
             last_executed_action_ = action_info_->action;
             boost::shared_ptr<safety_core::SafeAction> action;
-            ROS_ERROR("calling action");
+            ROS_ERROR("do action");
             action = action_loader_.createInstance(action_info_->action);
             if (action_info_->negate){
                 ROS_INFO("negate action");
@@ -103,32 +112,37 @@ namespace gr_safety_policies
             policy_.action_ = action->getSafetyID();
         }
         update_ = true;
+        reset();
         policy_.state_ = PolicyDescription::UNSAFE;
     }
 
     void StateTransitionPolicy::updateState(const ros::TimerEvent& event){
         double transcurred_time = (ros::Time::now() - last_detection_time_).toSec();//seconds
-        ROS_INFO_STREAM("update action " <<action_info_->action.c_str() << " last state "<< state_t_str_);
 
         //Undo Action
         if (transcurred_time >= clear_delay_){
             undoAction();
+            reset();
         }
         
         //If action is executed
         if (!update_){
             return;
         }
+    }
 
-        std::scoped_lock lock(mtx_);
-        state_t_ = std::numeric_limits<int>::max();
+
+    void StateTransitionPolicy::reset(){
+        ROS_INFO("RESET STATES");
+        //std::scoped_lock lock(mtx_);
+        //state_t_ = std::numeric_limits<int>::max();
         action_info_ = new TransitionInfo();
         state_t1_str_= state_t_str_;
     }
 
     void StateTransitionPolicy::undoAction(){
         //std::scoped_lock lock(mtx_);f
-        ROS_INFO_STREAM("clear action " << last_executed_action_);
+        ROS_INFO_STREAM("undo action " << last_executed_action_);
         //last_executed_action
         if(action_loader_.isClassAvailable(last_executed_action_)){
             boost::shared_ptr<safety_core::SafeAction> action;
@@ -147,6 +161,8 @@ namespace gr_safety_policies
         last_executed_action_ = "";
         last_detection_time_ = ros::Time::now();
         update_ = true;
+        state_t_str = "Unknown";
+        reset();
     }
 
 
