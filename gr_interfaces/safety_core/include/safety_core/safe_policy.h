@@ -10,13 +10,13 @@ namespace safety_core {
       virtual bool checkPolicy() = 0;
       virtual void reportState(){
           if (policy_.getType() != PolicyDescription::PASSIVE){
-            suggestAction();
+            doAction();
           }
           else{
             std::cout << "Policy not active what should passive policies do?" << std::endl;
           }
         }
-      virtual void suggestAction() = 0;
+      virtual void doAction() = 0;
       virtual PolicyDescription getPolicyDescription(){
         return policy_;
       };

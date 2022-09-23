@@ -34,27 +34,27 @@ namespace gr_safety_policies
 
       void instantiateServices(ros::NodeHandle nh);
       bool checkPolicy();
-      void suggestAction();
+      void doAction();
       void states_CB(const detection_msgs::BoundingBoxesConstPtr current_detections);
       void updateState(const ros::TimerEvent& event);
-      void clearState();
+      void undoAction();
 
     private:
       std::string action_;
       bool update_;
-      int current_state_;
+      int state_t_;
       double clear_delay_;
 
-      std::string current_state_str_;
+      std::string state_t_str_;
+      std::string state_t1_str_;
+      std::string last_executed_action_;
+
       TransitionInfo* action_info_;
       //get state
       //std::string state_;
-      std::string last_state_str_;
       ros::Subscriber states_sub_;
-      //manager includes all transactions informations
-      //TransitionsManager* manager_;
       RiskManager manager_;
-      //This instantiate a single class
+
       boost::shared_ptr<ActionHelper<safety_core::SafeAction>> current_action_;
       pluginlib::ClassLoader<safety_core::SafeAction> action_loader_;
       boost::mutex mtx_;

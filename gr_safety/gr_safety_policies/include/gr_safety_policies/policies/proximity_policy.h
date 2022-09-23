@@ -42,7 +42,7 @@ namespace gr_safety_policies
 
       void instantiateServices(ros::NodeHandle nh);
       bool checkPolicy();
-      void suggestAction();
+      void doAction();
       void publishTopics();
 
       void createAllRings();

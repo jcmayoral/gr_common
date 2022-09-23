@@ -29,7 +29,7 @@ namespace gr_safety_policies
 
       void instantiateServices(ros::NodeHandle nh);
       bool checkPolicy();
-      void suggestAction();
+      void doAction();
       void commands_CB(const std_msgs::String::ConstPtr& command);
       void loadActionClasses();
       void instantiateRequestedAction(std::string desired_action);

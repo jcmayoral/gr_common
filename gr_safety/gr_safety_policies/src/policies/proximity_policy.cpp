@@ -218,7 +218,7 @@ namespace gr_safety_policies
     return is_obstacle_detected_;
   }
 
-  void ProximityPolicy::suggestAction(){
+  void ProximityPolicy::doAction(){
     //action_executer_ = new PublisherSafeAction();
     //ROS_INFO_STREAM_THROTTLE(5, "Obstacle detected on region with ID "<< fault_region_id_ );
     switch (fault_region_id_){

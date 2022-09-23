@@ -40,7 +40,7 @@ namespace gr_safety_policies
         return is_action_requested_;
     }
 
-    void SpeechPolicy::suggestAction(){
+    void SpeechPolicy::doAction(){
         if (!is_action_executed_){
             current_action_->execute();
             policy_.state_ = PolicyDescription::UNSAFE;
