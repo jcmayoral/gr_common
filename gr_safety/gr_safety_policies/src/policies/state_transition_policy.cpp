@@ -148,11 +148,11 @@ namespace gr_safety_policies
             boost::shared_ptr<safety_core::SafeAction> action;
             action = action_loader_.createInstance(last_executed_action_);
             if (!action_info_->negate){
-                ROS_INFO("Undo negate action");
+                ROS_ERROR("Undo negate action");
                 action->stop();
             }
             else{
-                ROS_INFO("Undo Execute action");
+                ROS_ERROR("Undo Execute action");
                 action->execute();
             }
             policy_.action_ = -1;
@@ -161,8 +161,7 @@ namespace gr_safety_policies
         last_executed_action_ = "";
         last_detection_time_ = ros::Time::now();
         update_ = true;
-        state_t_str = "Unknown";
-        reset();
+        state_t_str_ = "Unknown";
     }
 
 
