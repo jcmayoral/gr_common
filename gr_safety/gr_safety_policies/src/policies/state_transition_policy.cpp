@@ -67,7 +67,7 @@ namespace gr_safety_policies
    }
 
     void StateTransitionPolicy::instantiateServices(ros::NodeHandle nh){
-        states_sub_ = nh.subscribe("/yolov5/detections", 10, &StateTransitionPolicy::states_CB, this);
+        states_sub_ = nh.subscribe("/yolov5/detections", -1, &StateTransitionPolicy::states_CB, this);
         timer_ = nh.createTimer(ros::Duration(0.05), &StateTransitionPolicy::updateState,this);
     }
 
