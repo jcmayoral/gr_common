@@ -112,7 +112,7 @@ namespace gr_safety_policies
             policy_.action_ = action->getSafetyID();
         }
         update_ = true;
-        reset();
+        updateState();
         policy_.state_ = PolicyDescription::UNSAFE;
     }
 
@@ -122,7 +122,7 @@ namespace gr_safety_policies
         //Undo Action
         if (transcurred_time >= clear_delay_){
             undoAction();
-            reset();
+            updateState();
         }
         
         //If action is executed
@@ -132,8 +132,8 @@ namespace gr_safety_policies
     }
 
 
-    void StateTransitionPolicy::reset(){
-        ROS_INFO("RESET STATES");
+    void StateTransitionPolicy::updateState(){
+        ROS_INFO("Update Info");
         //std::scoped_lock lock(mtx_);
         //state_t_ = std::numeric_limits<int>::max();
         action_info_ = new TransitionInfo();
