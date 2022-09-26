@@ -26,7 +26,7 @@ transitions:
     Safe: slow_action!
   Safe:
     Unknown: slow_action
-    Lethal: human_intervetnion
+    Lethal: human_intervention
     Danger: human_intervention
     Warning: slow_action
     Safe: idle

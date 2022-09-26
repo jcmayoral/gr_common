@@ -14,13 +14,14 @@ HumanInterventionSafeAction::~HumanInterventionSafeAction(){
 };
 
 void HumanInterventionSafeAction::execute(){
-    std_srvs::SetBool::Request srv_req;
-    std_srvs::SetBool::Response srv_resp;
-    ros::service::call("/gr_human_intervention", srv_req, srv_resp);
+    std_srvs::Trigger::Request srv_req;
+    std_srvs::Trigger::Response srv_resp;
+    ros::service::call("/gr_human_intervention/set", srv_req, srv_resp);
 };
 
 void HumanInterventionSafeAction::stop(){
-    std_srvs::SetBool::Request srv_req;
-    std_srvs::SetBool::Response srv_resp;
-    ros::service::call("/gr_human_intervention", srv_req, srv_resp);
+    ROS_INFO("stop is same as execute in Human Intervention");
+    std_srvs::Trigger::Request srv_req;
+    std_srvs::Trigger::Response srv_resp;
+    ros::service::call("/gr_human_intervention/set", srv_req, srv_resp);
 };

@@ -3,8 +3,8 @@
 
 #include <safety_core/safe_action.h>
 #include <ros/ros.h>
-#include<std_srvs/SetBool.h>
-#include<std_srvs/SetBoolResponse.h>
+#include<std_srvs/Trigger.h>
+#include<std_srvs/TriggerResponse.h>
 
 
 namespace gr_safety_policies{
