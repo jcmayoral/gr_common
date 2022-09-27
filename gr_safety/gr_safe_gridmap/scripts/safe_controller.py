@@ -10,6 +10,7 @@ class SafeController(PitchCorrection):
         rospy.init_node("safe_controller")
         PitchCorrection.__init__(self)
         self.limit_speed = False
+        self.safe_speed = 0.25
         self.s = rospy.Service('/limit_safe_speed', SetBool, self.safe_speed_cb)
 
         self.penalization_factor = 0.0
