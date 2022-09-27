@@ -24,6 +24,7 @@ class SafeController(PitchCorrection):
         rospy.spin()
     
     def safe_speed_cb(self,req):
+        print("limit_speed ", req.data)
         if req.data:
             self.limit_speed = True
         return SetBoolResponse(sucess=True)
