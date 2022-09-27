@@ -14,6 +14,7 @@ find_package(catkin REQUIRED
         sensor_msgs
         geometry_msgs
         std_msgs
+        std_srvs
         detection_msgs
 	#cv_bridge
         message_filters
@@ -53,7 +54,7 @@ catkin_package(
         sensor_msgs
         geometry_msgs
         std_msgs
-	#cv_bridge
+        std_srvs
         message_filters
 )
 
