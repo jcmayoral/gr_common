@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>gr_safe_gridmap</name>
-  <version>0.26.2</version>
+  <version>0.26.3</version>
   <description>Safety Gridmap based on grid_map from anybotics</description>
   <maintainer email="jose.carlos.mayoral.banos@nmbu.no">Jose Mayoral</maintainer>
 

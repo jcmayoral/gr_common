@@ -3,7 +3,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
 from pitch_correction import PitchCorrection
-from std_srvs.srv import SetBool
+from std_srvs.srv import SetBool, SetBoolResponse
 
 class SafeController(PitchCorrection):
     def __init__(self):
