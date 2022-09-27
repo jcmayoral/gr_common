@@ -27,7 +27,7 @@ class SafeController(PitchCorrection):
         print("limit_speed ", req.data)
         if req.data:
             self.limit_speed = True
-        return SetBoolResponse(sucess=True)
+        return SetBoolResponse(success=True)
 
     def timer_event(self,event):
         self.twist.linear.x = self.twist.linear.x * (1-self.penalization_factor)
