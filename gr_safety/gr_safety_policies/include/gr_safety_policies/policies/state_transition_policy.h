@@ -16,6 +16,7 @@
 
 #include <gr_safety_policies/utils/action_helper.hpp>
 #include <gr_safety_policies/utils/yaml-parser.hpp>
+#include <gr_safety_policies/utils/matching_person.hpp>
 
 #include <boost/thread/mutex.hpp>
 #include <pluginlib/class_loader.h>
@@ -51,6 +52,7 @@ namespace gr_safety_policies
       std::string last_executed_action_;
 
       TransitionInfo* action_info_;
+      BoundingBoxInfo* bb_info_;
       //get state
       //std::string state_;
       ros::Subscriber states_sub_;

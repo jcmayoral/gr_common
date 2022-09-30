@@ -15,4 +15,17 @@ namespace gr_safety_policies{
         TransitionArray transition;
         RiskLevels levels;
     };
+
+    struct BoundingBox{
+        int x1;
+        int y1;
+        int x2;
+        int y2;
+    }
+
+    struct BoundingBoxInfo{
+        int centroid_x;
+        int centroid_y;
+        BoundingBox bb;
+    }
 }

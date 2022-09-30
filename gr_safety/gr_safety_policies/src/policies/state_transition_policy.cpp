@@ -55,6 +55,11 @@ namespace gr_safety_policies
     int state_t1 = manager_.levels[state_t1_str_];
 
     for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
+        //Same object as previous riskier person
+        if(it == bb_info_){
+
+        }
+        
         // ROS_WARN_STREAM(it->Class << " " << it->probability);
         //If risk state is higher than actual and last_state is different to state in t-1
         if (manager_.levels[it->Class]< state_t){
