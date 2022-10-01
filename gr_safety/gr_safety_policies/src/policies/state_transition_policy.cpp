@@ -38,7 +38,7 @@ namespace gr_safety_policies
     }
     */
 
-   void StateTransitionPolicy::states_CB(detection_msgs::BoundingBoxesConstPtr current_detections){
+   void StateTransitionPolicy::states_CB(const detection_msgs::BoundingBoxesConstPtr current_detections){
     std::scoped_lock lock(mtx_);
 
     if (current_detections->bounding_boxes.size()==0){
@@ -56,8 +56,8 @@ namespace gr_safety_policies
 
     for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
         //Same object as previous riskier person
-        if(it == bb_info_){
-
+        if(comparePersons(bb_info_, &(*(it)))){
+            std::cout << "aaa" << std::endl;
         }
         
         // ROS_WARN_STREAM(it->Class << " " << it->probability);

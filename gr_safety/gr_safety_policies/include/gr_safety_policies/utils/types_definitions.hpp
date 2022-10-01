@@ -1,4 +1,5 @@
 #include<string>
+#include <detection_msgs/BoundingBox.h>
 
 namespace gr_safety_policies{
     //typedef TransitionInfo = std::tuple<std::string, bool>
@@ -16,16 +17,17 @@ namespace gr_safety_policies{
         RiskLevels levels;
     };
 
-    struct BoundingBox{
-        int x1;
-        int y1;
-        int x2;
-        int y2;
-    }
+    struct MyBoundingBox{
+        int x1 = 0;
+        int y1 = 0;
+        int x2 = 0;
+        int y2 = 0;
+    };
 
-    struct BoundingBoxInfo{
-        int centroid_x;
-        int centroid_y;
-        BoundingBox bb;
-    }
+    class BoundingBoxInfo{
+        public:
+            int centroid_x;
+            int centroid_y;
+            MyBoundingBox bb;
+    };
 }

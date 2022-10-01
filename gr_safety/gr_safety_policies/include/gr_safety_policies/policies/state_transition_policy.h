@@ -16,7 +16,7 @@
 
 #include <gr_safety_policies/utils/action_helper.hpp>
 #include <gr_safety_policies/utils/yaml-parser.hpp>
-#include <gr_safety_policies/utils/matching_person.hpp>
+#include <gr_safety_policies/utils/matching_persons.hpp>
 
 #include <boost/thread/mutex.hpp>
 #include <pluginlib/class_loader.h>
