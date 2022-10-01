@@ -1,7 +1,7 @@
 #include <detection_msgs/BoundingBox.h>
 
 namespace gr_safety_policies{
-    float calculateIOU(BoundingBoxInfo* lhs, const detection_msgs::BoundingBox* rhs){
+    float calculateIOU(const BoundingBoxInfo* lhs, const detection_msgs::BoundingBox* rhs){
         int xA = lhs->bb.x1 > rhs->xmin ? lhs->bb.x1 : rhs->xmin; //std::max(lhs->bb.x1, rhs->xmin);
         int yA = lhs->bb.y1 > rhs->ymin ? lhs->bb.y1 : rhs->ymin;//std::max(lhs->bb.y1, rhs->ymin);
         int xB = lhs->bb.x2 < rhs->xmax ? lhs->bb.x2 : rhs->xmax;//std::min(lhs->bb.x2, rhs->xmax);
@@ -20,7 +20,7 @@ namespace gr_safety_policies{
         return iou;
     }
 
-    bool comparePersons(BoundingBoxInfo*  bb, const detection_msgs::BoundingBox*  rhs){
+    bool comparePersons(const BoundingBoxInfo*  bb, const detection_msgs::BoundingBox*  rhs){
         //Centroid distance ? 
         /*
         float rx = rhs->xmin + (rhs->xmax - rhs->ymin)/2;
