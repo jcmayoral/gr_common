@@ -57,7 +57,8 @@ namespace gr_safety_policies
     for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
         //Same object as previous riskier person
         if(comparePersons(bb_info_, &(*(it)))){
-            std::cout << "aaa" << std::endl;
+            std::cout << "Same Person" << std::endl;
+            bb_info_->updateObject(&(*(it)));
         }
         
         // ROS_WARN_STREAM(it->Class << " " << it->probability);

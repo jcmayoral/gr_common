@@ -29,5 +29,11 @@ namespace gr_safety_policies{
             int centroid_x;
             int centroid_y;
             MyBoundingBox bb;
+            void updateObject(const detection_msgs::BoundingBox* detec){
+                bb.x1 = detec->xmin;
+                bb.x2 = detec->xmax;
+                bb.y1 = detec->ymin;
+                bb.y2 = detec->ymax;
+            }
     };
 }
