@@ -7,7 +7,6 @@ namespace gr_safety_policies{
         int yA = std::max(lhs->bb.y1, (int)rhs->ymin);
         int xB = std::min(lhs->bb.x2, (int)rhs->xmax);
         int yB = std::min(lhs->bb.y2, (int)rhs->ymax);
-        std::cout << "PIXELS " << xA << " " << yA << " " << xB << " "<< yB << std::endl;
         //compute the area of intersection rectangle
         float interArea = std::max(0, xB - xA + 1) * std::max(0, yB - yA + 1);
         //compute the area of both the prediction and ground-truth

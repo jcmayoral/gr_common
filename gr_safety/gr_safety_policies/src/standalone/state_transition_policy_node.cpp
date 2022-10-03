@@ -12,7 +12,7 @@ int main(int argc, char** argv){
         if(policy->checkPolicy()){
             policy->reportState();
         }
-        ros::Duration(1.0).sleep();
+        ros::Duration(0.25).sleep();
         ros::spinOnce();
     }
     return 1;

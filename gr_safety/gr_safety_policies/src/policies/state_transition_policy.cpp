@@ -53,14 +53,20 @@ namespace gr_safety_policies
     std::string msg_state_str = "Unknown";
 
     detection_msgs::BoundingBox riskier_bb;
+    double highest_iou = 0.0;
 
     //Get Most Dangerous from the msg
     for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){        
         //If risk state is lowe than actual
-        if (manager_.levels[it->Class]< manager_.levels[msg_state_str]){
+        if (manager_.levels[it->Class]<= manager_.levels[msg_state_str]){
             //ROS_INFO_STREAM("This person Class " << it->Class << " Current State in Msg " << msg_state_str);
-            //int
+            double iou = comparePersons(bb_info_, &(*it));
+            if (iou<highest_iou){
+                continue;
+            }
             msg_riskier_state = manager_.levels[it->Class];
+            //local iou 
+            highest_iou = iou;
             //strings
             msg_state_str = it->Class;
             //Bounding Box
@@ -73,7 +79,7 @@ namespace gr_safety_policies
     //Compare with timed window
     if(msg_riskier_state < riskier_id_){
         double iou = comparePersons(bb_info_, &riskier_bb);
-        if(iou< 0.6){
+        if(iou< 0.4){
             is_same_person_ = false;
             ROS_ERROR("different person from previous iteration");
         }
