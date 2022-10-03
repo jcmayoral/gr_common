@@ -15,7 +15,7 @@ namespace gr_safety_policies
         action_info_(new TransitionInfo()), state_t_str_("Unknown"),
         update_(false), last_detection_time_(ros::Time::now()), clear_delay_(10.0),
         last_executed_action_(""), riskier_id_{std::numeric_limits<int>::max()},
-        is_same_person_{true}
+        is_same_person_{false}, last_person_in_borders_{false}
     {
         bb_info_ = new BoundingBoxInfo();
         manager_ = parseFile("config/state_policy.yaml");
@@ -52,7 +52,6 @@ namespace gr_safety_policies
     int msg_riskier_state = 1000;
     std::string msg_state_str = "Unknown";
 
-    ROS_ERROR("NEW MSG");
     detection_msgs::BoundingBox riskier_bb;
 
     //Get Most Dangerous from the msg
@@ -65,45 +64,32 @@ namespace gr_safety_policies
             //strings
             msg_state_str = it->Class;
             //Bounding Box
-            riskier_bb = std::move(*(it));
+            riskier_bb = std::move(*(it));        
         }
         //update time
         last_detection_time_ = ros::Time::now();
     }
 
-    ROS_WARN_STREAM("Final State in Msg " << msg_state_str.c_str());
-
     //Compare with timed window
     if(msg_riskier_state < riskier_id_){
-        ROS_INFO_STREAM ("Update current STATE FROM " << state_t1_str_ << " TO " << msg_state_str );
-        float iou = comparePersons(bb_info_, &riskier_bb);
-
-        if(iou< 0.7){
+        double iou = comparePersons(bb_info_, &riskier_bb);
+        if(iou< 0.6){
             is_same_person_ = false;
             ROS_ERROR("different person from previous iteration");
         }
-        else{
-            ROS_WARN("Same person");
+        else {
+            is_same_person_ = true;
         }
+        ROS_ERROR_STREAM("IOU "<< iou << "same person "<< is_same_person_);
 
         //new Coordinate from riskier person
-        std::cout << bb_info_ << std::endl;
         bb_info_->updateObject(&riskier_bb); 
-        std::cout << bb_info_ << std::endl;
 
+        //ROS_ERROR_STREAM("UPDATED " << bb_info_ << " IOU "<< iou << " is_same_person "<< is_same_person_);
         state_t_str_ = msg_state_str;
         *action_info_ = manager_.transition[state_t1_str_][state_t_str_];
         riskier_id_ = manager_.levels[msg_state_str];
     }
-
-    /*
-        if (current_detections->bounding_boxes.size()>0){
-            ROS_ERROR_STREAM("DETECTIONS but no change.. state " << state_t_str_);
-        }   
-        else{
-            ROS_WARN("No detection NO change");
-        }
-        */
     
    }
 
@@ -113,24 +99,38 @@ namespace gr_safety_policies
     }
 
     bool StateTransitionPolicy::checkPolicy(){
-        riskier_id_ = 10000;
+        ROS_INFO("new cycle");
         //Restart
+        riskier_id_ = std::numeric_limits<int>::max();
+
+        bool policy_state = false;
+        //Check exceptionms
         if(action_info_->action != "None"){
-            //TODO obviously this can be simplifies
             //Just testing reasons
-            if (is_same_person_){
-                ROS_ERROR("Same Person detected");
-                return true;
+            std::cout << is_same_person_ << last_person_in_borders_ << std::endl;
+            if (!is_same_person_ && last_person_in_borders_){
+                ROS_ERROR("Previous person detected in Borders has not detected...assuming all is correct");
+                policy_state = false;
+                //updateState();
+                //last_person_in_borders_ = false;
             }
-            ROS_INFO("Other person");
-            is_same_person_ = true;
-            return false;
+            else{
+                policy_state = true;
+            }
+        }
+
+        float centroidx = bb_info_->centroid_x/640.0;
+        //std::cout << "centroid " << centroidx << std::endl;
+
+         //Update flag
+        if (0.15>centroidx>0 || 1.0>centroidx> 0.85){
+            last_person_in_borders_ = true;
         }
         else{
-            is_same_person_ = true;
-            ROS_INFO("NO ACTION");
-            return false;
+            ROS_WARN("Person not in borders");
+            last_person_in_borders_ = false;
         }
+        return policy_state;
     }
 
     void StateTransitionPolicy::doAction(){
@@ -159,19 +159,15 @@ namespace gr_safety_policies
     }
 
     void StateTransitionPolicy::updateState(const ros::TimerEvent& event){
-        std::lock_guard lock(mtx_);
-        double transcurred_time = (ros::Time::now() - last_detection_time_).toSec();//seconds
+       std::lock_guard lock(mtx_);
+       double transcurred_time = (ros::Time::now() - last_detection_time_).toSec();//seconds
+       //Undo Action
+       if (transcurred_time >= clear_delay_){
+           undoAction();
+           updateState();
+       }
+       //bb_info_ = new BoundingBoxInfo();
 
-        //Undo Action
-        if (transcurred_time >= clear_delay_){
-            undoAction();
-            updateState();
-        }
-        
-        //If action is executed
-        if (!update_){
-            return;
-        }
     }
 
 
@@ -182,8 +178,7 @@ namespace gr_safety_policies
         action_info_ = new TransitionInfo();
         state_t1_str_= state_t_str_;
         riskier_id_ = std::numeric_limits<int>::max();
-        bb_info_ = new BoundingBoxInfo();
-
+        //bb_info_ = new BoundingBoxInfo();
     }
 
     void StateTransitionPolicy::undoAction(){

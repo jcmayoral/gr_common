@@ -47,6 +47,7 @@ namespace gr_safety_policies
       double clear_delay_;
       int riskier_id_;
       bool is_same_person_;
+      bool last_person_in_borders_;
 
       std::string state_t_str_;
       std::string state_t1_str_;

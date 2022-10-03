@@ -1,12 +1,13 @@
 #include <detection_msgs/BoundingBox.h>
 
 namespace gr_safety_policies{
-    float calculateIOU(const BoundingBoxInfo* lhs, const detection_msgs::BoundingBox* rhs){
-        int xA = lhs->bb.x1 > rhs->xmin ? lhs->bb.x1 : rhs->xmin; //std::max(lhs->bb.x1, rhs->xmin);
-        int yA = lhs->bb.y1 > rhs->ymin ? lhs->bb.y1 : rhs->ymin;//std::max(lhs->bb.y1, rhs->ymin);
-        int xB = lhs->bb.x2 < rhs->xmax ? lhs->bb.x2 : rhs->xmax;//std::min(lhs->bb.x2, rhs->xmax);
-        int yB = lhs->bb.y2 < rhs->ymax ? lhs->bb.y2 : rhs->ymax;//std::min(lhs->bb.y2, rhs->ymax);
-        //std::cout << "PIXELS " << xA << " " << yA << " " << xB << " "<< yB << std::endl;
+
+    double calculateIOU(const BoundingBoxInfo* lhs, const detection_msgs::BoundingBox* rhs){
+        int xA = std::max(lhs->bb.x1, (int)rhs->xmin);
+        int yA = std::max(lhs->bb.y1, (int)rhs->ymin);
+        int xB = std::min(lhs->bb.x2, (int)rhs->xmax);
+        int yB = std::min(lhs->bb.y2, (int)rhs->ymax);
+        std::cout << "PIXELS " << xA << " " << yA << " " << xB << " "<< yB << std::endl;
         //compute the area of intersection rectangle
         float interArea = std::max(0, xB - xA + 1) * std::max(0, yB - yA + 1);
         //compute the area of both the prediction and ground-truth
@@ -21,14 +22,14 @@ namespace gr_safety_policies{
         return iou;
     }
 
-    float comparePersons(const BoundingBoxInfo*  bb, const detection_msgs::BoundingBox*  rhs){        
+    double comparePersons(const BoundingBoxInfo*  bb, const detection_msgs::BoundingBox*  rhs){        
         //Centroid distance ? 
         /*
         float rx = rhs->xmin + (rhs->xmax - rhs->ymin)/2;
         float ry = rhs->ymin + (rhs->ymax - rhs->ymin)/2;
         float centroids_distance = sqrt(pow(lhs.centroid_x - rx,2) + pow(lhs.centroid_y - ry,2));
         */
-        float iou =  calculateIOU(bb,rhs);
+        double iou =  calculateIOU(bb,rhs);
         //std::cout << "iou " << iou << std::endl;
         return iou;
 
