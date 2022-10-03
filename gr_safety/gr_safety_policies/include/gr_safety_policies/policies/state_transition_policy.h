@@ -45,7 +45,8 @@ namespace gr_safety_policies
       std::string action_;
       bool update_;
       double clear_delay_;
-      int riskier_obj_;
+      int riskier_id_;
+      bool is_same_person_;
 
       std::string state_t_str_;
       std::string state_t1_str_;

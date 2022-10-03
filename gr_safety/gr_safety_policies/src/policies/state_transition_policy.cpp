@@ -14,10 +14,11 @@ namespace gr_safety_policies
         action_loader_("safety_core", "safety_core::SafeAction"),
         action_info_(new TransitionInfo()), state_t_str_("Unknown"),
         update_(false), last_detection_time_(ros::Time::now()), clear_delay_(10.0),
-        last_executed_action_(""), riskier_obj_{std::numeric_limits<int>::max()}
+        last_executed_action_(""), riskier_id_{std::numeric_limits<int>::max()},
+        is_same_person_{true}
     {
+        bb_info_ = new BoundingBoxInfo();
         manager_ = parseFile("config/state_policy.yaml");
-
         //loadActionClasses();
         policy_.id_ = "STATE_TRANSITION_POLICY";
         //TODO remove action
@@ -46,36 +47,53 @@ namespace gr_safety_policies
         return;
     }
 
-    int state_t = 1000; 
-    int o_state_t = manager_.levels[state_t_str_];
-    int s = 1000;
-    std::string cl = "Unknown";
 
     //If not riskier state detected not update transition
-    int state_t1 = manager_.levels[state_t1_str_];
+    int msg_riskier_state = 1000;
+    std::string msg_state_str = "Unknown";
 
-    for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
-        //Same object as previous riskier person
-        if(comparePersons(bb_info_, &(*(it)))){
-            std::cout << "Same Person" << std::endl;
-            bb_info_->updateObject(&(*(it)));
+    ROS_ERROR("NEW MSG");
+    detection_msgs::BoundingBox riskier_bb;
+
+    //Get Most Dangerous from the msg
+    for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){        
+        //If risk state is lowe than actual
+        if (manager_.levels[it->Class]< manager_.levels[msg_state_str]){
+            //ROS_INFO_STREAM("This person Class " << it->Class << " Current State in Msg " << msg_state_str);
+            //int
+            msg_riskier_state = manager_.levels[it->Class];
+            //strings
+            msg_state_str = it->Class;
+            //Bounding Box
+            riskier_bb = std::move(*(it));
         }
-        
-        // ROS_WARN_STREAM(it->Class << " " << it->probability);
-        //If risk state is higher than actual and last_state is different to state in t-1
-        if (manager_.levels[it->Class]< state_t){
-            s = manager_.levels[it->Class];
-            state_t = s;
-            cl = it->Class;
-        }
+        //update time
         last_detection_time_ = ros::Time::now();
     }
 
-    if(state_t < riskier_obj_){
-        ROS_INFO_STREAM (state_t << o_state_t);
-        state_t_str_ = cl;
+    ROS_WARN_STREAM("Final State in Msg " << msg_state_str.c_str());
+
+    //Compare with timed window
+    if(msg_riskier_state < riskier_id_){
+        ROS_INFO_STREAM ("Update current STATE FROM " << state_t1_str_ << " TO " << msg_state_str );
+        float iou = comparePersons(bb_info_, &riskier_bb);
+
+        if(iou< 0.7){
+            is_same_person_ = false;
+            ROS_ERROR("different person from previous iteration");
+        }
+        else{
+            ROS_WARN("Same person");
+        }
+
+        //new Coordinate from riskier person
+        std::cout << bb_info_ << std::endl;
+        bb_info_->updateObject(&riskier_bb); 
+        std::cout << bb_info_ << std::endl;
+
+        state_t_str_ = msg_state_str;
         *action_info_ = manager_.transition[state_t1_str_][state_t_str_];
-        riskier_obj_ = state_t;
+        riskier_id_ = manager_.levels[msg_state_str];
     }
 
     /*
@@ -95,12 +113,22 @@ namespace gr_safety_policies
     }
 
     bool StateTransitionPolicy::checkPolicy(){
-        riskier_obj_ = 10000;
+        riskier_id_ = 10000;
         //Restart
         if(action_info_->action != "None"){
-            return true;
+            //TODO obviously this can be simplifies
+            //Just testing reasons
+            if (is_same_person_){
+                ROS_ERROR("Same Person detected");
+                return true;
+            }
+            ROS_INFO("Other person");
+            is_same_person_ = true;
+            return false;
         }
         else{
+            is_same_person_ = true;
+            ROS_INFO("NO ACTION");
             return false;
         }
     }
@@ -153,7 +181,9 @@ namespace gr_safety_policies
         //state_t_ = std::numeric_limits<int>::max();
         action_info_ = new TransitionInfo();
         state_t1_str_= state_t_str_;
-        riskier_obj_ = std::numeric_limits<int>::max();
+        riskier_id_ = std::numeric_limits<int>::max();
+        bb_info_ = new BoundingBoxInfo();
+
     }
 
     void StateTransitionPolicy::undoAction(){

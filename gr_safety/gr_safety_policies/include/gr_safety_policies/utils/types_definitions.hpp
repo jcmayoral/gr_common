@@ -18,14 +18,23 @@ namespace gr_safety_policies{
     };
 
     struct MyBoundingBox{
-        int x1 = 0;
-        int y1 = 0;
-        int x2 = 0;
-        int y2 = 0;
+        int x1 = std::numeric_limits<int>::max();;
+        int y1 = std::numeric_limits<int>::max();;
+        int x2 = std::numeric_limits<int>::min();
+        int y2 = std::numeric_limits<int>::min();
     };
 
     class BoundingBoxInfo{
         public:
+            BoundingBoxInfo():bb{}{
+            }
+
+            friend std::ostream &operator<<(std::ostream &os, const BoundingBoxInfo* m) {
+                //os << "Bounding BOX "<< m.bb.x1 << " " << m.bb.y1 << " " << m.bb.x2 << " " << m.bb.y2;
+                os << "xmin " << m->bb.x1 << " xmax "<< m->bb.x2 << " ymin " << m->bb.y1 << " ymax " << m->bb.y2;
+                return os;
+            }
+
             int centroid_x;
             int centroid_y;
             MyBoundingBox bb;
@@ -36,4 +45,6 @@ namespace gr_safety_policies{
                 bb.y2 = detec->ymax;
             }
     };
+
+    
 }
