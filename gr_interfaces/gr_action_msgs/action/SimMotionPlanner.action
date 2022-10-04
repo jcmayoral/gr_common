@@ -5,6 +5,7 @@ bool is_motion
 bool is_infinite_motion
 float64 linearspeed
 float64 linearspeedy
+float64 dist2collision
 geometry_msgs/PoseStamped startpose
 geometry_msgs/PoseStamped goalPose
 ---
