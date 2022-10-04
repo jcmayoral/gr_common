@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   DIRECTORY msg
    FILES
+   HumanSafety.msg
    PolicyFeedback.msg
    SafetyState.msg
    Object.msg
