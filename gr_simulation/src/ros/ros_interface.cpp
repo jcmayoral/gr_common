@@ -33,9 +33,8 @@ void ROSInterface::dyn_reconfigureCB(gr_simulation::PersonMotionConfig &config, 
     myquaternion.setRPY(0,0,config.start_yaw);
     //tf2::convert(p.pose.orientation , myquaternion);
     p.pose.orientation = tf2::toMsg(myquaternion);
-    ROS_INFO_STREAM(p);
-
-    ROS_INFO("Calculate goal");
+    //ROS_INFO_STREAM(p);
+    //ROS_INFO("Calculate goal");
     geometry_msgs::PoseStamped p2;
 
     //orientation of current odometry to map
@@ -55,6 +54,7 @@ void ROSInterface::dyn_reconfigureCB(gr_simulation::PersonMotionConfig &config, 
 
     goal.startpose = p;
     goal.goalPose = p2;
+    goal.dist2collision = config.collision_distance;
 
     goal.linearspeed = config.linearvel * cos(config.start_yaw);
     goal.linearspeedy = config.linearvel * sin(config.start_yaw);

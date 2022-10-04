@@ -84,6 +84,7 @@ namespace gazebo
         double lin_velx = 0;
         double lin_vely = 0;
         double mapsize = 30.0;
+        double dist2collision = 1.5;
 
         //For ROS
         /// \brief A node use for ROS transpor

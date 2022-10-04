@@ -2,7 +2,7 @@
 using namespace gazebo;
 
 SimpleROSInterface::SimpleROSInterface(): is_ok{true}, flag{false}, tfBuffer(ros::Duration(5)),
-                                tf2_listener(tfBuffer){
+                                tf2_listener(tfBuffer), dist2collision{1.5}{
     // Initialize ros, if it has not already bee initialized
     std::cout << "CONSTRUCTOR 10 "<<std::endl;
     desiredspeed = new ignition::math::Vector3d();
@@ -31,7 +31,7 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
     this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
     this->model->ResetPhysicsStates();
 
-    std::cout << curAngularVel << "ANGULAR VEL" << std::endl;
+    //std::cout << curAngularVel << "ANGULAR VEL" << std::endl;
 
     /*if (this->model->GetName().compare(goal->object_id)){
         std::cout<<  "WRONG ID "<<std::endl;
@@ -56,7 +56,7 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
         this->link->SetWorldPose(startpose, true, true);
     }
 
-
+    dist2collision = goal->dist2collision;
     desiredspeed->Set(goal->linearspeed,goal->linearspeedy,0);
 
     this->SetLinearVelocityX(goal->linearspeed);
@@ -76,8 +76,6 @@ void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalCon
     neworientation.Set(0,0,tf2::getYaw(goal->goalPose.pose.orientation));
 
     endpose.Set(newTarget, neworientation);
-    std::cout << "ON UPDATE"<< endpose.Pos().X() <<std::endl;
-
 
     //msgs::Vector3d* newTarget = new msgs::Vector3d();
     //newTarget->set_x(goal->goalPose.pose.position.x);
@@ -108,7 +106,6 @@ void SimpleROSInterface::SetAngVelocity(const double &_vel){
 
 void SimpleROSInterface::SetLinearVelocityX(const double &_vel){
     lin_velx = _vel;
-    std::cout << "VELX "<< _vel <<std::endl;
     this->link->SetLinearVel(ignition::math::Vector3<double>(lin_velx,lin_vely,0.0));
 }
 
@@ -211,14 +208,13 @@ void SimpleROSInterface::OnUpdate(){
     //std::cout << "Distance2robot " << dist2robot << std::endl;
     double dist2goal = sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2));
     //std::cout << "Distance2goal " << dist2goal << std::endl;
-
-    //std::cout << "Not Collide" << collisionstate << std::endl;
+    //std::cout << "Not Collide" << collisionstate.IsZero() << std::endl;
 
     if (!collisionstate.IsZero()){
-        std::cout << "Collide" << collisionstate << std::endl;
+        std::cout << "Collide in distance " << dist2robot << std::endl;
     }
-     if (dist2goal <0.5 || dist2robot < 1.5){
-        ROS_ERROR("DONE");
+     if (dist2goal <0.5 || dist2robot < dist2collision){
+        ROS_ERROR_STREAM("DONE Distance 2 robot"<< dist2robot );
         this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
         this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));        
         this->model->ResetPhysicsStates();
