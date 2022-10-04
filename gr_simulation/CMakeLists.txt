@@ -40,22 +40,25 @@ add_subdirectory(msgs)
 #link_directories(${GAZEBO_LIBRARY_DIRS})
 #list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
-
+#NO
 add_library(dynobjectgazebo SHARED src/gazebo/dynamic_object_gazebo_interface.cpp)
 target_link_libraries(dynobjectgazebo ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
-
+#NO
 add_library(grassrow SHARED src/grassrobot/grass_row.cpp)
 target_link_libraries(grassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
-
+#NO
 add_library(visualgrassrow SHARED src/grassrobot/visual_grass_row.cpp)
 target_link_libraries(visualgrassrow ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} gr_simulation_msgs)
 
+#NO
 add_library(motionplanner SHARED src/gazebo/motion_planner.cpp)
 target_link_libraries(motionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY})
 
+#NO
 add_library(rosmotionplanner SHARED src/ros/motion_planner.cpp)
 target_link_libraries(rosmotionplanner ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${SBPL_LIBRARY} ${tf2_ros_LIBRARIES})
 
+#NO
 add_library(obstaclescoordinator SHARED src/gazebo/obstacles_coordinator.cpp)
 target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} motionplanner)
 
@@ -63,6 +66,7 @@ target_link_libraries(obstaclescoordinator ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIE
 add_library(dynobjectros SHARED src/ros/dynamic_object_ros_interface.cpp)
 target_link_libraries(dynobjectros ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} rosmotionplanner)
 #add_dependencies(dynobjectros   ${gr_action_msgs_EXPORTED_TARGETS})
+#NO
 add_library(myrosgazeboanimation SHARED src/ros/gazebo_ros_animation.cpp)
 target_link_libraries(myrosgazeboanimation ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES} ${actionlib_LIBRARIES} motionplanner)
 

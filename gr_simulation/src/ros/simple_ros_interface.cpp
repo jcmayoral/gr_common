@@ -208,9 +208,9 @@ void SimpleROSInterface::OnUpdate(){
 
     }
     double dist2robot = sqrt(pow(p.pose.position.x,2)+pow(p.pose.position.y,2));
-    std::cout << "Distance2robot " << dist2robot << std::endl;
+    //std::cout << "Distance2robot " << dist2robot << std::endl;
     double dist2goal = sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2));
-    std::cout << "Distance2goal " << dist2goal << std::endl;
+    //std::cout << "Distance2goal " << dist2goal << std::endl;
 
     //std::cout << "Not Collide" << collisionstate << std::endl;
 
