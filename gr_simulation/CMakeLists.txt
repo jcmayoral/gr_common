@@ -104,3 +104,9 @@ file(GLOB WORLDS_FILES
 )
 file(COPY ${WORLDS_FILES}
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+install(TARGETS ros_interface_node rosinterface
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION /home/jose/local/lib
+  RUNTIME DESTINATION /home/jose/local/bin
+  )
