@@ -5,6 +5,7 @@ from dynamic_reconfigure.client import Client, DynamicReconfigureCallbackExcepti
 from configuration import ConfigurationManager
 from std_srvs.srv import SetBool, SetBoolRequest
 import os
+import tqdm
 
 class Manager:
     def __init__(self, id="test_results"):
@@ -48,14 +49,14 @@ class Manager:
         self.update_env_configuration(1)
 
 
-    def run(self):
+    def run(self, repetitions):
         self.run_finished = False
         run_msg = SetBoolRequest()
 
-        for i in range(250):
+        for i in tqdm.tqdm(range(repetitions)):
             #START
             self.run_number = i
-            print("RUN {}". format(i))
+            #print("RUN {}". format(i))
             run_msg.data = True
             resp1 = self.run_client(run_msg)
             while not self.run_finished:
