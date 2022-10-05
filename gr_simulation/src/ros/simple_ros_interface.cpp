@@ -191,7 +191,7 @@ void SimpleROSInterface::OnUpdate(){
     auto collisionstate = collision->GetState();
     //std::cout << "HERE "<<std::endl;
 
-    geometry_msgs::TransformStamped base_link_to_odom;
+    geometry_msgs::TransformStamped camera_link_to_odom;
     geometry_msgs::TransformStamped odom_to_base_link;
 
     geometry_msgs::PoseStamped p0;
@@ -208,7 +208,7 @@ void SimpleROSInterface::OnUpdate(){
         p0.pose.position.y = current_pose.Pos().Y();
         p0.pose.orientation.w = 1.0;
         odom_to_base_link = tfBuffer.lookupTransform("base_link", "odom", ros::Time(0));
-        base_link_to_odom = tfBuffer.lookupTransform("odom", "base_link", ros::Time(0));
+        camera_link_to_odom = tfBuffer.lookupTransform("odom", "camera_link", ros::Time(0));
         tf2::doTransform(p0, p1, odom_to_base_link);
 
         /*
@@ -226,14 +226,11 @@ void SimpleROSInterface::OnUpdate(){
     }
     //double dist2robot = sqrt(pow(p1.pose.position.x,2)+pow(p1.pose.position.y,2));
     //In odom coordinates
-    double dist2robot = sqrt(pow(current_pose.Pos().X()- base_link_to_odom.transform.translation.x,2)+
-                        pow(current_pose.Pos().Y()- base_link_to_odom.transform.translation.y,2));
+    double dist2camera = sqrt(pow(p1.pose.position.x- camera_link_to_odom.transform.translation.x,2)+
+                        pow(p1.pose.position.y- camera_link_to_odom.transform.translation.y,2));
 
-    //std::cout << "Person world " << current_pose.Pos().X() << " , " << current_pose.Pos().Y() << std::endl;
-    //std::cout << "ROBOT world " << base_link_to_odom.transform.translation.x << " , " << base_link_to_odom.transform.translation.y << std::endl;
-    //std::cout << "Distance2robot " << dist2robot << std::endl;
     double dist2goal = sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2));
-    std::cout << "Distance2goal " << dist2goal << std::endl;
+    std::cout << "Distance2camera " << dist2camera << std::endl;
     //std::cout << "Not Collide" << collisionstate.IsZero() << std::endl;
 
     /*
@@ -248,11 +245,8 @@ void SimpleROSInterface::OnUpdate(){
     this->link->SetLinearVel(ignition::math::Vector3<double>(vx,vy,0.0));
     */
 
-    if (!collisionstate.IsZero()){
-        std::cout << "Collide in distance " << dist2robot << std::endl;
-    }
-     if (dist2goal <0.5 || dist2robot < dist2collision || dist2goal > original_distance){
-        ROS_ERROR_STREAM("DONE Distance 2 robot"<< dist2robot );
+    if (dist2goal <0.5 || dist2camera < dist2collision || dist2goal > original_distance){
+        ROS_ERROR_STREAM("DONE Distance 2 robot"<< dist2camera );
         //this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
         //this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));     
         //this->SetLinearVelocityX(0);
@@ -261,7 +255,7 @@ void SimpleROSInterface::OnUpdate(){
         //this->model->Reset();
 
         //std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
-        if (dist2robot < dist2collision && !is_collided){
+        if (dist2camera < dist2collision && !is_collided){
             is_collided = true;
             std::cout << "add offset to avoid collision"<< std::endl;
             startpose.Pos().Y() += 2.0;
@@ -275,7 +269,7 @@ void SimpleROSInterface::OnUpdate(){
             fb.base_link_pose.header = p1.header;
             fb.base_link_pose.point = p1.pose.position; 
             fb.inCollision = true;
-            fb.distance = dist2robot;
+            fb.distance = dist2camera;
             ROS_INFO_STREAM (fb);
             this->rosPub.publish(fb);
             this->rosFinishPub.publish(std_msgs::Empty());
