@@ -25,6 +25,9 @@
 #include <nav_msgs/Path.h>
 
 
+#include <safety_msgs/HumanSafety.h>
+
+
 #include <future>
 
 namespace gazebo

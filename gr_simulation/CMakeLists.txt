@@ -7,6 +7,7 @@ find_package(roscpp REQUIRED COMPONENTS std_msgs geometry_msgs gr_action_msgs na
 find_package(gr_action_msgs REQUIRED)
 find_package(actionlib REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(safety_msgs REQUIRED)
 
 
 find_package(gazebo REQUIRED)
@@ -29,7 +30,9 @@ include_directories(include
                     ${gr_action_msgs_INCLUDE_DIRS}
                     ${GAZEBO_INCLUDE_DIRS}
                     ${CMAKE_CURRENT_BINARY_DIR}/msgs
-                    ${SBPL_INCLUDE_DIRS})
+                    ${SBPL_INCLUDE_DIRS}
+                    ${safety_msgs_INCLUDE_DIRS}
+                    )
 
 link_directories(${Boost_INCLUDE_DIRS}
                  ${GAZEBO_LIBRARY_DIRS}

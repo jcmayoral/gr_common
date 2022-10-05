@@ -162,7 +162,9 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
     aserver = boost::make_shared<actionlib::SimpleActionServer<gr_action_msgs::SimMotionPlannerAction>>(nh, "SimMotionPlanner/" + this->model->GetName(),
                                                                 boost::bind(&SimpleROSInterface::executeCB, this, _1), false);
 
-    std::cout << "MODEL NAME " << this->model->GetName() << std::endl;
+    std::string topic_name = this->model->GetName() + "/human_collision";
+
+    rosPub = nh.advertise<safety_msgs::HumanSafety>(topic_name, 1);
 
     // Spin up the queue helper thread.
     futureObj = exitSignal.get_future();
@@ -184,27 +186,28 @@ void SimpleROSInterface::OnUpdate(){
     //std::cout << "HERE "<<std::endl;
 
     geometry_msgs::TransformStamped base_link_to_odom;
-    geometry_msgs::PoseStamped p;
+    geometry_msgs::PoseStamped p0;
+    geometry_msgs::PoseStamped p1;
 
     //tfBuffer.canTransform("base_link", "odom", ros::Time(0), ros::Duration(1.0) );
 
     try{
         //orientation of current odometry to map
-        p.header.stamp = ros::Time::now();
-        p.header.frame_id = "odom";
-        p.pose.position.x = current_pose.Pos().X();
-        p.pose.position.y = current_pose.Pos().Y();
-        p.pose.orientation.w = 1.0;
+        p0.header.stamp = ros::Time::now();
+        p0.header.frame_id = "odom";
+        p0.pose.position.x = current_pose.Pos().X();
+        p0.pose.position.y = current_pose.Pos().Y();
+        p0.pose.orientation.w = 1.0;
 
         base_link_to_odom = tfBuffer.lookupTransform("base_link", "odom", ros::Time(0));
-        tf2::doTransform(p, p, base_link_to_odom);
+        tf2::doTransform(p0, p1, base_link_to_odom);
     }
     catch(tf2::TransformException &ex){
         ROS_ERROR("%s",ex.what());
         return;
 
     }
-    double dist2robot = sqrt(pow(p.pose.position.x,2)+pow(p.pose.position.y,2));
+    double dist2robot = sqrt(pow(p1.pose.position.x,2)+pow(p1.pose.position.y,2));
     //std::cout << "Distance2robot " << dist2robot << std::endl;
     double dist2goal = sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2));
     //std::cout << "Distance2goal " << dist2goal << std::endl;
@@ -221,12 +224,22 @@ void SimpleROSInterface::OnUpdate(){
         this->model->Reset();
 
         //std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
-        if (dist2robot < 1.5){
+        if (dist2robot < dist2collision){
             std::cout << "add offset to avoid collision"<< std::endl;
             startpose.Pos().Y() += 2.0;
             endpose.Pos().Y() += 2.0;
             startpose.Pos().X() += 2.0;
             endpose.Pos().X() += 2.0;
+
+            safety_msgs::HumanSafety fb;
+            fb.odom_pose.header = p0.header;
+            fb.base_link_pose.header = p1.header;
+            fb.odom_pose.point = p0.pose.position;
+            fb.base_link_pose.point = p1.pose.position;
+            fb.inCollision = true;
+            fb.distance = dist2robot;
+            ROS_INFO_STREAM (fb);
+            this->rosPub.publish(fb);
         }
         
         std::swap(endpose,startpose);
