@@ -1,6 +1,0 @@
-SCORENumber of detections 1579
-SM1 Metric: 1.08396557655
-SM2 Metric: 1.0
-SM3 Metric: 2.0
-COVARIANCE [[ 2.85773804 -0.13619385]
- [-0.13619385  0.04705959]]

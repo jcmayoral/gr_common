@@ -1,5 +1,0 @@
-SCORE
-Number of detections 60
-SM1 Metric: 0.358333333333
-SM2 Metric: 0.0
-SM3 Metric: 0.5
