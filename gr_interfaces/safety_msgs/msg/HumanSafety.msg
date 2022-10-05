@@ -1,3 +1,4 @@
 bool inCollision
-geometry_msgs/PoseStamped pose
+geometry_msgs/PointStamped odom_pose
+geometry_msgs/PointStamped base_link_pose
 float32 distance
