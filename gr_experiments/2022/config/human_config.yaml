@@ -29,7 +29,7 @@ start_yaw:
   increment: 0.3926875
   default_value: 0
 collision_distance:
-  min_value: 1.2
-  max_value: 1.2
+  min_value: 0.6
+  max_value: 0.6
   increment: 0.0
   default_value: 1.0
