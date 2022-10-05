@@ -8,6 +8,7 @@ float64 linearspeedy
 float64 dist2collision
 geometry_msgs/PoseStamped startpose
 geometry_msgs/PoseStamped goalPose
+float64 original_distance
 ---
 bool succeeded
 float64 executing_time
