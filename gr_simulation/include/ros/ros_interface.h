@@ -15,7 +15,7 @@
 namespace gr_simulation{
     class ROSInterface{
         public:
-            ROSInterface();
+            ROSInterface(std::string action_id);
             virtual ~ROSInterface(){
                 dyn_server_.clearCallback();
             };

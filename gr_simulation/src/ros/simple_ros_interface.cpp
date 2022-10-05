@@ -2,7 +2,8 @@
 using namespace gazebo;
 
 SimpleROSInterface::SimpleROSInterface(): is_ok{true}, flag{false}, tfBuffer(ros::Duration(5)),
-                                tf2_listener(tfBuffer), dist2collision{1.5}, original_distance{10.0}{
+                                tf2_listener(tfBuffer), dist2collision{1.5}, original_distance{10.0},
+                                count{0}, is_collided{false}{
     // Initialize ros, if it has not already bee initialized
     std::cout << "CONSTRUCTOR 10 "<<std::endl;
     desiredspeed = new ignition::math::Vector3d();
@@ -21,6 +22,8 @@ SimpleROSInterface::SimpleROSInterface(): is_ok{true}, flag{false}, tfBuffer(ros
 
 
 void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal){
+    count = 0;
+    is_collided = false;
     std::cout << "OK execute cb " << this->model->GetName() << std::endl;
     original_distance = goal->original_distance;
     forward = true;
@@ -166,6 +169,9 @@ void SimpleROSInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf){
 
     rosPub = nh.advertise<safety_msgs::HumanSafety>(topic_name, 1);
 
+    std::string topic_name2 = this->model->GetName() + "/human_trigger";
+    rosFinishPub = nh.advertise<std_msgs::Empty>(topic_name2, 1);
+
     // Spin up the queue helper thread.
     futureObj = exitSignal.get_future();
     aserver->start();
@@ -190,7 +196,7 @@ void SimpleROSInterface::OnUpdate(){
 
     geometry_msgs::PoseStamped p0;
     geometry_msgs::PoseStamped p1;
-    geometry_msgs::PoseStamped pend;
+    //geometry_msgs::PoseStamped pend;
 
     //tfBuffer.canTransform("base_link", "odom", ros::Time(0), ros::Duration(1.0) );
 
@@ -255,24 +261,24 @@ void SimpleROSInterface::OnUpdate(){
         //this->model->Reset();
 
         //std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
-        if (dist2robot < dist2collision){
-            /*
+        if (dist2robot < dist2collision && !is_collided){
+            is_collided = true;
             std::cout << "add offset to avoid collision"<< std::endl;
             startpose.Pos().Y() += 2.0;
             endpose.Pos().Y() += 2.0;
             startpose.Pos().X() += 2.0;
             endpose.Pos().X() += 2.0;
-            */
-
             safety_msgs::HumanSafety fb;
-            fb.base_link_pose.header = p0.header;
-            fb.odom_pose.header = p1.header;
-            fb.base_link_pose.point = p0.pose.position;
-            fb.odom_pose.point = p1.pose.position;
+            fb.odom_pose.header = p0.header;
+            fb.odom_pose.point = p0.pose.position;
+
+            fb.base_link_pose.header = p1.header;
+            fb.base_link_pose.point = p1.pose.position; 
             fb.inCollision = true;
             fb.distance = dist2robot;
             ROS_INFO_STREAM (fb);
             this->rosPub.publish(fb);
+            this->rosFinishPub.publish(std_msgs::Empty());
         }
         
         //std::swap(endpose,startpose);
@@ -303,6 +309,11 @@ void SimpleROSInterface::OnUpdate(){
 
         this->SetLinearVelocityX(desiredspeed->X());
         this->SetLinearVelocityY(desiredspeed->Y());
+
+        if(count==2){
+            this->rosFinishPub.publish(std_msgs::Empty());
+        }
+        count++;
      }
     //this->pub->Publish(gazebo::msgs::Convert(current_pose));
 }

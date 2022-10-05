@@ -26,9 +26,8 @@
 
 #include <nav_msgs/Path.h>
 
-
 #include <safety_msgs/HumanSafety.h>
-
+#include <std_msgs/Empty.h>
 
 #include <future>
 
@@ -97,6 +96,8 @@ namespace gazebo
         /// \brief A ROS subscriber
         ros::Subscriber rosSub;
         ros::Publisher rosPub;
+        ros::Publisher rosFinishPub;
+
         /// \brief A ROS callbackqueue that helps process messages
         ros::CallbackQueue rosQueue;
         /// \brief A thread the keeps running the rosQueue
@@ -129,7 +130,9 @@ namespace gazebo
         tf2_ros::TransformListener tf2_listener;
 
         double original_distance;
+        int count;
 
+        bool is_collided;
   };
 
   // Tell Gazebo about this plugin, so that Gazebo can call Load on this plugin.

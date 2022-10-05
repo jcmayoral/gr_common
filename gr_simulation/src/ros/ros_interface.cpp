@@ -2,9 +2,9 @@
 using namespace gr_simulation;
 
 
-ROSInterface::ROSInterface(): tfBuffer(ros::Duration(5)),
+ROSInterface::ROSInterface(std::string action_id): tfBuffer(ros::Duration(5)),
                                 tf2_listener(tfBuffer){
-    ac_client_ = boost::make_shared<actionlib::SimpleActionClient<gr_action_msgs::SimMotionPlannerAction>>("SimMotionPlanner/my_person",true);
+    ac_client_ = boost::make_shared<actionlib::SimpleActionClient<gr_action_msgs::SimMotionPlannerAction>>(action_id,true);
     ROS_INFO("WAIT FOR SERVER");
     ac_client_->waitForServer();
     ROS_INFO("SERVER FOUND");
@@ -30,8 +30,8 @@ void ROSInterface::dyn_reconfigureCB(gr_simulation::PersonMotionConfig &config, 
     myquaternion.setRPY(0,0,config.start_yaw);
     //tf2::convert(p.pose.orientation , myquaternion);
     p.pose.orientation = tf2::toMsg(myquaternion);
-    base_link_to_odom = tfBuffer.lookupTransform("odom", "base_link", ros::Time::now(), ros::Duration(1.0) );
-    tf2::doTransform(p, p, base_link_to_odom);
+    //base_link_to_odom = tfBuffer.lookupTransform("odom", "base_link", ros::Time::now(), ros::Duration(1.0) );
+    //tf2::doTransform(p, p, base_link_to_odom);
 
     //tf2::Quaternion myquaternion;
     //myquaternion.setRPY(0,0,config.start_yaw);
@@ -53,7 +53,7 @@ void ROSInterface::dyn_reconfigureCB(gr_simulation::PersonMotionConfig &config, 
     //tf2::convert(p.pose.orientation , myquaternion);
     p2.pose.orientation = tf2::toMsg(myquaternion);
 
-    tf2::doTransform(p2, p2, base_link_to_odom);
+    //tf2::doTransform(p2, p2, base_link_to_odom);
 
     goal.original_distance = sqrt(pow(p.pose.position.x - p2.pose.position.x,2)+pow(p.pose.position.y - p2.pose.position.y,2))*1.2;
     ROS_INFO_STREAM("original_distance  "<<goal.original_distance);
