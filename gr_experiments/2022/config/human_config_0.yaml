@@ -11,20 +11,25 @@ linearvel:
 start_offset_x:
   min_value: 0.0
   max_value: -6.0
-  increment: 0.1
+  increment: 1.0
   default_value: -2.0
 start_offset_y:
   min_value: -1.0
   max_value: 10.0
-  increment: 0.5
+  increment: 1.0
   default_value: 2.0
 distanceToMove:
   min_value: 2.0
   max_value: 10.0
   increment: 0.5
-  default_value: 3.0
+  default_value: 10.0
 start_yaw:
   min_value: -3.1415
   max_value: 0.0
-  increment: 0.3926875
+  increment: 0.785375
   default_value: -3.1415
+collision_distance:
+  min_value: 1.2
+  max_value: 1.2
+  increment: 0.0
+  default_value: 1.0
