@@ -21,6 +21,8 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2/utils.h>
+#include <tf/tf.h>
+
 
 #include <nav_msgs/Path.h>
 
@@ -125,6 +127,8 @@ namespace gazebo
 
         tf2_ros::Buffer tfBuffer;
         tf2_ros::TransformListener tf2_listener;
+
+        double original_distance;
 
   };
 

@@ -2,7 +2,7 @@
 using namespace gazebo;
 
 SimpleROSInterface::SimpleROSInterface(): is_ok{true}, flag{false}, tfBuffer(ros::Duration(5)),
-                                tf2_listener(tfBuffer), dist2collision{1.5}{
+                                tf2_listener(tfBuffer), dist2collision{1.5}, original_distance{10.0}{
     // Initialize ros, if it has not already bee initialized
     std::cout << "CONSTRUCTOR 10 "<<std::endl;
     desiredspeed = new ignition::math::Vector3d();
@@ -22,6 +22,7 @@ SimpleROSInterface::SimpleROSInterface(): is_ok{true}, flag{false}, tfBuffer(ros
 
 void SimpleROSInterface::executeCB(const gr_action_msgs::SimMotionPlannerGoalConstPtr &goal){
     std::cout << "OK execute cb " << this->model->GetName() << std::endl;
+    original_distance = goal->original_distance;
     forward = true;
     gr_action_msgs::SimMotionPlannerFeedback feedback;
     gr_action_msgs::SimMotionPlannerResult result;
@@ -189,6 +190,7 @@ void SimpleROSInterface::OnUpdate(){
 
     geometry_msgs::PoseStamped p0;
     geometry_msgs::PoseStamped p1;
+    geometry_msgs::PoseStamped pend;
 
     //tfBuffer.canTransform("base_link", "odom", ros::Time(0), ros::Duration(1.0) );
 
@@ -202,41 +204,65 @@ void SimpleROSInterface::OnUpdate(){
         odom_to_base_link = tfBuffer.lookupTransform("base_link", "odom", ros::Time(0));
         base_link_to_odom = tfBuffer.lookupTransform("odom", "base_link", ros::Time(0));
         tf2::doTransform(p0, p1, odom_to_base_link);
+
+        /*
+        pend.header.stamp = ros::Time::now();
+        pend.header.frame_id = "odom";
+        pend.pose.position.x = endpose.Pos().X();
+        pend.pose.position.y = endpose.Pos().Y();
+        pend.pose.orientation.w = 1.0;
+        tf2::doTransform(pend, pend, odom_to_base_link);
+        */
     }
     catch(tf2::TransformException &ex){
         ROS_ERROR("%s",ex.what());
         return;
-
     }
     //double dist2robot = sqrt(pow(p1.pose.position.x,2)+pow(p1.pose.position.y,2));
     //In odom coordinates
     double dist2robot = sqrt(pow(current_pose.Pos().X()- base_link_to_odom.transform.translation.x,2)+
                         pow(current_pose.Pos().Y()- base_link_to_odom.transform.translation.y,2));
 
-    std::cout << "Person world " << current_pose.Pos().X() << " , " << current_pose.Pos().Y() << std::endl;
-    std::cout << "ROBOT world " << base_link_to_odom.transform.translation.x << " , " << base_link_to_odom.transform.translation.y << std::endl;
-    std::cout << "Distance2robot " << dist2robot << std::endl;
+    //std::cout << "Person world " << current_pose.Pos().X() << " , " << current_pose.Pos().Y() << std::endl;
+    //std::cout << "ROBOT world " << base_link_to_odom.transform.translation.x << " , " << base_link_to_odom.transform.translation.y << std::endl;
+    //std::cout << "Distance2robot " << dist2robot << std::endl;
     double dist2goal = sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2));
-    //std::cout << "Distance2goal " << dist2goal << std::endl;
+    std::cout << "Distance2goal " << dist2goal << std::endl;
     //std::cout << "Not Collide" << collisionstate.IsZero() << std::endl;
+
+    /*
+    tf2::Quaternion quat_tf;
+    tf2::convert(pend.pose.orientation , quat_tf);
+    tf2::Matrix3x3 m(quat_tf);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+    std::cout << " DIFF " << yaw << std::endl;
+    auto vx = this->link->RelativeLinearVel().X() * cos(yaw);
+    auto vy = this->link->RelativeLinearVel().Y() * sin(yaw);
+    this->link->SetLinearVel(ignition::math::Vector3<double>(vx,vy,0.0));
+    */
 
     if (!collisionstate.IsZero()){
         std::cout << "Collide in distance " << dist2robot << std::endl;
     }
-     if (dist2goal <0.5 || dist2robot < dist2collision){
+     if (dist2goal <0.5 || dist2robot < dist2collision || dist2goal > original_distance){
         ROS_ERROR_STREAM("DONE Distance 2 robot"<< dist2robot );
-        this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
-        this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));        
-        this->model->ResetPhysicsStates();
-        this->model->Reset();
+        //this->link->SetAngularVel(ignition::math::Vector3<double>(0.0,0.0,0.0));
+        //this->link->SetLinearVel(ignition::math::Vector3<double>(0.0,0.0,0.0));     
+        //this->SetLinearVelocityX(0);
+        //this->SetLinearVelocityY(0);   
+        //this->model->ResetPhysicsStates();
+        //this->model->Reset();
 
         //std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
         if (dist2robot < dist2collision){
+            /*
             std::cout << "add offset to avoid collision"<< std::endl;
             startpose.Pos().Y() += 2.0;
             endpose.Pos().Y() += 2.0;
             startpose.Pos().X() += 2.0;
             endpose.Pos().X() += 2.0;
+            */
 
             safety_msgs::HumanSafety fb;
             fb.base_link_pose.header = p0.header;
@@ -249,7 +275,7 @@ void SimpleROSInterface::OnUpdate(){
             this->rosPub.publish(fb);
         }
         
-        std::swap(endpose,startpose);
+        //std::swap(endpose,startpose);
         //std::cout << startpose.Pos().X() << "::::" << endpose.Pos().X() << std::endl;
 
         //startpose.Rot().Z() += M_PI;// - startpose.Rot().Z();//
@@ -273,7 +299,7 @@ void SimpleROSInterface::OnUpdate(){
         desiredspeed->X(-desiredspeed->X());
         desiredspeed->Y(-desiredspeed->Y());
 
-        endpose.Set(endpose.Pos(), endpose.Rot());
+        //endpose.Set(endpose.Pos(), endpose.Rot());
 
         this->SetLinearVelocityX(desiredspeed->X());
         this->SetLinearVelocityY(desiredspeed->Y());
