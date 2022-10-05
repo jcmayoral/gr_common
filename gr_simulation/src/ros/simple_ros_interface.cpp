@@ -226,8 +226,8 @@ void SimpleROSInterface::OnUpdate(){
     }
     //double dist2robot = sqrt(pow(p1.pose.position.x,2)+pow(p1.pose.position.y,2));
     //In odom coordinates
-    double dist2camera = sqrt(pow(p1.pose.position.x- camera_link_to_odom.transform.translation.x,2)+
-                        pow(p1.pose.position.y- camera_link_to_odom.transform.translation.y,2));
+    double dist2camera = sqrt(pow(p0.pose.position.x- camera_link_to_odom.transform.translation.x,2)+
+                        pow(p0.pose.position.y- camera_link_to_odom.transform.translation.y,2));
 
     double dist2goal = sqrt(pow(current_pose.Pos().X() - endpose.Pos().X(),2) + pow(current_pose.Pos().Y() - endpose.Pos().Y(),2));
     std::cout << "Distance2camera " << dist2camera << std::endl;
