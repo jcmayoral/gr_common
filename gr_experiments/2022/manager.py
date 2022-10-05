@@ -34,8 +34,8 @@ class Manager:
 
         rospy.Subscriber("/my_person/human_collision", HumanSafety,callback_args="0",callback=self.collision_cb, queue_size=1)
         rospy.Subscriber("/my_person/human_trigger", Empty,callback_args="0",callback=self.start_human, queue_size=1)
-        rospy.Subscriber("/my_person/human_collision_0", HumanSafety,callback_args="1",callback=self.collision_cb, queue_size=1)
-        rospy.Subscriber("/my_person/human_trigger_0", Empty,callback_args="1",callback=self.start_human, queue_size=1)
+        rospy.Subscriber("/my_person_0/human_collision", HumanSafety,callback_args="1",callback=self.collision_cb, queue_size=1)
+        rospy.Subscriber("/my_person_0/human_trigger", Empty,callback_args="1",callback=self.start_human, queue_size=1)
 
         rospy.Timer(rospy.Duration(15), self.timer_cb)
 
