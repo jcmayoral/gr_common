@@ -6,6 +6,8 @@ from configuration import ConfigurationManager
 from std_srvs.srv import SetBool, SetBoolRequest
 import os
 import tqdm
+import time
+import copy
 
 class Manager:
     def __init__(self, id="test_results"):
@@ -71,20 +73,20 @@ class Manager:
 
     def stop_cb(self):
         with open('{}/stop.txt'.format(self.test_id),'a') as f:
-            f.write("{} {}\n". format(str(self.run_number) ,str(rospy.Time.now())))
+            f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
 
     def estop_cb(self,msg):
         with open('{}/estop.txt'.format(self.test_id),'a') as f:
-            f.write("{} {}\n". format(str(self.run_number) ,str(rospy.Time.now())))
+            f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
         self.run_finished = True
 
     def start_cb(self,msg):
         with open('{}/start.txt'.format(self.test_id),'a') as f:
-            f.write("{} {}\n". format(str(self.run_number) ,str(rospy.Time.now())))
+            f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
 
     def collision_cb(self,msg, id):
         #run_id time
-        msg_str="{} {} ". format(str(self.run_number) ,str(rospy.Time.now()))
+        msg_str="{} {} ". format(str(self.run_number) ,str(time.time()))
         #odom pose
         msg_str+="{} {} ".format(msg.odom_pose.point.x,msg.odom_pose.point.y)
         #base_link pose
