@@ -52,13 +52,14 @@ class Manager:
 
     def start_human(self,event,id):
         #print ("restart person")
-        self.update_env_configuration(0)
-        self.update_env_configuration(1)
+        idx = 0
+        if id == "_0":
+            idx = 1
+        self.update_env_configuration(idx)
 
     def bumper_vals(self,msg):
         if len(msg.states) ==0:
             return
-        print ("bumper_vals")
         self.update_env_configuration(0)
         self.update_env_configuration(1)
 

@@ -19,23 +19,29 @@ def mean_distance(person1, person2):
         distances.append(d)
     print("Mean Collision Distance " , np.mean(np.asarray(distances)))
 
-def plot_coordinates(data, title, filename):
-    plt.figure()
-    plt.title(title)
+def plot_coordinates(data, title, filename, new = True):
+    if new:
+        plt.figure()
+        plt.title(title)
     for d in data:
         plt.scatter(d[:,0], d[:,1])
     plt.savefig(filename)
 
 #check
-def plot_coordinates2(data, vxs, title, filename):
+def plot_coordinates2(data, vxs, title, filename, save=True):
+    #if new:
     plt.figure()
     plt.title(title)
-    plt.scatter(data[:,0], data[:,1], s=100*vxs/np.mean(vxs))
-    plt.savefig(filename)
+    plt.scatter(data[:,0], data[:,1], s = 20, c=vxs/np.max(vxs), alpha=0.5, cmap='jet')
+    plt.colorbar()
+    if save:
+        plt.savefig(filename)
 
 
-def time_between_collision(person1, person2):
+def time_between_collision(person1, person2,start_time, stop_time):
     time_between_collision = list()
+    #tiempo desde iniicio a primera colision
+    time_between_collision.append(person1[0] - start_time)
 
     for data in (person1, person2):    
         t0 = data[0]
@@ -43,6 +49,9 @@ def time_between_collision(person1, person2):
         for i in range(1, len(data)):
             time_between_collision.append(data[i] - t0)
             t0 = copy.copy(data[i])
+
+    #tiempo desde ultima colision a final
+    time_between_collision.append(stop_time - person2[-1])
 
     print ("Mean Time between collisions " , np.mean(time_between_collision))
 
@@ -61,6 +70,8 @@ def filter_collisions(odom, collisions):
     vxs = odom[:,8]
     authenticity = list()
 
+    average_speed = list()
+
     for collision in collisions:
         collision_time = collision[1]
         closest_time = 1000000
@@ -74,7 +85,10 @@ def filter_collisions(odom, collisions):
                 idx = o
                 vx = velx
                 closest_time = np.fabs(odom_time - collision_time)
-        authenticity.append(np.fabs(vx)>0.3)
+        authenticity.append(np.fabs(vx)>0.1)
+        if np.fabs(vx)>0.1:
+            average_speed.append(vx)
+
     assert len(collisions) == len(authenticity)
 
     authentic_collisions = list()
@@ -83,9 +97,10 @@ def filter_collisions(odom, collisions):
         if (authenticity[i]):
             authentic_collisions.append(collisions[i])
 
-    
+    print ("Avergae speed on collision ", np.mean(np.asarray(average_speed)))
     print(len(collisions), len(authentic_collisions))
     return np.asarray(authentic_collisions)
+
 
 
 if __name__== "__main__":
@@ -113,10 +128,13 @@ if __name__== "__main__":
     mean_execution_time(stop, start)
     #run_id 0
     #time 1
-    time_between_collision(person1[:,1], person2[:,1])
+    time_between_collision(person1[:,1], person2[:,1], start[0], stop[-1])
     #odom pose 2 3
     plot_coordinates((person1[:,2:4],person2[:,2:4]), "Collision in Map coordinates", "{}/odom_coordinates.png".format(experiment))
     #base_link pose 4 5
     plot_coordinates((person1[:,4:6],person2[:,4:6]), "Collision in Relative coordinates", "{}/local_coordinates.png".format(experiment))
     #distance 6
     mean_distance(person1[:,-1], person2[:,-1])
+
+    plot_coordinates2(odom[:,2:4], odom[:,8], "Collisions and Robot Path","", save=False)
+    plot_coordinates((person1[:,2:4],person2[:,2:4]), "", "{}/robot_collision.png".format(experiment), new=False)
