@@ -74,8 +74,7 @@ def filter_collisions(odom, collisions):
                 idx = o
                 vx = velx
                 closest_time = np.fabs(odom_time - collision_time)
-        print(vx, idx, closest_time, np.fabs(vx>0.1))
-        authenticity.append(np.fabs(vx)>0.1)
+        authenticity.append(np.fabs(vx)>0.3)
     assert len(collisions) == len(authenticity)
 
     authentic_collisions = list()
