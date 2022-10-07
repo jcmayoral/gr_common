@@ -4,6 +4,8 @@ from safety_msgs.msg import HumanSafety
 from dynamic_reconfigure.client import Client, DynamicReconfigureCallbackException
 from configuration import ConfigurationManager
 from std_srvs.srv import SetBool, SetBoolRequest
+from gazebo_msgs.msg import ContactsState
+from nav_msgs.msg import Odometry
 import os
 import tqdm
 import time
@@ -37,7 +39,10 @@ class Manager:
             self.env_params.append(dict())
             rospy.Subscriber("/my_person{}/human_collision".format(i), HumanSafety,callback_args=i,callback=self.collision_cb, queue_size=1)
             rospy.Subscriber("/my_person{}/human_trigger".format(i), Empty,callback_args=i,callback=self.start_human, queue_size=1)
-        
+
+        rospy.Subscriber("/bumper_vals", ContactsState, queue_size=1, callback=self.bumper_vals)
+        rospy.Subscriber("/odometry/base_raw", Odometry, queue_size=1, callback=self.odom_cb)
+
         rospy.Timer(rospy.Duration(15), self.timer_cb)
 
     def timer_cb(self,event):
@@ -50,6 +55,12 @@ class Manager:
         self.update_env_configuration(0)
         self.update_env_configuration(1)
 
+    def bumper_vals(self,msg):
+        if len(msg.states) ==0:
+            return
+        print ("bumper_vals")
+        self.update_env_configuration(0)
+        self.update_env_configuration(1)
 
     def run(self, repetitions):
         self.run_finished = False
@@ -83,6 +94,20 @@ class Manager:
     def start_cb(self,msg):
         with open('{}/start.txt'.format(self.test_id),'a') as f:
             f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
+
+    def odom_cb(self,msg):
+        #run_id time
+        msg_str="{} {} ". format(str(self.run_number) ,str(time.time()))
+        #odom pose
+        msg_str+="{} {} ".format(msg.pose.pose.position.x,msg.pose.pose.position.y)
+        #odom quat
+        msg_str+="{} {} {} {} ".format(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,msg.pose.pose.orientation.z, msg.pose.pose.orientation.w )
+        #velocity
+        msg_str+="{} {} {} \n".format(msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.angular.z)
+        
+
+        with open('{}/odom.txt'.format(self.test_id, id),'a') as f:
+            f.write(msg_str)
 
     def collision_cb(self,msg, id):
         #run_id time
