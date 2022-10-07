@@ -27,11 +27,10 @@ def plot_coordinates(data, title, filename):
     plt.savefig(filename)
 
 #check
-def plot_coordinates2(data, title, filename):
+def plot_coordinates2(data, vxs, title, filename):
     plt.figure()
     plt.title(title)
-    print (data.shape)
-    plt.scatter(data[:,0], data[:,1])
+    plt.scatter(data[:,0], data[:,1], s=100*vxs/np.mean(vxs))
     plt.savefig(filename)
 
 
@@ -56,20 +55,60 @@ def mean_execution_time(stops, starts):
 def average_speed(vxs, vys, vzs):
     print("Mean speed {} {} {}".format(np.mean(vxs),np.mean(vys),np.mean(vzs)))
 
+def filter_collisions(odom, collisions):
+    collision_time = collisions[:,1]
+    odom_time = odom[:,1]
+    vxs = odom[:,8]
+    authenticity = list()
+
+    for collision in collisions:
+        collision_time = collision[1]
+        closest_time = 1000000
+        idx = -1
+        vx = -1
+        #best index
+        for o in range(len(odom)):
+            odom_time = odom[o,1]
+            velx = odom[o,8]
+            if np.fabs(odom_time - collision_time) < closest_time:
+                idx = o
+                vx = velx
+                closest_time = np.fabs(odom_time - collision_time)
+        print(vx, idx, closest_time, np.fabs(vx>0.1))
+        authenticity.append(np.fabs(vx)>0.1)
+    assert len(collisions) == len(authenticity)
+
+    authentic_collisions = list()
+
+    for i in range(len(authenticity)):
+        if (authenticity[i]):
+            authentic_collisions.append(collisions[i])
+
+    
+    print(len(collisions), len(authentic_collisions))
+    return np.asarray(authentic_collisions)
+
 
 if __name__== "__main__":
     if len(sys.argv) != 2:
         sys.exit()
     experiment = sys.argv[1]
-    person1 = read_file("{}/collision.txt".format(experiment))
-    person2 = read_file("{}/collision_0.txt".format(experiment))
+    person1_raw = read_file("{}/collision.txt".format(experiment))
+
+    person2_raw = read_file("{}/collision_0.txt".format(experiment))
     start = read_file("{}/start.txt".format(experiment))[:,1]
     stop = read_file("{}/stop.txt".format(experiment))[:,1]    
     odom = read_file("{}/odom.txt".format(experiment))    
+
+
+    person1 = filter_collisions(odom,person1_raw)
+    person2 = filter_collisions(odom,person2_raw)
+
+
     #average speed
     average_speed(odom[:,-3], odom[:,-2], odom[:,-1])
     #odom pose
-    plot_coordinates2(odom[:,2:4], "robot_path", "{}/robot_path.png".format(experiment))
+    plot_coordinates2(odom[:,2:4], odom[:,8], "robot_path", "{}/robot_path.png".format(experiment))
 
     #Execution Time
     mean_execution_time(stop, start)
