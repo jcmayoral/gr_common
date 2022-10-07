@@ -3,9 +3,10 @@ from std_msgs.msg import Time, Empty
 from safety_msgs.msg import HumanSafety
 from dynamic_reconfigure.client import Client, DynamicReconfigureCallbackException
 from configuration import ConfigurationManager
-from std_srvs.srv import SetBool, SetBoolRequest
+from std_srvs.srv import SetBool, SetBoolRequest, Trigger, TriggerResponse
 from gazebo_msgs.msg import ContactsState
 from nav_msgs.msg import Odometry
+
 import os
 import tqdm
 import time
@@ -28,9 +29,15 @@ class Manager:
         except:
             print("folder existed")
         self.test_id = id
+
+        self.hri_requested = False
+
+        rospy.Subscriber("/hri_requested", Empty, self.hri_cb, queue_size=1)
+
         rospy.Subscriber("/start", Time,self.start_cb, queue_size=1)
         rospy.Subscriber("/stop", Time,self.estop_cb, queue_size=1)
 
+        self.hri_client = rospy.ServiceProxy("/gr_human_intervention/reset", Trigger)
 
         indexes = ["", "_0"]
         for i in indexes:
@@ -44,6 +51,10 @@ class Manager:
         rospy.Subscriber("/odometry/base_raw", Odometry, queue_size=1, callback=self.odom_cb)
 
         rospy.Timer(rospy.Duration(15), self.timer_cb)
+
+    def hri_cb(self, msg):
+        print ("hri cb")
+        self.hri_requested = True
 
     def timer_cb(self,event):
         #print ('Timer called at ' + str(event.current_real))
@@ -73,8 +84,12 @@ class Manager:
             #print("RUN {}". format(i))
             run_msg.data = True
             resp1 = self.run_client(run_msg)
-            while not self.run_finished:
+            while not self.run_finished and not self.hri_requested:
                 rospy.sleep(0.1)
+            if (self.hri_requested):
+                self.restart()
+                i = i-1
+                continue
             self.run_finished = False
             #rospy.logwarn("Restarting")
             #run_msg.data = False
@@ -82,6 +97,12 @@ class Manager:
             self.stop_cb()
         self.has_finished = True
 
+    def restart(self):
+        print ("restart")
+        with open('{}/hri_requests.txt'.format(self.test_id),'a') as f:
+            f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
+        self.hri_client.call()
+        self.hri_requested = False
 
     def stop_cb(self):
         with open('{}/stop.txt'.format(self.test_id),'a') as f:
