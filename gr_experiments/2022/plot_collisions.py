@@ -19,13 +19,21 @@ def mean_distance(person1, person2):
         distances.append(d)
     print("Mean Collision Distance " , np.mean(np.asarray(distances)))
 
-def plot_coordinates(person1, person2, title, filename):
-    print (person1)
+def plot_coordinates(data, title, filename):
     plt.figure()
     plt.title(title)
-    for data in (person1, person2):
-        plt.scatter(data[:,0], data[:,1])
+    for d in data:
+        plt.scatter(d[:,0], d[:,1])
     plt.savefig(filename)
+
+#check
+def plot_coordinates2(data, title, filename):
+    plt.figure()
+    plt.title(title)
+    print (data.shape)
+    plt.scatter(data[:,0], data[:,1])
+    plt.savefig(filename)
+
 
 def time_between_collision(person1, person2):
     time_between_collision = list()
@@ -35,7 +43,7 @@ def time_between_collision(person1, person2):
 
         for i in range(1, len(data)):
             time_between_collision.append(data[i] - t0)
-            to = copy.copy(data[i])
+            t0 = copy.copy(data[i])
 
     print ("Mean Time between collisions " , np.mean(time_between_collision))
 
@@ -43,8 +51,10 @@ def mean_execution_time(stops, starts):
     execution_times = list()
     for s, st in zip(starts, stops):
         execution_times.append(st-s)
-
     print("Mean Execution Time " , np.mean(np.asarray(execution_times)))
+
+def average_speed(vxs, vys, vzs):
+    print("Mean speed {} {} {}".format(np.mean(vxs),np.mean(vys),np.mean(vzs)))
 
 
 if __name__== "__main__":
@@ -55,15 +65,20 @@ if __name__== "__main__":
     person2 = read_file("{}/collision_0.txt".format(experiment))
     start = read_file("{}/start.txt".format(experiment))[:,1]
     stop = read_file("{}/stop.txt".format(experiment))[:,1]    
+    odom = read_file("{}/odom.txt".format(experiment))    
+    #average speed
+    average_speed(odom[:,-3], odom[:,-2], odom[:,-1])
+    #odom pose
+    plot_coordinates2(odom[:,2:4], "robot_path", "{}/robot_path.png".format(experiment))
+
     #Execution Time
     mean_execution_time(stop, start)
-
     #run_id 0
     #time 1
     time_between_collision(person1[:,1], person2[:,1])
     #odom pose 2 3
-    plot_coordinates(person1[:,2:4],person2[:,2:4], "Collision in Map coordinates", "{}/odom_coordinates.png".format(experiment))
+    plot_coordinates((person1[:,2:4],person2[:,2:4]), "Collision in Map coordinates", "{}/odom_coordinates.png".format(experiment))
     #base_link pose 4 5
-    plot_coordinates(person1[:,4:6],person2[:,4:6], "Collision in Relative coordinates", "{}/local_coordinates.png".format(experiment))
+    plot_coordinates((person1[:,4:6],person2[:,4:6]), "Collision in Relative coordinates", "{}/local_coordinates.png".format(experiment))
     #distance 6
     mean_distance(person1[:,-1], person2[:,-1])

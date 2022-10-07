@@ -103,7 +103,7 @@ class Manager:
         #odom quat
         msg_str+="{} {} {} {} ".format(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,msg.pose.pose.orientation.z, msg.pose.pose.orientation.w )
         #velocity
-        msg_str+="{} {} {} \n".format(msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.angular.z)
+        msg_str+="{} {} {}\n".format(msg.twist.twist.linear.x, msg.twist.twist.linear.y, msg.twist.twist.angular.z)
         
 
         with open('{}/odom.txt'.format(self.test_id, id),'a') as f:
