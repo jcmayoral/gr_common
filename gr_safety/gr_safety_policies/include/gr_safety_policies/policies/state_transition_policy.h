@@ -38,7 +38,7 @@ namespace gr_safety_policies
       void doAction();
       void states_CB(const detection_msgs::BoundingBoxesConstPtr current_detections);
       void updateState(const ros::TimerEvent& event);
-      void undoAction();
+      void undoAction(std::string action);
       void updateState();
 
     private:

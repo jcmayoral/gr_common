@@ -13,7 +13,7 @@ namespace gr_safety_policies
         state_t1_str_("Unknown"),
         action_loader_("safety_core", "safety_core::SafeAction"),
         action_info_(new TransitionInfo()), state_t_str_("Unknown"),
-        update_(false), last_detection_time_(ros::Time::now()), clear_delay_(10.0),
+        update_(false), last_detection_time_(ros::Time::now()), clear_delay_(1.0),
         last_executed_action_(""), riskier_id_{std::numeric_limits<int>::max()},
         is_same_person_{false}, last_person_in_borders_{false}
     {
@@ -105,7 +105,6 @@ namespace gr_safety_policies
     }
 
     bool StateTransitionPolicy::checkPolicy(){
-        ROS_INFO("new cycle");
         //Restart
         riskier_id_ = std::numeric_limits<int>::max();
 
@@ -129,6 +128,7 @@ namespace gr_safety_policies
         //std::cout << "centroid " << centroidx << std::endl;
 
          //Update flag
+        /*
         if (0.15>centroidx>0 || 1.0>centroidx> 0.85){
             last_person_in_borders_ = true;
         }
@@ -136,6 +136,7 @@ namespace gr_safety_policies
             ROS_WARN("Person not in borders");
             last_person_in_borders_ = false;
         }
+        */
         return policy_state;
     }
 
@@ -169,7 +170,10 @@ namespace gr_safety_policies
        double transcurred_time = (ros::Time::now() - last_detection_time_).toSec();//seconds
        //Undo Action
        if (transcurred_time >= clear_delay_){
-           undoAction();
+           undoAction("slow_action");
+           undoAction("stop_action");
+           //undoAction("human_intervention");
+
            updateState();
        }
        //bb_info_ = new BoundingBoxInfo();
@@ -187,13 +191,12 @@ namespace gr_safety_policies
         //bb_info_ = new BoundingBoxInfo();
     }
 
-    void StateTransitionPolicy::undoAction(){
+    void StateTransitionPolicy::undoAction(std::string action_name){
         //std::scoped_lock lock(mtx_);f
-        ROS_INFO_STREAM("undo action " << last_executed_action_);
         //last_executed_action
-        if(action_loader_.isClassAvailable(last_executed_action_)){
+        if(action_loader_.isClassAvailable(action_name)){
             boost::shared_ptr<safety_core::SafeAction> action;
-            action = action_loader_.createInstance(last_executed_action_);
+            action = action_loader_.createInstance(action_name);
             if (!action_info_->negate){
                 ROS_ERROR("Undo negate action");
                 action->stop();

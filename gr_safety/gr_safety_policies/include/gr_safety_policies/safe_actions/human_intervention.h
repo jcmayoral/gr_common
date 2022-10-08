@@ -5,6 +5,8 @@
 #include <ros/ros.h>
 #include<std_srvs/Trigger.h>
 #include<std_srvs/TriggerResponse.h>
+#include<std_msgs/Empty.h>
+
 
 
 namespace gr_safety_policies{
@@ -14,6 +16,7 @@ namespace gr_safety_policies{
             ~HumanInterventionSafeAction();
             virtual void execute();
             virtual void stop();
+            ros::Publisher notification_pub_;
     };
 };
 

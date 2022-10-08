@@ -16,7 +16,6 @@ find_package(catkin REQUIRED
         std_msgs
         std_srvs
         detection_msgs
-	#cv_bridge
         message_filters
         detection_msgs
 )
