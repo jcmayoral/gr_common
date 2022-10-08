@@ -37,8 +37,6 @@ class Manager:
         rospy.Subscriber("/start", Time,self.start_cb, queue_size=1)
         rospy.Subscriber("/stop", Time,self.estop_cb, queue_size=1)
 
-        self.hri_client = rospy.ServiceProxy("/gr_human_intervention/reset", Trigger)
-
         indexes = ["", "_0"]
         for i in indexes:
             self.env_dyn_client.append(Client("interface_for_person{}".format(i), timeout=30,config_callback=None))
@@ -54,8 +52,9 @@ class Manager:
 
     def hri_cb(self, msg):
         print ("hri cb")
-        self.hri_requested = True
-
+        with open('{}/hri_requests.txt'.format(self.test_id),'a') as f:
+            f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
+    
     def timer_cb(self,event):
         #print ('Timer called at ' + str(event.current_real))
         self.update_env_configuration(0)
@@ -77,38 +76,42 @@ class Manager:
     def run(self, repetitions):
         self.run_finished = False
         run_msg = SetBoolRequest()
+        i =0
+        resp1 = self.run_client(run_msg)
+        rospy.sleep(1.0)
 
-        for i in tqdm.tqdm(range(repetitions)):
+        #for i in tqdm.tqdm(range(repetitions)):
+        while i < repetitions:
+            print ("{} of {}".format(i, repetitions))
             #START
             self.run_number = i
             #print("RUN {}". format(i))
             run_msg.data = True
-            resp1 = self.run_client(run_msg)
-            while not self.run_finished and not self.hri_requested:
-                rospy.sleep(0.1)
-            if (self.hri_requested):
-                self.restart()
-                i = i-1
-                continue
+            self.run_client.call(run_msg)
+            rospy.sleep(0.4)
             self.run_finished = False
+
+            while not self.run_finished:
+                rospy.sleep(0.1)
+
+
+            print ("end or abort")
+            #self.run_finished = False
+
+            print("end")
+            i=i+1
             #rospy.logwarn("Restarting")
             #run_msg.data = False
             #resp1 = self.run_client(run_msg)
             self.stop_cb()
         self.has_finished = True
 
-    def restart(self):
-        print ("restart")
-        with open('{}/hri_requests.txt'.format(self.test_id),'a') as f:
-            f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
-        self.hri_client.call()
-        self.hri_requested = False
-
     def stop_cb(self):
         with open('{}/stop.txt'.format(self.test_id),'a') as f:
             f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
 
     def estop_cb(self,msg):
+        print("estop")
         with open('{}/estop.txt'.format(self.test_id),'a') as f:
             f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
         self.run_finished = True
