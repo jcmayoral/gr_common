@@ -1,0 +1,2 @@
+string previous
+string current
