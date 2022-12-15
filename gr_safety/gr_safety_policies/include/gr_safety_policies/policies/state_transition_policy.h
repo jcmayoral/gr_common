@@ -5,6 +5,7 @@
 #include <string>
 #include <std_msgs/String.h>
 #include <detection_msgs/BoundingBoxes.h>
+#include <safety_msgs/StateTransition.h>
 
 #include <safety_core/safe_action.h>
 #include <safety_core/safe_policy.h>
@@ -66,6 +67,9 @@ namespace gr_safety_policies
 
       ros::Timer timer_;
       ros::Time last_detection_time_;
+
+      ros::Publisher fb_pub_;
+      safety_msgs::StateTransition fb_msg_;
 
   };
 

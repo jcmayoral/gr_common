@@ -56,7 +56,7 @@ namespace gr_safety_policies
     double highest_iou = 0.0;
 
     //Get Most Dangerous from the msg
-    for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){        
+    for (auto it = current_detections->bounding_boxes.begin(); it!=current_detections->bounding_boxes.end();it++){
         //If risk state is lowe than actual
         if (manager_.levels[it->Class]<= manager_.levels[msg_state_str]){
             //ROS_INFO_STREAM("This person Class " << it->Class << " Current State in Msg " << msg_state_str);
@@ -65,16 +65,21 @@ namespace gr_safety_policies
                 continue;
             }
             msg_riskier_state = manager_.levels[it->Class];
-            //local iou 
+            //local iou
             highest_iou = iou;
             //strings
             msg_state_str = it->Class;
             //Bounding Box
-            riskier_bb = std::move(*(it));        
+            riskier_bb = std::move(*(it));
         }
         //update time
         last_detection_time_ = ros::Time::now();
     }
+
+    //FEEDBACK
+    fb_msg_.current = msg_state_str;
+    fb_msg_.previous = state_t1_str_;
+    fb_pub_.publish(fb_msg_);
 
     //Compare with timed window
     if(msg_riskier_state < riskier_id_){
@@ -89,17 +94,18 @@ namespace gr_safety_policies
         ROS_ERROR_STREAM("IOU "<< iou << "same person "<< is_same_person_);
 
         //new Coordinate from riskier person
-        bb_info_->updateObject(&riskier_bb); 
+        bb_info_->updateObject(&riskier_bb);
 
         //ROS_ERROR_STREAM("UPDATED " << bb_info_ << " IOU "<< iou << " is_same_person "<< is_same_person_);
         state_t_str_ = msg_state_str;
         *action_info_ = manager_.transition[state_t1_str_][state_t_str_];
         riskier_id_ = manager_.levels[msg_state_str];
     }
-    
+
    }
 
     void StateTransitionPolicy::instantiateServices(ros::NodeHandle nh){
+        fb_pub_ = nh.advertise<safety_msgs::StateTransition>("~/feedback",10);
         states_sub_ = nh.subscribe("/yolov5/detections", -1, &StateTransitionPolicy::states_CB, this);
         timer_ = nh.createTimer(ros::Duration(0.05), &StateTransitionPolicy::updateState,this);
     }
