@@ -6,7 +6,7 @@ import random
 class ConfigurationManager:
     def __init__(self, config_name = 'config/human_config.yaml', static_dict=None):
         file_stream = open(config_name, 'r')
-        params = yaml.load(file_stream)
+        params = yaml.load(file_stream,  Loader=yaml.Loader)
 
         self.config_params = dict()
         self.static_dict = dict()
