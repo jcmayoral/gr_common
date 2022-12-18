@@ -3,11 +3,19 @@ import numpy as np
 import rospy
 import copy
 import sys
+import os
 
 def read_file(filename):
     with open(filename,"r") as f:
         data = f.readlines()
     f = lambda data : [float(d) for d in data.rstrip().split(" ") ]
+    data = map(f, data)
+    return np.asarray(list(data))
+
+def read_file2(filename):
+    with open(filename,"r") as f:
+        data = f.readlines()
+    f = lambda data : [d for d in data.rstrip().split(" ") ]
     data = map(f, data)
     return np.asarray(list(data))
 
@@ -101,6 +109,18 @@ def filter_collisions(odom, collisions):
     print(len(collisions), len(authentic_collisions))
     return np.asarray(authentic_collisions)
 
+def process_states(states, filename):
+    acc = np.zeros((5,5))
+    map_idx = dict({'Lethal': 0, 'Danger': 1, 'Warning': 2, 'Safe': 3, 'Unknown': 4})
+
+    for i in range(len(states)):
+        ind1 = map_idx[states[i,1]]
+        ind2 = map_idx[states[i,2]]    
+        acc[ind1, ind2] += 1
+    plt.matshow(acc)
+    plt.colorbar()
+    #plt.show()
+    plt.savefig(filename)
 
 
 if __name__== "__main__":
@@ -112,8 +132,11 @@ if __name__== "__main__":
     person2_raw = read_file("{}/collision_0.txt".format(experiment))
     start = read_file("{}/start.txt".format(experiment))[:,1]
     stop = read_file("{}/stop.txt".format(experiment))[:,1]    
-    odom = read_file("{}/odom.txt".format(experiment))    
+    odom = read_file("{}/odom.txt".format(experiment))
 
+    if os.path.exists("{}/state_transitions.txt".format(experiment)):
+        states = read_file2("{}/state_transitions.txt".format(experiment))
+        process_states(states,"{}/conf_matrix.png".format(experiment))
 
     person1 = filter_collisions(odom,person1_raw)
     person2 = filter_collisions(odom,person2_raw)
