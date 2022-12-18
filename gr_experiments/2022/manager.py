@@ -53,7 +53,7 @@ class Manager:
 
     def st_cb(self, msg):
         with open('{}/state_transitions.txt'.format(self.test_id),'a') as f:
-            f.write("{} {}\n". format(str(time.time()), msg.previous, msg.current))
+            f.write("{} {} {}\n". format(str(time.time()), msg.previous, msg.current))
 
     def hri_cb(self, msg):
         print ("hri cb")
