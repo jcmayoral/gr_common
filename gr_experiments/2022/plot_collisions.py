@@ -4,6 +4,8 @@ import rospy
 import copy
 import sys
 import os
+from sklearn.preprocessing import normalize
+
 
 def read_file(filename):
     with open(filename,"r") as f:
@@ -119,10 +121,11 @@ def process_states(states, filename):
         acc[ind1, ind2] += 1
     
     fig, ax = plt.subplots()
+    x_normed = acc#normalize(acc, axis=1, norm='l1')
     # Using matshow here just because it sets the ticks up nicely. imshow is faster.
-    ax.matshow(acc, cmap='spring')
+    ax.matshow(x_normed, cmap='prism')
 
-    for (i, j), z in np.ndenumerate(acc):
+    for (i, j), z in np.ndenumerate(x_normed):
         ax.text(j, i, '{:0.1f}'.format(z), ha='center', va='center')
 
     #plt.colorbar()
