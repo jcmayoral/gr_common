@@ -117,8 +117,15 @@ def process_states(states, filename):
         ind1 = map_idx[states[i,1]]
         ind2 = map_idx[states[i,2]]    
         acc[ind1, ind2] += 1
-    plt.matshow(acc)
-    plt.colorbar()
+    
+    fig, ax = plt.subplots()
+    # Using matshow here just because it sets the ticks up nicely. imshow is faster.
+    ax.matshow(acc, cmap='spring')
+
+    for (i, j), z in np.ndenumerate(acc):
+        ax.text(j, i, '{:0.1f}'.format(z), ha='center', va='center')
+
+    #plt.colorbar()
     #plt.show()
     plt.savefig(filename)
 
