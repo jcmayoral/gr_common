@@ -56,7 +56,6 @@ class Manager:
             f.write("{} {} {}\n". format(str(time.time()), msg.previous, msg.current))
 
     def hri_cb(self, msg):
-        print ("hri cb")
         with open('{}/hri_requests.txt'.format(self.test_id),'a') as f:
             f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
 
@@ -87,7 +86,7 @@ class Manager:
 
         #for i in tqdm.tqdm(range(repetitions)):
         while i < repetitions:
-            print ("{} of {}".format(i, repetitions))
+            print ("{} of {}".format(i+1, repetitions))
             #START
             self.run_number = i
             #print("RUN {}". format(i))
@@ -116,7 +115,6 @@ class Manager:
             f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
 
     def estop_cb(self,msg):
-        print("estop")
         with open('{}/estop.txt'.format(self.test_id),'a') as f:
             f.write("{} {}\n". format(str(self.run_number) ,str(time.time())))
         self.run_finished = True
