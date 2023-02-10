@@ -95,8 +95,8 @@ def filter_collisions(odom, collisions):
                 idx = o
                 vx = velx
                 closest_time = np.fabs(odom_time - collision_time)
-        authenticity.append(np.fabs(vx)>0.1)
-        if np.fabs(vx)>0.1:
+        authenticity.append(np.fabs(vx)>0.2)
+        if np.fabs(vx)>0.2:
             average_speed.append(vx)
 
     assert len(collisions) == len(authenticity)
@@ -119,14 +119,22 @@ def process_states(states, filename):
         ind1 = map_idx[states[i,1]]
         ind2 = map_idx[states[i,2]]    
         acc[ind1, ind2] += 1
-    
+   
+    suma = np.sum(acc)
     fig, ax = plt.subplots()
-    x_normed = acc#normalize(acc, axis=1, norm='l1')
+    x_normed = acc/suma #normalize(acc, axis=0, norm='l2')
+    #x_normed = acc/norm  # normalized matrix
+    #normalize(acc, axis=0, norm='l1')
     # Using matshow here just because it sets the ticks up nicely. imshow is faster.
-    ax.matshow(x_normed, cmap='prism')
+    alpha = ['Lethal', 'Danger', 'Warning', 'Safe','Unknown']
+
+    ax.set_xticklabels(['']+alpha)
+    ax.set_yticklabels(['']+alpha)
+    ax.matshow(x_normed, cmap='Pastel1')
+    #ax.set_xlabel(['Lethal', 'Danger', 'Warning', 'Safe', 'Unknown'])
 
     for (i, j), z in np.ndenumerate(x_normed):
-        ax.text(j, i, '{:0.1f}'.format(z), ha='center', va='center')
+        ax.text(j, i, '{:0.3f}'.format(z), ha='center', va='center')
 
     #plt.colorbar()
     #plt.show()
