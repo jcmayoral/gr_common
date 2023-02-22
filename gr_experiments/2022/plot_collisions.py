@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import matplotlib
 import numpy as np
 import rospy
 import copy
 import sys
 import os
 from sklearn.preprocessing import normalize
-
 
 def read_file(filename):
     with open(filename,"r") as f:
@@ -121,12 +122,28 @@ def process_states(states, filename):
         acc[ind1, ind2] += 1
     
     fig, ax = plt.subplots()
-    x_normed = acc#normalize(acc, axis=1, norm='l1')
+    
+
+    print("antes", acc)
+    for i in range(acc.shape[0]):
+        acc[i,i] = 0 
+    
+    print("despues", acc)
+
+    total_count = np.sum(acc)
+    print("total", total_count)
+    x_normed = acc/total_count#normalize(acc, axis=1, norm='l1')
+
+
+    colors = [('white')] + [(cm.Wistia(i)) for i in range(1,256)]
+    new_map = matplotlib.colors.LinearSegmentedColormap.from_list('new_map', colors, N=256)
     # Using matshow here just because it sets the ticks up nicely. imshow is faster.
-    ax.matshow(x_normed, cmap='prism')
+    ax.matshow(x_normed, cmap=new_map)
 
     for (i, j), z in np.ndenumerate(x_normed):
-        ax.text(j, i, '{:0.1f}'.format(z), ha='center', va='center')
+        if i==j:
+            continue
+        ax.text(j, i, '{:0.4f}'.format(z), ha='center', va='center')
 
     #plt.colorbar()
     #plt.show()
@@ -137,6 +154,7 @@ if __name__== "__main__":
     if len(sys.argv) != 2:
         sys.exit()
     experiment = sys.argv[1]
+    print("Start")
     person1_raw = read_file("{}/collision.txt".format(experiment))
 
     person2_raw = read_file("{}/collision_0.txt".format(experiment))
