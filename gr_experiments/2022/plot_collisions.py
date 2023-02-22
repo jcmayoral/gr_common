@@ -125,6 +125,7 @@ def process_states(states, filename):
     fig, ax = plt.subplots()
     
 
+    """
     print("antes", acc)
     for i in range(acc.shape[0]):
         acc[i,i] = 0 
@@ -146,7 +147,6 @@ def process_states(states, filename):
             continue
         ax.text(j, i, '{:0.4f}'.format(z), ha='center', va='center')
     """
-    =======
     x_normed = acc/suma #normalize(acc, axis=0, norm='l2')
     #x_normed = acc/norm  # normalized matrix
     #normalize(acc, axis=0, norm='l1')
@@ -160,8 +160,6 @@ def process_states(states, filename):
 
     for (i, j), z in np.ndenumerate(x_normed):
         ax.text(j, i, '{:0.3f}'.format(z), ha='center', va='center')
-    >>>>>>> f9057f8783cfd0d01b4c11ef5933a5a3bd54c655
-    """
     #plt.colorbar()
     #plt.show()
     plt.savefig(filename)
